@@ -21,6 +21,9 @@
  * legal_moves[piece_code][position][direction (from white's perspective)][moves]
  *
  * A value of 64 in [moves] indicates an invalid move, and the end of a ray.
+ *
+ * used here
+ * used in pregame.h
  */
 static uint8_t legal_moves[12][64][8][7];
 
@@ -38,6 +41,9 @@ typedef uint64_t bitboard;
  * given a piece and location
  *
  * attacked_squares[piece_code][position]
+ *
+ * used here
+ * used in pregame.h
  */
 static bitboard attacked_squares[12][64];
 
@@ -51,6 +57,9 @@ static bitboard attacked_squares[12][64];
  *  Rook:   3   9
  *  Queen:  4   10
  *  King:   5   11
+ *
+ * used here
+ * used in pregame.h
  */
 static const uint8_t w_codes[16] =
 { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 5 };
@@ -90,6 +99,9 @@ typedef struct
  *
  * These are loaded at program start, and not modified during runtime unless
  * game pre-generation work is being performed.
+ *
+ * used here
+ * used in pregame.h
  */
 static HASHKEY key_table[12][64];
 
