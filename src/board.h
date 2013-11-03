@@ -68,9 +68,18 @@ static const uint8_t b_codes[16] =
  */
 typedef struct
 {
-    //Bitboard of piece locations for white
+    //Locations of all white pieces
+    uint8_t w_pieces[16];
+    //Bitboard of all white pieces
+    bitboard all_w_pieces;
+    //Bitboards of individual piece locations for white
     bitboard w_locations[16];
-    //Bitboard of piece locations for black
+
+    //Locations of all black pieces
+    uint8_t b_pieces[16];
+    //Bitboard of all black pieces
+    bitboard all_b_pieces;
+    //Bitboards of individual piece locations for black
     bitboard b_locations[16];
 } chessboard;
 
