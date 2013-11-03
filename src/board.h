@@ -52,9 +52,9 @@ static bitboard attacked_squares[12][64];
  *  Queen:  4   10
  *  King:   5   11
  */
-static const w_codes[16] =
+static const uint8_t w_codes[16] =
 { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 5 };
-static const b_codes[16] =
+static const uint8_t b_codes[16] =
 { 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 8, 8, 9, 9, 10, 11 };
 
 /*
