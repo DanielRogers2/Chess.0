@@ -2,7 +2,9 @@
  * board.h
  *
  * Contains the function definitions & data structures for manipulating the
- * board state
+ * board state.
+ *
+ * @modifiers pregame
  *
  * @author Daniel Rogers
  *
@@ -22,8 +24,14 @@
  *
  * A value of 64 in [moves] indicates an invalid move, and the end of a ray.
  *
- * used here
- * used in pregame.h
+ * @users this
+ * @modifiers pregame
+ *
+ * @initializer pregame->generateMoveTable. This creates a binary file that
+ *              will be used to initialize the table for later runs of the
+ *              program.
+ * @initializer pregame->loadMoveTables. This loads a pre-generated binary
+ *              file into this variable
  */
 static uint8_t legal_moves[12][64][8][7];
 
@@ -42,8 +50,14 @@ typedef uint64_t bitboard;
  *
  * attacked_squares[piece_code][position]
  *
- * used here
- * used in pregame.h
+ * @users this
+ * @modifiers pregame
+ *
+ * @initializer pregame->generateMoveTable. This creates a binary file that
+ *              will be used to initialize the table for later runs of the
+ *              program.
+ * @initializer pregame->loadMoveTables. This loads a pre-generated binary
+ *              file into this variable
  */
 static bitboard attacked_squares[12][64];
 
@@ -58,8 +72,8 @@ static bitboard attacked_squares[12][64];
  *  Queen:  4   10
  *  King:   5   11
  *
- * used here
- * used in pregame.h
+ * @users this
+ * @users pregame
  */
 static const uint8_t w_codes[16] =
 { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 5 };
@@ -100,8 +114,12 @@ typedef struct
  * These are loaded at program start, and not modified during runtime unless
  * game pre-generation work is being performed.
  *
- * used here
- * used in pregame.h
+ * @users this
+ * @modifiers pregame
+ *
+ * @initializer pregame->generateHashkeys. Generates a new set of hashkeys
+ *              prior to game start. Hashkeys are not currently saved, and
+ *              must be regenerated during each startup.
  */
 static HASHKEY key_table[12][64];
 
