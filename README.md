@@ -3,16 +3,22 @@ Chess.0
 A chess project for CMSC-404-AI
 
 Build options:
-  Compile time defines:
-    -DHASHKEY=uint16_t
-  Compile time flags:
-      -std=c11 -pedantic -pedantic-errors -Wall -Wextra
-    After base functionality is complete:
-      -std=c11 -pedantic -pedantic-errors -Wall -Wextra -Werror
+  - Compile time defines:
+    - DHASHKEY=uint16_t
+  - Initial compile time flags:
+    - -std=c11 -pedantic -pedantic-errors -Wall -Wextra
+  - Flags after base functionality is complete:
+    - -std=c11 -pedantic -pedantic-errors -Wall -Wextra -Werror
       
 References:
-  http://stackoverflow.com/questions/494721/what-are-some-good-resources-for-writing-a-chess-engine
-  http://www.gamedev.net/page/resources/_/technical/artificial-intelligence/chess-programming-part-i-getting-started-r1014
+  - http://stackoverflow.com/questions/494721/what-are-some-good-resources-for-writing-a-chess-engine
+  - http://www.gamedev.net/page/resources/_/technical/artificial-intelligence/chess-programming-part-i-getting-started-r1014
+  
+Identifying owners:
+  - When adopting a function to work on, push a change to the repository that
+    adds an @owner field to the function documentation prior to starting. This 
+    will indicate that someone is already working on that functionality and  
+    keep us from wasting time doing duplicate work.
 
 Philosophy on #includes
   - Separate into two groups
