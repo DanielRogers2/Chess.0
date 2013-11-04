@@ -2,6 +2,18 @@ Chess.0
 =======
 A chess project for CMSC-404-AI
 
+Build options:
+  Compile time defines:
+    -DHASHKEY=uint16_t
+  Compile time flags:
+      -std=c11 -pedantic -pedantic-errors -Wall -Wextra
+    After base functionality is complete:
+      -std=c11 -pedantic -pedantic-errors -Wall -Wextra -Werror
+      
+References:
+  http://stackoverflow.com/questions/494721/what-are-some-good-resources-for-writing-a-chess-engine
+  http://www.gamedev.net/page/resources/_/technical/artificial-intelligence/chess-programming-part-i-getting-started-r1014
+
 Philosophy on #includes
   - Separate into two groups
     - System <includes>
