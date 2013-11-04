@@ -4,6 +4,10 @@
  * Contains the functions associated with pre-game generation work & loading
  * of pre-generated structures.
  *
+ * @modifies legal_moves in board.h
+ * @modifies attacked_squares in board.h
+ * @modifies key_table in board.h
+ *
  * @author Daniel Rogers
  * 
  */
@@ -17,16 +21,31 @@
 
 /*
  * Generates the table of valid moves for each piece/position in addition to
- * the bitboards representing attacking squares for each piece/position
+ * the bitboards representing attacking squares for each piece/position. The
+ * resulting table will be exported as a binary file to be used by
+ * loadMoveTables()
  *
- * Modifies: legal_moves, attacked_squares in board.h
+ * @modifies legal_moves, attacked_squares in board.h
  */
 void generateMoveTable();
 
 /*
- * Populates the hashkey table for the board
+ * Loads in a binary file created by generateMoveTable to initializer the
+ * pre-calculated move tables.
  *
- * Modifies: key_table in board.h
+ * @modifies legal_moves, attacked_squares in board.h
+ *
+ * @returns true if the file loaded successfully, false if some error occurred
+ *          which prevented a successful initialization of legal_moves and
+ *          attacked_squares.
+ */
+bool loadMoveTables();
+
+/*
+ * Populates the hashkey table for the board with randomly generated N-bit
+ * values, where N is the bitwidth of HASHKEY.
+ *
+ * @modifies key_table in board.h
  */
 void generateHashkeys();
 
@@ -37,7 +56,7 @@ void generateHashkeys();
  * @param moves An array to fill with the available moves from that location
  *              They will be in order from left to right
  *              (from white's perspective)
- * @param white True if calculating moves for the white pieces
+ * @param white true if calculating moves for the white pieces
  */
 void calcPawnMoves(uint8_t location, uint8_t moves[3], bool white);
 
@@ -48,7 +67,7 @@ void calcPawnMoves(uint8_t location, uint8_t moves[3], bool white);
  * @param moves An array to fill with the available moves from that location
  *              They will travel clockwise from the top-right
  *              (from white's perspective)
- * @param white True if calculating moves for the white pieces
+ * @param white true if calculating moves for the white pieces
  */
 void calcKnightMoves(uint8_t location, uint8_t moves[8], bool white);
 
@@ -61,7 +80,7 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8], bool white);
  *              traveling radially from the piece, with each moveset being
  *              filled clockwise from the top
  *              (from white's perspective)
- * @param white True if calculating moves for the white pieces
+ * @param white true if calculating moves for the white pieces
  */
 void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bool white);
 
@@ -74,7 +93,7 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bool white);
  *              traveling radially from the piece, with each moveset being
  *              filled clockwise from the top
  *              (from white's perspective)
- * @param white True if calculating moves for the white pieces
+ * @param white true if calculating moves for the white pieces
  */
 void calcRookMoves(uint8_t location, uint8_t moves[4][7], bool white);
 
@@ -87,7 +106,7 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7], bool white);
  *              traveling radially from the piece, with each moveset being
  *              filled clockwise from the top
  *              (from white's perspective)
- * @param white True if calculating moves for the white pieces
+ * @param white true if calculating moves for the white pieces
  */
 void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bool white);
 
@@ -99,7 +118,7 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bool white);
  *              Each array will be filled with the moves available to the
  *              piece, traveling clockwise from the top
  *              (from white's perspective)
- * @param white True if calculating moves for the white pieces
+ * @param white true if calculating moves for the white pieces
  */
 void calcKingMoves(uint8_t location, uint8_t moves[8], bool white);
 
