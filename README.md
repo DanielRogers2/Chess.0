@@ -4,7 +4,7 @@ A chess project for CMSC-404-AI
 
 Build options:
   - Compile time defines:
-    - DHASHKEY=uint16_t
+    - -DHASHKEY=uint16_t
   - Initial compile time flags:
     - -std=c11 -pedantic -pedantic-errors -Wall -Wextra
   - Flags after base functionality is complete:
@@ -16,8 +16,8 @@ References:
   
 Identifying owners:
   - When adopting a function to work on, push a change to the repository that
-    adds an @owner field to the function documentation prior to starting. This 
-    will indicate that someone is already working on that functionality and  
+    adds an @owner field to the function documentation prior to starting. This
+    will indicate that someone is already working on that functionality and
     keep us from wasting time doing duplicate work.
 
 Philosophy on #includes
