@@ -51,6 +51,8 @@ void generateHashkeys()
 /*
  * Calculates the moves available to a pawn piece from a location
  *
+ * @owner Daniel Rogers
+ *
  * @param location The location of the pawn
  * @param moves An array to fill with the available moves from that location
  *              They will be in order from left to right
