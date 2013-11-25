@@ -61,11 +61,35 @@ void generateHashkeys()
  */
 void calcPawnMoves(uint8_t location, uint8_t moves[3], bool white)
 {
+    //If location / 8 == 7, then it's a value in the range 56-63
+    //  and in the last row, so no moves are valid for white (except promotion)
+    //  Same if location / 8 == 0 and black
+    if ((white && ((location / 8) < 7)) || (!white && location / 8 > 0))
+    {
+        //white moves away from 0:0, black moves towards 0:0
+        int8_t delta = (white) ? 8 : -8;
+        uint8_t col = location % 8;
+        //Valid moves are up and left, up, up and right
+        //up
+        moves[1] = location + delta;
 
+        //Check for left edge, if location % 8 == 0, then it's a leftmost square
+        //  and can have no up/left value, otherwise move up a row and back 1
+        moves[0] = (col == 0) ? INVALID_SQUARE : (moves[1] - 1);
+
+        //Check for right edge, if location %8 == 7, then it's a rightmost square
+        moves[2] = (col == 7) ? INVALID_SQUARE : (moves[1] + 1);
+    }
+    else
+    {
+        moves[0] = moves[1] = moves[2] = INVALID_SQUARE;
+    }
 }
 
 /*
  * Calculates the moves available to a knight piece from a location
+ *
+ * @owner Daniel Rogers
  *
  * @param location The location of the knight
  * @param moves An array to fill with the available moves from that location

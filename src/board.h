@@ -15,6 +15,8 @@
 
 #include <stdint.h>
 
+#define INVALID_SQUARE 64
+
 /*
  * At runtime, this will be pointed at a pre-generated table of valid moves for
  * a piece, given the piece and its location. This will include moves that are
