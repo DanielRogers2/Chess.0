@@ -100,8 +100,28 @@ void generateMoveTable()
  */
 bool loadMoveTables()
 {
-    //TODO Load in the table
-    return (false);
+    //Table files in local directory
+    FILE * move_table = fopen("move_table.bin", "rb");
+    FILE * atk_table = fopen("atk_boards.bin", "rb");
+
+    if (!move_table || !atk_table)
+    {
+        puts("UNABLE TO WRITE TABLE FILES!");
+        return (false);
+    }
+    else
+    {
+        //read files
+        //12 different pieces, 64 squares, 8 directions, 7 max moves/direction
+        fread(legal_moves, sizeof(uint8_t), 12 * 64 * 8 * 7, move_table);
+        //12 different pieces, 64 squares
+        fread(attacked_squares, sizeof(bitboard), 12 * 64, atk_table);
+
+        fclose(move_table);
+        fclose(atk_table);
+
+        return (true);
+    }
 }
 
 /*
