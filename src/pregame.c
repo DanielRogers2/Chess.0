@@ -19,7 +19,7 @@
  */
 void generateMoveTable()
 {
-
+    //TODO Generate the tables and store in a file
 }
 
 /*
@@ -34,6 +34,7 @@ void generateMoveTable()
  */
 bool loadMoveTables()
 {
+    //TODO Load in the table
     return (false);
 }
 
@@ -45,7 +46,7 @@ bool loadMoveTables()
  */
 void generateHashkeys()
 {
-
+    //TODO Generate the hashkey tables
 }
 
 /*
@@ -223,7 +224,29 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7])
  */
 void calcRookMoves(uint8_t location, uint8_t moves[4][7])
 {
+    //Same as for queen, but only horizontal/vertical
+    uint8_t N, E, S, W;
+    N = E = S = W = location;
 
+    uint8_t i;
+    //Extend rays
+    for (uint8_t i = 0; i < 7; ++i)
+    {
+        moves[0][i] = (N < INVALID_SQUARE) ? N : INVALID_SQUARE;
+        moves[1][i] = (E < INVALID_SQUARE) ? E : INVALID_SQUARE;
+        moves[2][i] = (S < INVALID_SQUARE) ? S : INVALID_SQUARE;
+        moves[3][i] = (W < INVALID_SQUARE) ? W : INVALID_SQUARE;
+
+        //Update ray positions on board
+        //Moving up a row
+        N = (N < INVALID_SQUARE) ? N + 8 : INVALID_SQUARE;
+        //Moving right a column
+        E = (E % 8 < 7 && E < INVALID_SQUARE) ? E + 1 : INVALID_SQUARE;
+        //Moving down a row
+        S = (S < INVALID_SQUARE) ? S - 8 : INVALID_SQUARE;
+        //Moving left a column
+        W = (W % 8 > 0 && W < INVALID_SQUARE) ? W - 1 : INVALID_SQUARE;
+    }
 }
 
 /*
@@ -281,6 +304,8 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7])
 }
 /*
  * Calculates the moves available to a king from a location
+ *
+ * @owner Daniel Rogers
  *
  * @param location The location of the king
  * @param moves An array to fill with the available moves from that location.
