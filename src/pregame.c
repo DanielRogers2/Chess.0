@@ -170,6 +170,8 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8])
 /*
  * Calculates the moves available to a bishop piece from a location
  *
+ * @owner Daniel Rogers
+ *
  * @param location The location of the bishop
  * @param moves An array of arrays to fill with the available moves from that
  *              location. Each sub-array will be filled with the moves
@@ -211,9 +213,45 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7])
  */
 void calcQueenMoves(uint8_t location, uint8_t moves[8][7])
 {
+    uint8_t N, NE, E, SE, S, SW, W, NW;
+    N = NE = E = SE = S = SW = W = NW = location;
 
+    uint8_t i;
+    //Extend ray towards + columns
+    for (uint8_t i = 0; i < 7; ++i)
+    {
+        moves[0][i] = (N < INVALID_SQUARE) ? N : INVALID_SQUARE;
+        moves[1][i] = (NE < INVALID_SQUARE) ? NE : INVALID_SQUARE;
+        moves[2][i] = (E < INVALID_SQUARE) ? E : INVALID_SQUARE;
+        moves[3][i] = (SE < INVALID_SQUARE) ? SE : INVALID_SQUARE;
+        moves[4][i] = (S < INVALID_SQUARE) ? S : INVALID_SQUARE;
+        moves[5][i] = (SW < INVALID_SQUARE) ? SW : INVALID_SQUARE;
+        moves[6][i] = (W < INVALID_SQUARE) ? W : INVALID_SQUARE;
+        moves[7][i] = (NW < INVALID_SQUARE) ? NW : INVALID_SQUARE;
+
+        //Update ray positions on board
+        //Moving up a row
+        N = (N < INVALID_SQUARE) ? N + 8 : INVALID_SQUARE;
+        //Moving up a row and right a column
+        //  Don't go off the right edge of the board
+        NE = (NE % 8 < 7 && NE < INVALID_SQUARE) ? NE + 8 + 1 : INVALID_SQUARE;
+        //Moving right a column
+        E = (E % 8 < 7 && E < INVALID_SQUARE) ? E + 1 : INVALID_SQUARE;
+        //Moving down a row and right a column
+        //  Since using unsigned integers
+        //  underflow (which has defined behavior) will cause the value to
+        //      be > 64 (INVALID_SQUARE)
+        SE = (SE % 8 < 7 && SE < INVALID_SQUARE) ? SE - 8 + 1 : INVALID_SQUARE;
+        //Moving down a row
+        S = (S < INVALID_SQUARE) ? S - 8 : INVALID_SQUARE;
+        //Moving down a row and left a column
+        SW = (SW % 8 > 0 && SW < INVALID_SQUARE) ? SW - 8 - 1 : INVALID_SQUARE;
+        //Moving left a column
+        W = (W % 8 > 0 && W < INVALID_SQUARE) ? W - 1 : INVALID_SQUARE;
+        //Moving up a row and left a column
+        NW = (NW % 8 > 0 && NW < INVALID_SQUARE) ? NW + 8 - 1 : INVALID_SQUARE;
+    }
 }
-
 /*
  * Calculates the moves available to a king from a location
  *
