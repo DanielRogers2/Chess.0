@@ -15,6 +15,8 @@
  * resulting table will be exported as a binary file to be used by
  * loadMoveTables()
  *
+ * @owner Daniel Rogers
+ *
  * @modifies legal_moves, attacked_squares in board.h
  */
 void generateMoveTable()
@@ -315,6 +317,26 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7])
  */
 void calcKingMoves(uint8_t location, uint8_t moves[8])
 {
+    bool can_up = (location / 8 < 7);
+    bool can_down = (location / 8 > 0);
+    bool can_right = (location % 8 < 7);
+    bool can_left = (location % 8 > 0);
 
+    //Move up 1
+    moves[0] = (can_up) ? location + 8 : INVALID_SQUARE;
+    //Move up 1 and right 1
+    moves[1] = (can_up && can_right) ? location + 8 + 1 : INVALID_SQUARE;
+    //Move right 1
+    moves[2] = (can_right) ? location + 1 : INVALID_SQUARE;
+    //Move right 1 and down 1
+    moves[3] = (can_right && can_down) ? location + 1 - 8 : INVALID_SQUARE;
+    //Move down 1
+    moves[4] = (can_down) ? location - 8 : INVALID_SQUARE;
+    //Move down 1 and left 1
+    moves[5] = (can_down && can_left) ? location - 8 - 1 : INVALID_SQUARE;
+    //Move left 1
+    moves[6] = (can_left) ? location - 1 : INVALID_SQUARE;
+    //Move left 1 and up 1
+    moves[7] = (can_left && can_up) ? location - 1 + 8 : INVALID_SQUARE;
 }
 
