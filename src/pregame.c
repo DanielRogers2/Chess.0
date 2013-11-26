@@ -95,11 +95,76 @@ void calcPawnMoves(uint8_t location, uint8_t moves[3], bool white)
  * @param moves An array to fill with the available moves from that location
  *              They will travel clockwise from the top-right
  *              (from white's perspective)
- * @param white true if calculating moves for the white pieces
  */
-void calcKnightMoves(uint8_t location, uint8_t moves[8], bool white)
+void calcKnightMoves(uint8_t location, uint8_t moves[8])
 {
+    //Check if location allows movement upwards, and how much
+    //  Needed for up2/right, right2/up, up2/left, left2/up
+    //  if location is < 7 * 8, then able to move upwards at least 1
+    if (location / 8 < 7)
+    {
+        //Needed for up2/right, up2/left
+        //  if location is < 6 * 8, then able to move upwards at least 2
+        if (location / 8 < 6)
+        {
+            //if location % 8 < 7, then can move one right
+            //  Knight moves 2 up, 1 over, so set to 2*8 + 1 for + 2 rows + 1 col
+            moves[0] = (location % 8 > 6) ? INVALID_SQUARE : location + 16 + 1;
+            //  if location % 8 > 0, then can move one left
+            moves[7] = (location % 8 == 0) ? INVALID_SQUARE : location + 16 - 1;
+        }
+        else
+        {
+            moves[0] = INVALID_SQUARE;
+            moves[7] = INVALID_SQUARE;
+        }
 
+        //If location % 8 < 6, then can move 2 right and up 1
+        moves[1] = (location % 8 > 5) ? INVALID_SQUARE : location + 2 + 8;
+        //if location % 8 > 1, then can move 2 left and up 1
+        moves[6] = (location % 8 < 2) ? INVALID_SQUARE : location - 2 + 8;
+    }
+    else
+    {
+        //Can't move into higher columns
+        moves[0] = INVALID_SQUARE;
+        moves[1] = INVALID_SQUARE;
+        moves[7] = INVALID_SQUARE;
+        moves[6] = INVALID_SQUARE;
+    }
+
+    //Check for movement downwards and how much
+    //  Needed for right2/down, down2/right, down2/left, left2/down
+    if (location / 8 > 0)
+    {
+        //Needed for down2/right, down2/left
+        //  if location / 8 > 1, then able to move down at least 2
+        if (location / 8 > 1)
+        {
+            //if location % 8 < 7, then able to move right at least 1
+            moves[3] = (location % 8 > 6) ? INVALID_SQUARE : location - 16 + 1;
+            //if location % 8 > 0, then able to move left at least 1
+            moves[4] = (location % 8 == 0) ? INVALID_SQUARE : location - 16 - 1;
+        }
+        else
+        {
+            moves[3] = INVALID_SQUARE;
+            moves[4] = INVALID_SQUARE;
+        }
+
+        //if location % 8 < 6, then able to move right at least 2
+        moves[2] = (location % 8 > 5) ? INVALID_SQUARE : location + 2 - 8;
+        //if location % 8 > 1, then able to move left at least 2
+        moves[5] = (location % 8 < 2) ? INVALID_SQUARE : location - 2 - 8;
+    }
+    else
+    {
+        //Can't move into lower columns
+        moves[2] = INVALID_SQUARE;
+        moves[3] = INVALID_SQUARE;
+        moves[5] = INVALID_SQUARE;
+        moves[4] = INVALID_SQUARE;
+    }
 }
 
 /*
@@ -111,9 +176,8 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8], bool white)
  *              traveling radially from the piece, with each moveset being
  *              filled clockwise from the top
  *              (from white's perspective)
- * @param white true if calculating moves for the white pieces
  */
-void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bool white)
+void calcBishopMoves(uint8_t location, uint8_t moves[4][7])
 {
 
 }
@@ -127,9 +191,8 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bool white)
  *              traveling radially from the piece, with each moveset being
  *              filled clockwise from the top
  *              (from white's perspective)
- * @param white true if calculating moves for the white pieces
  */
-void calcRookMoves(uint8_t location, uint8_t moves[4][7], bool white)
+void calcRookMoves(uint8_t location, uint8_t moves[4][7])
 {
 
 }
@@ -137,15 +200,16 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7], bool white)
 /*
  * Calculates the moves available to a queen piece from a location
  *
+ * @owner Daniel Rogers
+ *
  * @param location The location of the queen
  * @param moves An array of arrays to fill with the available moves from that
  *              location. Each sub-array will be filled with the moves
  *              traveling radially from the piece, with each moveset being
  *              filled clockwise from the top
  *              (from white's perspective)
- * @param white true if calculating moves for the white pieces
  */
-void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bool white)
+void calcQueenMoves(uint8_t location, uint8_t moves[8][7])
 {
 
 }
@@ -158,9 +222,8 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bool white)
  *              Each array will be filled with the moves available to the
  *              piece, traveling clockwise from the top
  *              (from white's perspective)
- * @param white true if calculating moves for the white pieces
  */
-void calcKingMoves(uint8_t location, uint8_t moves[8], bool white)
+void calcKingMoves(uint8_t location, uint8_t moves[8])
 {
 
 }
