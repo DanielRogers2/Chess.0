@@ -21,12 +21,76 @@
  */
 void generateMoveTable()
 {
-    //TODO Generate the tables and store in a file
+    for (uint8_t i = 0; i < 12; ++i)
+    {
+        //Set all the bitboards to 0 initially
+        memset(attacked_squares[i], 0, 64 * sizeof(bitboard));
+        //Set all the legal moves to INVALID_SQUARE initially
+        memset(legal_moves[i], INVALID_SQUARE, 64 * 8 * 7 * sizeof(uint8_t));
+    }
+
+    //Loop through the squares and generate each set of moves for the squares
+    //  Technically there are duplicates/overlapping values in here, but space
+    //  is very cheap for this, and this will make it simpler and faster to
+    //  look up stuff later. This is also done BEFORE the game, so time spent
+    //  here is unimportant (so long as it's feasible)
+    for (uint8_t i = 0; i < 64; ++i)
+    {
+        //Generate white moves
+        //pawns
+        calcPawnMoves(i, legal_moves[W_P][i], attacked_squares[W_P][i], true);
+        //bishops
+        calcBishopMoves(i, legal_moves[W_B][i], attacked_squares[W_B][i]);
+        //knights
+        calcKnightMoves(i, legal_moves[W_N][i], attacked_squares[W_N][i]);
+        //rooks
+        calcRookMoves(i, legal_moves[W_R][i], attacked_squares[W_R][i]);
+        //queen
+        calcQueenMoves(i, legal_moves[W_Q][i], attacked_squares[W_Q][i]);
+        //king
+        calcKingMoves(i, legal_moves[W_K][i], attacked_squares[W_K][i]);
+
+        //Generate black moves
+        //pawns
+        calcPawnMoves(i, legal_moves[B_P][i], attacked_squares[B_P][i], false);
+        //bishops
+        calcBishopMoves(i, legal_moves[B_B][i], attacked_squares[B_B][i]);
+        //knights
+        calcKnightMoves(i, legal_moves[B_N][i], attacked_squares[B_N][i]);
+        //rooks
+        calcRookMoves(i, legal_moves[B_R][i], attacked_squares[B_R][i]);
+        //queen
+        calcQueenMoves(i, legal_moves[B_Q][i], attacked_squares[B_Q][i]);
+        //king
+        calcKingMoves(i, legal_moves[B_K][i], attacked_squares[B_K][i]);
+    }
+
+    //Table files in local directory
+    FILE * move_table = fopen("move_table.bin", "wb");
+    FILE * atk_table = fopen("atk_boards.bin", "wb");
+
+    if (!move_table || !atk_table)
+    {
+        puts("UNABLE TO WRITE TABLE FILES!");
+    }
+    else
+    {
+        //write files
+        //12 different pieces, 64 squares, 8 directions, 7 max moves/direction
+        fwrite(legal_moves, sizeof(uint8_t), 12 * 64 * 8 * 7, move_table);
+        //12 different pieces, 64 squares
+        fwrite(attacked_squares, sizeof(bitboard), 12 * 64, atk_table);
+
+        fclose(move_table);
+        fclose(atk_table);
+    }
 }
 
 /*
  * Loads in a binary file created by generateMoveTable to initializer the
  * pre-calculated move tables.
+ *
+ * @owner Daniel Rogers
  *
  * @modifies legal_moves, attacked_squares in board.h
  *
@@ -59,10 +123,15 @@ void generateHashkeys()
  * @param location The location of the pawn
  * @param moves An array to fill with the available moves from that location
  *              They will be in order from left to right
- *              (from white's perspective)
+ *              (from white's perspective).
+ *              Assumes that it is preset to INVALID
+ * @param atk_bboard The attack bitboard to configure for the location
+ *                      It is assumed to be set to 0.
+ *                      Does not account for en passant captures
  * @param white true if calculating moves for the white pieces
  */
-void calcPawnMoves(uint8_t location, uint8_t moves[3], bool white)
+void calcPawnMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard,
+bool white)
 {
     //If location / 8 == 7, then it's a value in the range 56-63
     //  and in the last row, so no moves are valid for white (except promotion)
@@ -74,18 +143,18 @@ void calcPawnMoves(uint8_t location, uint8_t moves[3], bool white)
         uint8_t col = location % 8;
         //Valid moves are up and left, up, up and right
         //up
-        moves[1] = location + delta;
+        moves[0][0] = location + delta;
+
+        //Check for right edge, if location %8 == 7, then it's a rightmost square
+        //Update the attack bitboard, pawns can only cap diagonally
+        // This does not account for en passant captures
+        moves[1][0] = (col == 7) ? INVALID_SQUARE : (moves[0][0] + 1);
+        atkbboard |= ON << (moves[1][0]);
 
         //Check for left edge, if location % 8 == 0, then it's a leftmost square
         //  and can have no up/left value, otherwise move up a row and back 1
-        moves[0] = (col == 0) ? INVALID_SQUARE : (moves[1] - 1);
-
-        //Check for right edge, if location %8 == 7, then it's a rightmost square
-        moves[2] = (col == 7) ? INVALID_SQUARE : (moves[1] + 1);
-    }
-    else
-    {
-        moves[0] = moves[1] = moves[2] = INVALID_SQUARE;
+        moves[7][0] = (col == 0) ? INVALID_SQUARE : (moves[0][0] - 1);
+        atkbboard |= ON << (moves[7][0]);
     }
 }
 
@@ -98,8 +167,12 @@ void calcPawnMoves(uint8_t location, uint8_t moves[3], bool white)
  * @param moves An array to fill with the available moves from that location
  *              They will travel clockwise from the top-right
  *              (from white's perspective)
+ *              Assumes that it is preset to INVALID
+ * @param atk_bboard The attack bitboard to configure for the location
+ *                      It is assumed to be set to 0.
+ *                      Does not account for en passant captures
  */
-void calcKnightMoves(uint8_t location, uint8_t moves[8])
+void calcKnightMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
 {
     //Check if location allows movement upwards, and how much
     //  Needed for up2/right, right2/up, up2/left, left2/up
@@ -112,28 +185,17 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8])
         {
             //if location % 8 < 7, then can move one right
             //  Knight moves 2 up, 1 over, so set to 2*8 + 1 for + 2 rows + 1 col
-            moves[0] = (location % 8 > 6) ? INVALID_SQUARE : location + 16 + 1;
+            moves[0][0] =
+                    (location % 8 > 6) ? INVALID_SQUARE : location + 16 + 1;
             //  if location % 8 > 0, then can move one left
-            moves[7] = (location % 8 == 0) ? INVALID_SQUARE : location + 16 - 1;
-        }
-        else
-        {
-            moves[0] = INVALID_SQUARE;
-            moves[7] = INVALID_SQUARE;
+            moves[7][0] =
+                    (location % 8 == 0) ? INVALID_SQUARE : location + 16 - 1;
         }
 
         //If location % 8 < 6, then can move 2 right and up 1
-        moves[1] = (location % 8 > 5) ? INVALID_SQUARE : location + 2 + 8;
+        moves[1][0] = (location % 8 > 5) ? INVALID_SQUARE : location + 2 + 8;
         //if location % 8 > 1, then can move 2 left and up 1
-        moves[6] = (location % 8 < 2) ? INVALID_SQUARE : location - 2 + 8;
-    }
-    else
-    {
-        //Can't move into higher columns
-        moves[0] = INVALID_SQUARE;
-        moves[1] = INVALID_SQUARE;
-        moves[7] = INVALID_SQUARE;
-        moves[6] = INVALID_SQUARE;
+        moves[6][0] = (location % 8 < 2) ? INVALID_SQUARE : location - 2 + 8;
     }
 
     //Check for movement downwards and how much
@@ -145,28 +207,25 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8])
         if (location / 8 > 1)
         {
             //if location % 8 < 7, then able to move right at least 1
-            moves[3] = (location % 8 > 6) ? INVALID_SQUARE : location - 16 + 1;
+            moves[3][0] =
+                    (location % 8 > 6) ? INVALID_SQUARE : location - 16 + 1;
             //if location % 8 > 0, then able to move left at least 1
-            moves[4] = (location % 8 == 0) ? INVALID_SQUARE : location - 16 - 1;
-        }
-        else
-        {
-            moves[3] = INVALID_SQUARE;
-            moves[4] = INVALID_SQUARE;
+            moves[4][0] =
+                    (location % 8 == 0) ? INVALID_SQUARE : location - 16 - 1;
         }
 
         //if location % 8 < 6, then able to move right at least 2
-        moves[2] = (location % 8 > 5) ? INVALID_SQUARE : location + 2 - 8;
+        moves[2][0] = (location % 8 > 5) ? INVALID_SQUARE : location + 2 - 8;
         //if location % 8 > 1, then able to move left at least 2
-        moves[5] = (location % 8 < 2) ? INVALID_SQUARE : location - 2 - 8;
+        moves[5][0] = (location % 8 < 2) ? INVALID_SQUARE : location - 2 - 8;
     }
-    else
+
+    //update the attack bitboard
+    for (uint8_t i = 0; i < 8; ++i)
     {
-        //Can't move into lower columns
-        moves[2] = INVALID_SQUARE;
-        moves[3] = INVALID_SQUARE;
-        moves[5] = INVALID_SQUARE;
-        moves[4] = INVALID_SQUARE;
+        atkbboard =
+                (moves[i][0] != INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[i][0]) : atkbboard;
     }
 }
 
@@ -181,15 +240,18 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8])
  *              traveling radially from the piece, with each moveset being
  *              filled clockwise from the top
  *              (from white's perspective)
+ *              Assumes that it is preset to INVALID
+ * @param atk_bboard The attack bitboard to configure for the location
+ *                      It is assumed to be set to 0.
+ *                      Does not account for en passant captures
  */
-void calcBishopMoves(uint8_t location, uint8_t moves[4][7])
+void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
 {
     //This is the same as for the queen, but without the
     //  vertical/horizontal moves
     uint8_t NE, SE, SW, NW;
     NE = SE = SW = NW = location;
 
-    uint8_t i;
     //Extend rays
     for (uint8_t i = 0; i < 7; ++i)
     {
@@ -197,6 +259,20 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7])
         moves[1][i] = (SE < INVALID_SQUARE) ? SE : INVALID_SQUARE;
         moves[2][i] = (SW < INVALID_SQUARE) ? SW : INVALID_SQUARE;
         moves[3][i] = (NW < INVALID_SQUARE) ? NW : INVALID_SQUARE;
+
+        //Update attack bitboards
+        atkbboard =
+                (NE < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[0][i]) : atkbboard;
+        atkbboard =
+                (SE < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[1][i]) : atkbboard;
+        atkbboard =
+                (SW < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[2][i]) : atkbboard;
+        atkbboard =
+                (NW < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[3][i]) : atkbboard;
 
         //Update ray positions on board
         //Uses the fact that unsigned integer overflow has defined behavior
@@ -223,14 +299,17 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7])
  *              traveling radially from the piece, with each moveset being
  *              filled clockwise from the top
  *              (from white's perspective)
+ *              Assumes that it is preset to INVALID
+ * @param atk_bboard The attack bitboard to configure for the location
+ *                      It is assumed to be set to 0.
+ *                      Does not account for en passant captures
  */
-void calcRookMoves(uint8_t location, uint8_t moves[4][7])
+void calcRookMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
 {
     //Same as for queen, but only horizontal/vertical
     uint8_t N, E, S, W;
     N = E = S = W = location;
 
-    uint8_t i;
     //Extend rays
     for (uint8_t i = 0; i < 7; ++i)
     {
@@ -238,6 +317,20 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7])
         moves[1][i] = (E < INVALID_SQUARE) ? E : INVALID_SQUARE;
         moves[2][i] = (S < INVALID_SQUARE) ? S : INVALID_SQUARE;
         moves[3][i] = (W < INVALID_SQUARE) ? W : INVALID_SQUARE;
+
+        //Update attack bitboards
+        atkbboard =
+                (N < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[0][i]) : atkbboard;
+        atkbboard =
+                (E < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[1][i]) : atkbboard;
+        atkbboard =
+                (S < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[2][i]) : atkbboard;
+        atkbboard =
+                (W < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[3][i]) : atkbboard;
 
         //Update ray positions on board
         //Moving up a row
@@ -262,13 +355,16 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7])
  *              traveling radially from the piece, with each moveset being
  *              filled clockwise from the top
  *              (from white's perspective)
+ *              Assumes that it is preset to INVALID
+ * @param atk_bboard The attack bitboard to configure for the location
+ *                      It is assumed to be set to 0.
+ *                      Does not account for en passant captures
  */
-void calcQueenMoves(uint8_t location, uint8_t moves[8][7])
+void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
 {
     uint8_t N, NE, E, SE, S, SW, W, NW;
     N = NE = E = SE = S = SW = W = NW = location;
 
-    uint8_t i;
     //Extend rays
     for (uint8_t i = 0; i < 7; ++i)
     {
@@ -280,6 +376,32 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7])
         moves[5][i] = (SW < INVALID_SQUARE) ? SW : INVALID_SQUARE;
         moves[6][i] = (W < INVALID_SQUARE) ? W : INVALID_SQUARE;
         moves[7][i] = (NW < INVALID_SQUARE) ? NW : INVALID_SQUARE;
+
+        //Update attack bitboards
+        atkbboard =
+                (N < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[0][i]) : atkbboard;
+        atkbboard =
+                (NE < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[1][i]) : atkbboard;
+        atkbboard =
+                (E < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[2][i]) : atkbboard;
+        atkbboard =
+                (SE < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[3][i]) : atkbboard;
+        atkbboard =
+                (S < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[4][i]) : atkbboard;
+        atkbboard =
+                (SW < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[5][i]) : atkbboard;
+        atkbboard =
+                (W < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[6][i]) : atkbboard;
+        atkbboard =
+                (NW < INVALID_SQUARE) ?
+                        atkbboard | (ON << moves[7][i]) : atkbboard;
 
         //Update ray positions on board
         //Moving up a row
@@ -304,6 +426,7 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7])
         NW = (NW % 8 > 0 && NW < INVALID_SQUARE) ? NW + 8 - 1 : INVALID_SQUARE;
     }
 }
+
 /*
  * Calculates the moves available to a king from a location
  *
@@ -314,8 +437,12 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7])
  *              Each array will be filled with the moves available to the
  *              piece, traveling clockwise from the top
  *              (from white's perspective)
+ *              Assumes that it is preset to INVALID
+ * @param atk_bboard The attack bitboard to configure for the location
+ *                      It is assumed to be set to 0.
+ *                      Does not account for en passant captures
  */
-void calcKingMoves(uint8_t location, uint8_t moves[8])
+void calcKingMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
 {
     bool can_up = (location / 8 < 7);
     bool can_down = (location / 8 > 0);
@@ -323,20 +450,27 @@ void calcKingMoves(uint8_t location, uint8_t moves[8])
     bool can_left = (location % 8 > 0);
 
     //Move up 1
-    moves[0] = (can_up) ? location + 8 : INVALID_SQUARE;
+    moves[0][0] = (can_up) ? location + 8 : INVALID_SQUARE;
     //Move up 1 and right 1
-    moves[1] = (can_up && can_right) ? location + 8 + 1 : INVALID_SQUARE;
+    moves[1][0] = (can_up && can_right) ? location + 8 + 1 : INVALID_SQUARE;
     //Move right 1
-    moves[2] = (can_right) ? location + 1 : INVALID_SQUARE;
+    moves[2][0] = (can_right) ? location + 1 : INVALID_SQUARE;
     //Move right 1 and down 1
-    moves[3] = (can_right && can_down) ? location + 1 - 8 : INVALID_SQUARE;
+    moves[3][0] = (can_right && can_down) ? location + 1 - 8 : INVALID_SQUARE;
     //Move down 1
-    moves[4] = (can_down) ? location - 8 : INVALID_SQUARE;
+    moves[4][0] = (can_down) ? location - 8 : INVALID_SQUARE;
     //Move down 1 and left 1
-    moves[5] = (can_down && can_left) ? location - 8 - 1 : INVALID_SQUARE;
+    moves[5][0] = (can_down && can_left) ? location - 8 - 1 : INVALID_SQUARE;
     //Move left 1
-    moves[6] = (can_left) ? location - 1 : INVALID_SQUARE;
+    moves[6][0] = (can_left) ? location - 1 : INVALID_SQUARE;
     //Move left 1 and up 1
-    moves[7] = (can_left && can_up) ? location - 1 + 8 : INVALID_SQUARE;
+    moves[7][0] = (can_left && can_up) ? location - 1 + 8 : INVALID_SQUARE;
+
+    for (uint8_t i = 0; i < 8; ++i)
+    {
+        atkbboard =
+                (moves[i][0] != INVALID_SQUARE) ?
+                        atkbboard | (ON < moves[i][0]) : atkbboard;
+    }
 }
 

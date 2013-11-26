@@ -16,6 +16,20 @@
 #include <stdint.h>
 
 #define INVALID_SQUARE 64
+//Piece code definitions
+#define W_P 0
+#define W_B 1
+#define W_N 2
+#define W_R 3
+#define W_Q 4
+#define W_K 5
+
+#define B_P 6
+#define B_B 7
+#define B_N 8
+#define B_R 9
+#define B_Q 10
+#define B_K 11
 
 /*
  * At runtime, this will be pointed at a pre-generated table of valid moves for
