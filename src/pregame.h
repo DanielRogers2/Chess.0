@@ -31,7 +31,7 @@
  *
  * @modifies legal_moves, attacked_squares in board.h
  */
-void generateMoveTable();
+void generateMoveTables();
 
 /*
  * Loads in a binary file created by generateMoveTable to initializer the

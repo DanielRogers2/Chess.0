@@ -19,7 +19,7 @@
  *
  * @modifies legal_moves, attacked_squares in board.h
  */
-void generateMoveTable()
+void generateMoveTables()
 {
     for (uint8_t i = 0; i < 12; ++i)
     {
@@ -71,7 +71,7 @@ void generateMoveTable()
 
     if (!move_table || !atk_table)
     {
-        puts("UNABLE TO WRITE TABLE FILES!");
+        puts("Unable to write table files. Work will not be saved!");
     }
     else
     {
@@ -83,6 +83,8 @@ void generateMoveTable()
 
         fclose(move_table);
         fclose(atk_table);
+
+        puts("Table files generated successfully");
     }
 }
 
@@ -106,7 +108,7 @@ bool loadMoveTables()
 
     if (!move_table || !atk_table)
     {
-        puts("UNABLE TO WRITE TABLE FILES!");
+        puts("Unable to open table files for reading...");
         return (false);
     }
     else
@@ -119,7 +121,7 @@ bool loadMoveTables()
 
         fclose(move_table);
         fclose(atk_table);
-
+        puts("Table files loaded successfully");
         return (true);
     }
 }
