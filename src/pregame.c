@@ -181,11 +181,38 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8])
  */
 void calcBishopMoves(uint8_t location, uint8_t moves[4][7])
 {
+    //This is the same as for the queen, but without the
+    //  vertical/horizontal moves
+    uint8_t NE, SE, SW, NW;
+    NE = SE = SW = NW = location;
 
+    uint8_t i;
+    //Extend rays
+    for (uint8_t i = 0; i < 7; ++i)
+    {
+        moves[0][i] = (NE < INVALID_SQUARE) ? NE : INVALID_SQUARE;
+        moves[1][i] = (SE < INVALID_SQUARE) ? SE : INVALID_SQUARE;
+        moves[2][i] = (SW < INVALID_SQUARE) ? SW : INVALID_SQUARE;
+        moves[3][i] = (NW < INVALID_SQUARE) ? NW : INVALID_SQUARE;
+
+        //Update ray positions on board
+        //Uses the fact that unsigned integer overflow has defined behavior
+        //Moving up a row and right a column
+        //  Don't go off the right edge of the board
+        NE = (NE % 8 < 7 && NE < INVALID_SQUARE) ? NE + 8 + 1 : INVALID_SQUARE;
+        //Moving down a row and right a column
+        SE = (SE % 8 < 7 && SE < INVALID_SQUARE) ? SE - 8 + 1 : INVALID_SQUARE;
+        //Moving down a row and left a column
+        SW = (SW % 8 > 0 && SW < INVALID_SQUARE) ? SW - 8 - 1 : INVALID_SQUARE;
+        //Moving up a row and left a column
+        NW = (NW % 8 > 0 && NW < INVALID_SQUARE) ? NW + 8 - 1 : INVALID_SQUARE;
+    }
 }
 
 /*
  * Calculates the moves available to a rook piece from a location
+ *
+ * @owner Daniel Rogers
  *
  * @param location The location of the rook
  * @param moves An array of arrays to fill with the available moves from that
@@ -217,7 +244,7 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7])
     N = NE = E = SE = S = SW = W = NW = location;
 
     uint8_t i;
-    //Extend ray towards + columns
+    //Extend rays
     for (uint8_t i = 0; i < 7; ++i)
     {
         moves[0][i] = (N < INVALID_SQUARE) ? N : INVALID_SQUARE;
