@@ -155,13 +155,15 @@ void generateHashkeys()
 void calcPawnMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard,
 bool white)
 {
+    int8_t delta = (white) ? 8 : -8;
     //If location / 8 == 7, then it's a value in the range 56-63
     //  and in the last row, so no moves are valid for white (except promotion)
     //  Same if location / 8 == 0 and black
-    if ((white && ((location / 8) < 7)) || (!white && location / 8 > 0))
+    //White starts in row two, which is >= 8, black starts in row 7
+    //  which is < 56
+    if (((location / 8) > 0) && ((location / 8) < 7))
     {
         //white moves away from 0:0, black moves towards 0:0
-        int8_t delta = (white) ? 8 : -8;
         uint8_t col = location % 8;
         //Valid moves are up and left, up, up and right
         //up
@@ -177,6 +179,12 @@ bool white)
         //  and can have no up/left value, otherwise move up a row and back 1
         moves[7][0] = (col == 0) ? INVALID_SQUARE : (moves[0][0] - 1);
         atkbboard |= ON << (moves[7][0]);
+    }
+    //Pawns can move 2 moves from start position, so account for special case
+    if ((white && ((location / 8) == 1)) || (!white && ((location / 8) == 6)))
+    {
+        //up 2
+        moves[0][1] = location + 2 * delta;
     }
 }
 
@@ -232,8 +240,9 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
             moves[3][0] =
                     (location % 8 > 6) ? INVALID_SQUARE : location - 16 + 1;
             //if location % 8 > 0, then able to move left at least 1
-            moves[4][0] =
-                    (location % 8 == 0) ? INVALID_SQUARE : location - 16 - 1;
+            moves[4][0] = (location % 8 == 0) ?
+            INVALID_SQUARE :
+                                                location - 16 - 1;
         }
 
         //if location % 8 < 6, then able to move right at least 2

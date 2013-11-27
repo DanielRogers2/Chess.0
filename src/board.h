@@ -15,7 +15,7 @@
 
 #include <stdint.h>
 
-#define INVALID_SQUARE 64
+#define INVALID_SQUARE ((uint8_t) 64)
 //Piece code definitions
 #define W_P 0
 #define W_B 1

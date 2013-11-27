@@ -7,6 +7,8 @@
  * 
  */
 
+#include "board.h"
+
 /*
  * Initializes the board to its base state, where no moves have been made yet
  *
