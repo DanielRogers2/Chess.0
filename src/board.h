@@ -194,6 +194,7 @@ void initBoard(chessboard * board);
  * @param board A pointer to the board to expand
  * @param storage A pointer to an array in which to store the expanded states
  *         !!This pointer will be realloc'd to fit the set of expanded states!!
+ * @param white true if expanding the set of white moves
  * @return The number of states expanded
  */
 uint8_t expandStates(chessboard * const board, chessboard * storage);
