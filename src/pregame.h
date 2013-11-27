@@ -29,6 +29,8 @@
  * resulting table will be exported as a binary file to be used by
  * loadMoveTables()
  *
+ * @owner Daniel Rogers
+ *
  * @modifies legal_moves, attacked_squares in board.h
  */
 void generateMoveTables();
@@ -36,6 +38,8 @@ void generateMoveTables();
 /*
  * Loads in a binary file created by generateMoveTable to initializer the
  * pre-calculated move tables.
+ *
+ * @owner Daniel Rogers
  *
  * @modifies legal_moves, attacked_squares in board.h
  *

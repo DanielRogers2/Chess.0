@@ -139,4 +139,13 @@ typedef struct
  */
 static HASHKEY key_table[12][64];
 
+/*
+ * Initializes the board to its base state, where no moves have been made yet
+ *
+ * @owner Daniel Rogers
+ *
+ * @param board The chessboard to initialize.
+ */
+void initBoard(chessboard * board);
+
 #endif /* BOARD_H_ */
