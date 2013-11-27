@@ -7,6 +7,7 @@
  * @modifies legal_moves in board.h
  * @modifies attacked_squares in board.h
  * @modifies key_table in board.h
+ * @uses location_boards in board.h
  *
  * @author Daniel Rogers
  * 
@@ -60,6 +61,8 @@ void generateHashkeys();
  *
  * @owner Daniel Rogers
  *
+ * @uses location_boards
+ *
  * @param location The location of the pawn
  * @param moves An array to fill with the available moves from that location
  *              They will be in order from left to right
@@ -78,6 +81,8 @@ bool white);
  *
  * @owner Daniel Rogers
  *
+ * @uses location_boards
+ *
  * @param location The location of the knight
  * @param moves An array to fill with the available moves from that location
  *              They will travel clockwise from the top-right
@@ -85,7 +90,6 @@ bool white);
  *              Assumes that it is preset to INVALID
  * @param atk_bboard The attack bitboard to configure for the location
  *                      It is assumed to be set to 0.
- *                      Does not account for en passant captures
  */
 void calcKnightMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard);
 
@@ -93,6 +97,8 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard);
  * Calculates the moves available to a bishop piece from a location
  *
  * @owner Daniel Rogers
+ *
+ * @uses location_boards
  *
  * @param location The location of the bishop
  * @param moves An array of arrays to fill with the available moves from that
@@ -103,7 +109,6 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard);
  *              Assumes that it is preset to INVALID
  * @param atk_bboard The attack bitboard to configure for the location
  *                      It is assumed to be set to 0.
- *                      Does not account for en passant captures
  */
 void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard);
 
@@ -111,6 +116,8 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard);
  * Calculates the moves available to a rook piece from a location
  *
  * @owner Daniel Rogers
+ *
+ * @uses location_boards
  *
  * @param location The location of the rook
  * @param moves An array of arrays to fill with the available moves from that
@@ -121,7 +128,6 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard);
  *              Assumes that it is preset to INVALID
  * @param atk_bboard The attack bitboard to configure for the location
  *                      It is assumed to be set to 0.
- *                      Does not account for en passant captures
  */
 void calcRookMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard);
 
@@ -129,6 +135,8 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard);
  * Calculates the moves available to a queen piece from a location
  *
  * @owner Daniel Rogers
+ *
+ * @uses location_boards
  *
  * @param location The location of the queen
  * @param moves An array of arrays to fill with the available moves from that
@@ -139,7 +147,6 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard);
  *              Assumes that it is preset to INVALID
  * @param atk_bboard The attack bitboard to configure for the location
  *                      It is assumed to be set to 0.
- *                      Does not account for en passant captures
  */
 void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard);
 
@@ -147,6 +154,8 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard);
  * Calculates the moves available to a king from a location
  *
  * @owner Daniel Rogers
+ *
+ * @uses location_boards
  *
  * @param location The location of the king
  * @param moves An array to fill with the available moves from that location.
@@ -156,7 +165,6 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard);
  *              Assumes that it is preset to INVALID
  * @param atk_bboard The attack bitboard to configure for the location
  *                      It is assumed to be set to 0.
- *                      Does not account for en passant captures
  */
 void calcKingMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard);
 

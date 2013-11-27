@@ -142,6 +142,8 @@ void generateHashkeys()
  *
  * @owner Daniel Rogers
  *
+ * @uses location_boards
+ *
  * @param location The location of the pawn
  * @param moves An array to fill with the available moves from that location
  *              They will be in order from left to right
@@ -173,12 +175,12 @@ bool white)
         //Update the attack bitboard, pawns can only cap diagonally
         // This does not account for en passant captures
         moves[1][0] = (col == 7) ? INVALID_SQUARE : (moves[0][0] + 1);
-        atkbboard |= ON << (moves[1][0]);
+        atkbboard |= location_boards[moves[1][0]];
 
         //Check for left edge, if location % 8 == 0, then it's a leftmost square
         //  and can have no up/left value, otherwise move up a row and back 1
         moves[7][0] = (col == 0) ? INVALID_SQUARE : (moves[0][0] - 1);
-        atkbboard |= ON << (moves[7][0]);
+        atkbboard |= location_boards[moves[7][0]];
     }
     //Pawns can move 2 moves from start position, so account for special case
     if ((white && ((location / 8) == 1)) || (!white && ((location / 8) == 6)))
@@ -193,6 +195,8 @@ bool white)
  *
  * @owner Daniel Rogers
  *
+ * @uses location_boards
+ *
  * @param location The location of the knight
  * @param moves An array to fill with the available moves from that location
  *              They will travel clockwise from the top-right
@@ -200,7 +204,6 @@ bool white)
  *              Assumes that it is preset to INVALID
  * @param atk_bboard The attack bitboard to configure for the location
  *                      It is assumed to be set to 0.
- *                      Does not account for en passant captures
  */
 void calcKnightMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
 {
@@ -256,7 +259,7 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
     {
         atkbboard =
                 (moves[i][0] != INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[i][0]) : atkbboard;
+                        atkbboard | (location_boards[moves[i][0]]) : atkbboard;
     }
 }
 
@@ -264,6 +267,8 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
  * Calculates the moves available to a bishop piece from a location
  *
  * @owner Daniel Rogers
+ *
+ * @uses location_boards
  *
  * @param location The location of the bishop
  * @param moves An array of arrays to fill with the available moves from that
@@ -274,7 +279,6 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
  *              Assumes that it is preset to INVALID
  * @param atk_bboard The attack bitboard to configure for the location
  *                      It is assumed to be set to 0.
- *                      Does not account for en passant captures
  */
 void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
 {
@@ -294,16 +298,16 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
         //Update attack bitboards
         atkbboard =
                 (NE < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[0][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[0][i]]) : atkbboard;
         atkbboard =
                 (SE < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[1][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[1][i]]) : atkbboard;
         atkbboard =
                 (SW < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[2][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[2][i]]) : atkbboard;
         atkbboard =
                 (NW < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[3][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[3][i]]) : atkbboard;
 
         //Update ray positions on board
         //Uses the fact that unsigned integer overflow has defined behavior
@@ -324,6 +328,8 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
  *
  * @owner Daniel Rogers
  *
+ * @uses location_boards
+ *
  * @param location The location of the rook
  * @param moves An array of arrays to fill with the available moves from that
  *              location. Each sub-array will be filled with the moves
@@ -333,7 +339,6 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
  *              Assumes that it is preset to INVALID
  * @param atk_bboard The attack bitboard to configure for the location
  *                      It is assumed to be set to 0.
- *                      Does not account for en passant captures
  */
 void calcRookMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
 {
@@ -352,16 +357,16 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
         //Update attack bitboards
         atkbboard =
                 (N < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[0][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[0][i]]) : atkbboard;
         atkbboard =
                 (E < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[1][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[1][i]]) : atkbboard;
         atkbboard =
                 (S < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[2][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[2][i]]) : atkbboard;
         atkbboard =
                 (W < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[3][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[3][i]]) : atkbboard;
 
         //Update ray positions on board
         //Moving up a row
@@ -380,6 +385,8 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
  *
  * @owner Daniel Rogers
  *
+ * @uses location_boards
+ *
  * @param location The location of the queen
  * @param moves An array of arrays to fill with the available moves from that
  *              location. Each sub-array will be filled with the moves
@@ -389,7 +396,6 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
  *              Assumes that it is preset to INVALID
  * @param atk_bboard The attack bitboard to configure for the location
  *                      It is assumed to be set to 0.
- *                      Does not account for en passant captures
  */
 void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
 {
@@ -411,28 +417,28 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
         //Update attack bitboards
         atkbboard =
                 (N < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[0][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[0][i]]) : atkbboard;
         atkbboard =
                 (NE < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[1][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[1][i]]) : atkbboard;
         atkbboard =
                 (E < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[2][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[2][i]]) : atkbboard;
         atkbboard =
                 (SE < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[3][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[3][i]]) : atkbboard;
         atkbboard =
                 (S < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[4][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[4][i]]) : atkbboard;
         atkbboard =
                 (SW < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[5][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[5][i]]) : atkbboard;
         atkbboard =
                 (W < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[6][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[6][i]]) : atkbboard;
         atkbboard =
                 (NW < INVALID_SQUARE) ?
-                        atkbboard | (ON << moves[7][i]) : atkbboard;
+                        atkbboard | (location_boards[moves[7][i]]) : atkbboard;
 
         //Update ray positions on board
         //Moving up a row
@@ -463,6 +469,8 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
  *
  * @owner Daniel Rogers
  *
+ * @uses location_boards
+ *
  * @param location The location of the king
  * @param moves An array to fill with the available moves from that location.
  *              Each array will be filled with the moves available to the
@@ -471,7 +479,6 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
  *              Assumes that it is preset to INVALID
  * @param atk_bboard The attack bitboard to configure for the location
  *                      It is assumed to be set to 0.
- *                      Does not account for en passant captures
  */
 void calcKingMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
 {
@@ -501,7 +508,7 @@ void calcKingMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
     {
         atkbboard =
                 (moves[i][0] != INVALID_SQUARE) ?
-                        atkbboard | (ON < moves[i][0]) : atkbboard;
+                        atkbboard | (location_boards[moves[i][0]]) : atkbboard;
     }
 }
 

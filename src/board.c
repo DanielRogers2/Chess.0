@@ -12,7 +12,7 @@
 /*
  * Initializes the board to its base state, where no moves have been made yet
  *
- * @uses white_initial, black_initial, w_codes, b_codes
+ * @uses white_initial, black_initial, location_bitboards
  *
  * @owner Daniel Rogers
  *
@@ -33,8 +33,8 @@ void initBoard(chessboard * board)
     //Set location bitboards
     for (uint8_t i = 0; i < 16; ++i)
     {
-        board->w_locations[i] = ON << board->w_pieces[i];
-        board->b_locations[i] = ON << board->b_pieces[i];
+        board->w_locations[i] = location_boards[board->w_pieces[i]];
+        board->b_locations[i] = location_boards[board->b_pieces[i]];
     }
 }
 
@@ -43,13 +43,59 @@ void initBoard(chessboard * board)
  *
  * @owner Daniel Rogers
  *
+ * @uses w_codes, b_codes, location_boards
+ *
  * @param board A pointer to the board to expand
  * @param storage A pointer to an array in which to store the expanded states
  *         !!This pointer will be realloc'd to fit the set of expanded states!!
+ * @param white True if expanding the set of white moves
  * @return The number of states expanded
  */
-uint8_t expandStates(chessboard * const board, chessboard * storage)
+uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
 {
+    //Select the appropriate sets of data
+    uint8_t * pieces = (white) ? board->w_pieces : board->b_pieces;
+    bitboard * locations = (white) ? board->w_locations : board->b_locations;
+    bitboard self = (white) ? board->all_w_pieces : board->all_b_pieces;
+    bitboard op = (white) ? board->all_b_pieces : board->all_w_pieces;
+    uint8_t * codes = (white) ? w_codes : b_codes;
+
+    //Loop variables
+    uint8_t i, j, k;
+
+    //The set of moves
+    uint8_t * moves[8][7];
+
+    //For each piece, get the set of moves it can make from its location
+    for (i = 0; i < 16; ++i)
+    {
+        moves = legal_moves[codes[i]][locations[i]];
+        //Go through each move ray
+        for (j = 0; j < 8; ++j)
+        {
+            //Go through each move in ray
+            for (k = 0; k < 7; ++k)
+            {
+                //Check for end of ray, or own piece @ location
+                //Location check works as follows:
+                //  Get the bitboard representing the destination
+                //  Then AND with pieces for own side -> all 0 if no pieces at
+                //      destination, meaning valid move. !0 if own piece at
+                //      location, meaning invalid move
+                if (moves[j][k] == INVALID_SQUARE
+                        || (location_boards[moves[j][k]] & self))
+                {
+                    //Stop looking through ray
+                    break;
+                }
+                else
+                {
+                    //Make the mvoe
+                }
+            }
+        }
+    }
+
     return (0);
 }
 
@@ -68,7 +114,7 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
         chessboard * const current, chessboard * new)
 {
     //Generate the new location bitboard for the new location
-    bitboard new_loc = 1 << location;
+    bitboard new_loc = location_boards[location];
 
     //copy data
     memcpy(new, current, sizeof(chessboard));
