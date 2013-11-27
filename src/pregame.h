@@ -21,8 +21,6 @@
 #include <stdio.h>
 #include "board.h"
 
-#define ON ((uint64_t) 1)
-
 /*
  * Generates the table of valid moves for each piece/position in addition to
  * the bitboards representing attacking squares for each piece/position. The

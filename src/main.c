@@ -19,6 +19,10 @@ int main()
         generateMoveTables();
     }
 
+    //Get a new board and initialize it
+    chessboard current_state;
+    initBoard(&current_state);
+
     //Set up network code
 
     //Run the main program loop

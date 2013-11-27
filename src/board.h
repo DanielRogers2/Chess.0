@@ -14,20 +14,23 @@
 #define BOARD_H_
 
 #include <stdint.h>
+#include <string.h>
+
+#define ON ((uint64_t) 1)
 
 #define INVALID_SQUARE ((uint8_t) 64)
 //Piece code definitions
 #define W_P 0
-#define W_B 1
+#define W_R 1
 #define W_N 2
-#define W_R 3
+#define W_B 3
 #define W_Q 4
 #define W_K 5
 
 #define B_P 6
-#define B_B 7
+#define B_R 7
 #define B_N 8
-#define B_R 9
+#define B_B 9
 #define B_Q 10
 #define B_K 11
 
@@ -82,9 +85,9 @@ static bitboard attacked_squares[12][64];
  * Pieces are coded as follows:
  *  piece . w . b
  *  Pawn:   0   6
- *  Bishop: 1   7
+ *  Rook:   1   7
  *  Knight: 2   8
- *  Rook:   3   9
+ *  Bishop: 3   9
  *  Queen:  4   10
  *  King:   5   11
  *
@@ -121,6 +124,23 @@ typedef struct
     //Bitboards of individual piece locations for black
     bitboard b_locations[16];
 } chessboard;
+
+/*
+ * Initial positions of white/black pieces
+ * Pawns:   indexes 0-7 of white/black position arrays
+ *   8-15, 48-55
+ * Rook:    indexes 08-09, squares 0,7 & 56,63
+ * Knights: indexes 10-11, squares 1,6 & 57,62
+ * Bishops: indexes 12-13, squares 2,5 & 58,61
+ * Queen:   index 14, squares 3 & 59
+ * King:    index 15, squares 4 & 60
+ *
+ * @users this
+ */
+static const uint8_t white_initial[16] =
+{ 8, 9, 10, 11, 12, 13, 14, 15, 0, 7, 1, 6, 2, 5, 3, 4 };
+static const uint8_t black_initial[16] =
+{ 48, 49, 50, 51, 52, 53, 54, 55, 56, 63, 57, 62, 58, 61, 59, 60 };
 
 /*
  * Stores the randomly generated N-bit keys for hash table key generation.
