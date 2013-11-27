@@ -39,17 +39,60 @@ void initBoard(chessboard * board)
 }
 
 /*
+ * Expands the set of all possible board states from an initial state
+ *
+ * @owner Daniel Rogers
+ *
+ * @param board A pointer to the board to expand
+ * @param storage A pointer to an array in which to store the expanded states
+ *         !!This pointer will be realloc'd to fit the set of expanded states!!
+ * @return The number of states expanded
+ */
+uint8_t expandStates(chessboard * const board, chessboard * storage)
+{
+    return (0);
+}
+
+/*
  * Generates a new board state based on a piece move
  *
  * @owner Daniel Rogers
  *
  * @param piece The index of the piece to move
+ * @param location The location to move to
  * @param white true If the piece being moved is white
  * @param current The chessboard state being referenced
  * @param new The new chessboard state to write to
  */
-void makeMove(uint8_t piece, bool white, chessboard * const current,
-        chessboard * new)
+void makeMove(uint8_t piece, uint8_t location, bool white,
+        chessboard * const current, chessboard * new)
 {
-    //TODO Implement this
+    //Generate the new location bitboard for the new location
+    bitboard new_loc = 1 << location;
+
+    //copy data
+    memcpy(new, current, sizeof(chessboard));
+
+    //Update the location
+    if (white)
+    {
+        //Update the occupancy bitboard
+        //XOR out the old location, XOR in the new location
+        new->all_w_pieces ^= (new->w_locations[piece] ^ new_loc);
+        //Update position bitboard
+        new->w_locations[piece] = new_loc;
+        //update piece location
+        new->w_pieces[piece] = location;
+    }
+    else
+    {
+        //for black pieces
+        //Update the occupancy bitboard
+        //XOR out the old location, XOR in the new location
+        new->all_b_pieces ^= (new->b_locations[piece] ^ new_loc);
+        //Update position bitboard
+        new->b_locations[piece] = new_loc;
+        //update piece location
+        new->b_pieces[piece] = location;
+    }
 }

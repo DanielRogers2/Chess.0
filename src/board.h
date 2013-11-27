@@ -172,16 +172,29 @@ static HASHKEY key_table[12][64];
 void initBoard(chessboard * board);
 
 /*
+ * Expands the set of all possible board states from an initial state
+ *
+ * @owner Daniel Rogers
+ *
+ * @param board A pointer to the board to expand
+ * @param storage A pointer to an array in which to store the expanded states
+ *         !!This pointer will be realloc'd to fit the set of expanded states!!
+ * @return The number of states expanded
+ */
+uint8_t expandStates(chessboard * const board, chessboard * storage);
+
+/*
  * Generates a new board state based on a piece move
  *
  * @owner Daniel Rogers
  *
  * @param piece The index of the piece to move
+ * @param location The location to move to
  * @param white true If the piece being moved is white
  * @param current The chessboard state being referenced
  * @param new The new chessboard state to write to
  */
-void makeMove(uint8_t piece, bool white, chessboard * const current,
-        chessboard * new);
+void makeMove(uint8_t piece, uint8_t location, bool white,
+        chessboard * const current, chessboard * new);
 
 #endif /* BOARD_H_ */
