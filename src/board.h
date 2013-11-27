@@ -84,9 +84,12 @@ static bitboard attacked_squares[12][64];
 /*
  * Lookup table indicating the location bitboards for each square
  *
+ * location_boards[64] is set to UINT64_MAX so that a logical and of any non-0
+ * bitboard will result in a non-0 value
+ *
  * @users this, pregame
  */
-static const bitboard location_boards[64] =
+static const bitboard location_boards[65] =
 { ON, ON << 1, ON << 2, ON << 3, ON << 4, ON << 5, ON << 6, ON << 7,
 ON << 8, ON << 9, ON << 10, ON << 11, ON << 12, ON << 13, ON << 14, ON << 15,
 ON << 16, ON << 17, ON << 18, ON << 19, ON << 20, ON << 21, ON << 22, ON << 23,
@@ -94,7 +97,8 @@ ON << 24, ON << 25, ON << 26, ON << 27, ON << 28, ON << 29, ON << 30, ON << 31,
 ON << 32, ON << 33, ON << 34, ON << 35, ON << 36, ON << 37, ON << 38, ON << 39,
 ON << 40, ON << 41, ON << 42, ON << 43, ON << 44, ON << 45, ON << 46, ON << 47,
 ON << 48, ON << 49, ON << 50, ON << 51, ON << 52, ON << 53, ON << 54, ON << 55,
-ON << 56, ON << 57, ON << 58, ON << 59, ON << 60, ON << 61, ON << 62, ON << 63 };
+ON << 56, ON << 57, ON << 58, ON << 59, ON << 60, ON << 61, ON << 62, ON << 63,
+UINT64_MAX };
 
 /*
  * This defines a mapping between piece location bitboard indexes and piece codes

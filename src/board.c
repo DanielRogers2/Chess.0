@@ -60,6 +60,9 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
     bitboard op = (white) ? board->all_b_pieces : board->all_w_pieces;
     const uint8_t * codes = (white) ? w_codes : b_codes;
 
+    //Number of states generated
+    uint8_t states = 0;
+
     //Loop variables
     uint8_t i, j, k;
 
@@ -69,6 +72,12 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
     //For each piece, get the set of moves it can make from its location
     for (i = 0; i < 16; ++i)
     {
+        //Check if piece is captured
+        if (locations[i] == 64)
+        {
+            continue;
+        }
+
         moves = legal_moves[codes[i]][locations[i]];
         //Go through each move ray
         for (j = 0; j < 8; ++j)
@@ -82,8 +91,9 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
                 //  Then AND with pieces for own side -> all 0 if no pieces at
                 //      destination, meaning valid move. !0 if own piece at
                 //      location, meaning invalid move
-                if (moves[j][k] == INVALID_SQUARE
-                        || (location_boards[moves[j][k]] & self))
+                //location_boards[64] == 0xffffffffffffffff, so any AND will
+                //  make a non-0 value
+                if (location_boards[moves[j][k]] & self)
                 {
                     //Stop looking through ray
                     break;
@@ -96,7 +106,7 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
         }
     }
 
-    return (0);
+    return (states);
 }
 
 /*
