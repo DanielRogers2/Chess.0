@@ -15,6 +15,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define ON ((uint64_t) 1)
 
@@ -164,8 +165,23 @@ static HASHKEY key_table[12][64];
  *
  * @owner Daniel Rogers
  *
+ * @uses white_initial, black_initial, w_codes, b_codes
+ *
  * @param board The chessboard to initialize.
  */
 void initBoard(chessboard * board);
+
+/*
+ * Generates a new board state based on a piece move
+ *
+ * @owner Daniel Rogers
+ *
+ * @param piece The index of the piece to move
+ * @param white true If the piece being moved is white
+ * @param current The chessboard state being referenced
+ * @param new The new chessboard state to write to
+ */
+void makeMove(uint8_t piece, bool white, chessboard * const current,
+        chessboard * new);
 
 #endif /* BOARD_H_ */

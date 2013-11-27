@@ -37,3 +37,19 @@ void initBoard(chessboard * board)
         board->b_locations[i] = ON << board->b_pieces[i];
     }
 }
+
+/*
+ * Generates a new board state based on a piece move
+ *
+ * @owner Daniel Rogers
+ *
+ * @param piece The index of the piece to move
+ * @param white true If the piece being moved is white
+ * @param current The chessboard state being referenced
+ * @param new The new chessboard state to write to
+ */
+void makeMove(uint8_t piece, bool white, chessboard * const current,
+        chessboard * new)
+{
+    //TODO Implement this
+}
