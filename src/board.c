@@ -58,13 +58,13 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
     bitboard * locations = (white) ? board->w_locations : board->b_locations;
     bitboard self = (white) ? board->all_w_pieces : board->all_b_pieces;
     bitboard op = (white) ? board->all_b_pieces : board->all_w_pieces;
-    uint8_t * codes = (white) ? w_codes : b_codes;
+    const uint8_t * codes = (white) ? w_codes : b_codes;
 
     //Loop variables
     uint8_t i, j, k;
 
     //The set of moves
-    uint8_t * moves[8][7];
+    uint8_t (*moves)[7];
 
     //For each piece, get the set of moves it can make from its location
     for (i = 0; i < 16; ++i)

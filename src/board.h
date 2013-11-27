@@ -87,7 +87,7 @@ static bitboard attacked_squares[12][64];
  * @users this, pregame
  */
 static const bitboard location_boards[64] =
-{ 0, ON, ON << 1, ON << 2, ON << 3, ON << 4, ON << 5, ON << 6, ON << 7,
+{ ON, ON << 1, ON << 2, ON << 3, ON << 4, ON << 5, ON << 6, ON << 7,
 ON << 8, ON << 9, ON << 10, ON << 11, ON << 12, ON << 13, ON << 14, ON << 15,
 ON << 16, ON << 17, ON << 18, ON << 19, ON << 20, ON << 21, ON << 22, ON << 23,
 ON << 24, ON << 25, ON << 26, ON << 27, ON << 28, ON << 29, ON << 30, ON << 31,
@@ -197,7 +197,7 @@ void initBoard(chessboard * board);
  * @param white true if expanding the set of white moves
  * @return The number of states expanded
  */
-uint8_t expandStates(chessboard * const board, chessboard * storage);
+uint8_t expandStates(chessboard * const board, chessboard * storage, bool white);
 
 /*
  * Generates a new board state based on a piece move
