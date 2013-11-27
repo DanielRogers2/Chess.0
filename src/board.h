@@ -191,6 +191,8 @@ void initBoard(chessboard * board);
  *
  * @owner Daniel Rogers
  *
+ * @uses w_codes, b_codes, location_boards, legal_moves
+ *
  * @param board A pointer to the board to expand
  * @param storage A pointer to an array in which to store the expanded states
  *         !!This pointer will be realloc'd to fit the set of expanded states!!
