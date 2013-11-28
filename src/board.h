@@ -106,6 +106,9 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
  *
  * @owner Daniel Rogers
  *
+ * Based on:
+ *   http://chessprogramming.wikispaces.com/Simplified+evaluation+function
+ *
  * @uses all of the *_*_positions globals
  *
  * @param board The board to evaluate

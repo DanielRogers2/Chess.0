@@ -198,7 +198,10 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
  *
  * @owner Daniel Rogers
  *
- * @uses all of the *_*_positions globals
+ * Based on:
+ *   http://chessprogramming.wikispaces.com/Simplified+evaluation+function
+ *
+ * @uses all of the *_*_positions globals, modifier, piece_vals, *_codes
  *
  * @param board The board to evaluate
  * @return The value of the board in a form usable in a negamax function
@@ -209,10 +212,34 @@ int evaluateState(chessboard * const board)
     int w_val = 0;
     int b_val = 0;
 
+    //Sum up the values for white and black
     for (uint8_t i = 0; i < 16; ++i)
     {
-
+        //Get each piece's value, and add in the value of its position
+        //If it's captured, then add 0
+        //White
+        w_val +=
+                (board->w_pieces[i] == CAPTURED) ?
+                        0 :
+                        piece_vals[w_codes[i]]
+                                + board_position_vals[w_codes[i]][board->w_pieces[i]];
+        //Same for Black
+        b_val +=
+                (board->b_pieces[i] == CAPTURED) ?
+                        0 :
+                        piece_vals[b_codes[i]]
+                                + board_position_vals[b_codes[i]][board->b_pieces[i]];
     }
+
+    //Value = white - black
+    value = w_val - b_val;
+
+    //If we are white, then we want max white, and this is already going to
+    //  have higher scores for better values for white
+    //If black, then multiply by -1 to flip it so higher scores returned mean
+    //  better values for black
+    value *= modifier;
+
     return (value);
 }
 
