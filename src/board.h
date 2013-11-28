@@ -35,6 +35,16 @@
 #define B_Q 10
 #define B_K 11
 
+//Piece values
+// Current Reference (may be swapped for better function):
+//  http://chessprogramming.wikispaces.com/Simplified+evaluation+function
+#define P_CODE 100
+#define N_CODE 320
+#define B_CODE 330
+#define R_CODE 500
+#define Q_CODE 900
+#define K_CODE 20000
+
 /*
  * Defines an overall board state for the program
  *

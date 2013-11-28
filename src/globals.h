@@ -20,6 +20,20 @@ extern const uint8_t w_codes[16];
 extern const uint8_t b_codes[16];
 extern const uint8_t white_initial[16];
 extern const uint8_t black_initial[16];
+extern const int8_t w_P_positions[64];
+extern const int8_t b_P_positions[64];
+extern const int8_t w_N_positions[64];
+extern const int8_t b_N_positions[64];
+extern const int8_t w_B_positions[64];
+extern const int8_t b_B_positions[64];
+extern const int8_t w_R_positions[64];
+extern const int8_t b_R_positions[64];
+extern const int8_t w_Q_positions[64];
+extern const int8_t b_Q_positions[64];
+extern const int8_t w_K_m_positions[64];
+extern const int8_t b_K_m_positions[64];
+extern const int8_t w_K_e_positions[64];
+extern const int8_t b_K_e_positions[64];
 extern HASHKEY key_table[12][64];
 
 #endif /* GLOBALS_H_ */

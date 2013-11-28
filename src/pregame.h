@@ -15,6 +15,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
+#include <inttypes.h>
 #include "common_defs.h"
 #include "globals.h"
 #include "board.h"
