@@ -54,10 +54,11 @@ void initBoard(chessboard * board)
 uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
 {
     //Select the appropriate sets of data
+    //Piece locations
     uint8_t * pieces = (white) ? board->w_pieces : board->b_pieces;
-    bitboard * locations = (white) ? board->w_locations : board->b_locations;
+    //Side location occupancy boards
     bitboard self = (white) ? board->all_w_pieces : board->all_b_pieces;
-    bitboard op = (white) ? board->all_b_pieces : board->all_w_pieces;
+    //Lookup table piece codes
     const uint8_t * codes = (white) ? w_codes : b_codes;
 
     //Number of states generated
@@ -69,16 +70,19 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
     //The set of moves
     uint8_t (*moves)[7];
 
+    //Allocate enough storage
+    realloc(storage, 35 * sizeof(chessboard));
+
     //For each piece, get the set of moves it can make from its location
     for (i = 0; i < 16; ++i)
     {
         //Check if piece is captured
-        if (locations[i] == 64)
+        if (pieces[i] == 64)
         {
             continue;
         }
 
-        moves = legal_moves[codes[i]][locations[i]];
+        moves = legal_moves[codes[i]][pieces[i]];
         //Go through each move ray
         for (j = 0; j < 8; ++j)
         {
@@ -100,7 +104,13 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
                 }
                 else
                 {
-                    //Make the move
+                    //Make the move with the piece
+                    makeMove(i, moves[j][k], white, board, &storage[states++]);
+                    if (((states % 35) == 0))
+                    {
+                        //Allocate more storage
+                        realloc(storage, (states + 35) * sizeof(chessboard));
+                    }
                 }
             }
         }
