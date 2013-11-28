@@ -192,3 +192,51 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
     }
 
 }
+
+/*
+ * Evaluates the value of a particular board, where higher values are more
+ *  favorable towards white
+ *
+ * @owner Daniel Rogers
+ *
+ * @uses all of the *_*_positions globals
+ *
+ * @param board The board to evaluate
+ * @return The value of the board in a form usable in a negamax function
+ */
+int evaluateStateWhite(chessboard * const board)
+{
+    int value = 0;
+    int w_val = 0;
+    int b_val = 0;
+
+    for (uint8_t i = 0; i < 16; ++i)
+    {
+
+    }
+    return (value);
+}
+
+/*
+ * Evaluates the value of a particular board, where higher values are more
+ *  favorable towards black
+ *
+ * @owner Daniel Rogers
+ *
+ * @uses all of the *_*_positions globals
+ *
+ * @param board The board to evaluate
+ * @return The value of the board in a form usable in a negamax function
+ */
+int evaluateStateBlack(chessboard * const board)
+{
+    int value = 0;
+    int w_val = 0;
+    int b_val = 0;
+
+    for (uint8_t i = 0; i < 16; ++i)
+    {
+
+    }
+    return (value);
+}

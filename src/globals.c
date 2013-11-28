@@ -1,7 +1,7 @@
 /*
  * globals.c
  * 
- * 
+ * Here be dragons
  * 
  * @author Daniel Rogers
  * 
@@ -87,6 +87,24 @@ const uint8_t b_codes[16] =
 { 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 8, 8, 9, 9, 10, 11 };
 
 /*
+ * Values for each piece
+ * Current Reference (may be swapped for better function):
+ *   http://chessprogramming.wikispaces.com/Simplified+evaluation+function
+ *
+ * P = 100
+ * N = 320
+ * B = 330
+ * R = 500
+ * Q = 900
+ * K = 20000
+ *
+ * @users board
+ */
+//White/black, P, R, N, B, Q, K
+const uint8_t piece_vals[12] =
+{ 100, 500, 320, 330, 900, 20000, 100, 500, 320, 330, 900, 20000 };
+
+/*
  * Initial positions of white/black pieces
  * Pawns:   indexes 0-7 of white/black position arrays
  *   8-15, 48-55
@@ -124,7 +142,7 @@ HASHKEY key_table[12][64];
  * Lookup tables for evalutation function based on the article here:
  *      http://chessprogramming.wikispaces.com/Simplified+evaluation+function
  *
- *These are mirrored over X, so that's right... right?
+ * These are mirrored over X, so that's right... right?
  * @users board
  */
 //Pawns, white and black

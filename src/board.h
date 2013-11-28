@@ -35,16 +35,6 @@
 #define B_Q 10
 #define B_K 11
 
-//Piece values
-// Current Reference (may be swapped for better function):
-//  http://chessprogramming.wikispaces.com/Simplified+evaluation+function
-#define P_CODE 100
-#define N_CODE 320
-#define B_CODE 330
-#define R_CODE 500
-#define Q_CODE 900
-#define K_CODE 20000
-
 /*
  * Defines an overall board state for the program
  *
@@ -112,11 +102,29 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
         chessboard * const current, chessboard * new);
 
 /*
- * Evaluates the value of a particular board
+ * Evaluates the value of a particular board, where higher values are more
+ *  favorable towards white
+ *
+ * @owner Daniel Rogers
+ *
+ * @uses all of the *_*_positions globals
  *
  * @param board The board to evaluate
  * @return The value of the board in a form usable in a negamax function
  */
-int evaluateState(chessboard * const board);
+int evaluateStateWhite(chessboard * const board);
+
+/*
+ * Evaluates the value of a particular board, where higher values are more
+ *  favorable towards black
+ *
+ * @owner Daniel Rogers
+ *
+ * @uses all of the *_*_positions globals
+ *
+ * @param board The board to evaluate
+ * @return The value of the board in a form usable in a negamax function
+ */
+int evaluateStateBlack(chessboard * const board);
 
 #endif /* BOARD_H_ */
