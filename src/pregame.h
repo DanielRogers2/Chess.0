@@ -4,11 +4,6 @@
  * Contains the functions associated with pre-game generation work & loading
  * of pre-generated structures.
  *
- * @modifies legal_moves in board.h
- * @modifies attacked_squares in board.h
- * @modifies key_table in board.h
- * @uses location_boards in board.h
- *
  * @author Daniel Rogers
  * 
  */
@@ -20,8 +15,9 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
+#include "common_defs.h"
+#include "globals.h"
 #include "board.h"
-
 /*
  * Generates the table of valid moves for each piece/position in addition to
  * the bitboards representing attacking squares for each piece/position. The
@@ -30,7 +26,7 @@
  *
  * @owner Daniel Rogers
  *
- * @modifies legal_moves, attacked_squares in board.h
+ * @modifies legal_moves, attacked_squares
  */
 void generateMoveTables();
 
@@ -40,7 +36,7 @@ void generateMoveTables();
  *
  * @owner Daniel Rogers
  *
- * @modifies legal_moves, attacked_squares in board.h
+ * @modifies legal_moves, attacked_squares
  *
  * @returns true if the file loaded successfully, false if some error occurred
  *          which prevented a successful initialization of legal_moves and
@@ -52,7 +48,7 @@ bool loadMoveTables();
  * Populates the hashkey table for the board with randomly generated N-bit
  * values, where N is the bitwidth of HASHKEY.
  *
- * @modifies key_table in board.h
+ * @modifies key_table
  */
 void generateHashkeys();
 

@@ -17,7 +17,7 @@
  *
  * @owner Daniel Rogers
  *
- * @modifies legal_moves, attacked_squares in board.h
+ * @modifies legal_moves, attacked_squares
  */
 void generateMoveTables()
 {
@@ -94,7 +94,7 @@ void generateMoveTables()
  *
  * @owner Daniel Rogers
  *
- * @modifies legal_moves, attacked_squares in board.h
+ * @modifies legal_moves, attacked_squares
  *
  * @returns true if the file loaded successfully, false if some error occurred
  *          which prevented a successful initialization of legal_moves and
@@ -122,6 +122,9 @@ bool loadMoveTables()
         fclose(move_table);
         fclose(atk_table);
         puts("Table files loaded successfully");
+
+        printf("addr_LLM: %p\n", &legal_moves);
+        printf("moveL_00: %d\n", legal_moves[0][0][0][0]);
         return (true);
     }
 }
@@ -130,7 +133,7 @@ bool loadMoveTables()
  * Populates the hashkey table for the board with randomly generated N-bit
  * values, where N is the bitwidth of HASHKEY.
  *
- * @modifies key_table in board.h
+ * @modifies key_table
  */
 void generateHashkeys()
 {

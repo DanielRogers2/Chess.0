@@ -22,9 +22,9 @@ void initBoard(chessboard * board)
 {
     //Set up the occupation bitboards for all white/black pieces
     //White pieces are in positions 0-15 -> low 16 bits on
-    board->all_w_pieces = 0xFFFF;
+    board->all_w_pieces = 0;
     //Black pieces are in positions 48-63 -> low 48 off
-    board->all_b_pieces = ((bitboard) 0xFFFF) << 48;
+    board->all_b_pieces = 0;
 
     //Set location arrays
     memcpy(board->w_pieces, white_initial, 16 * sizeof(uint8_t));
@@ -35,7 +35,22 @@ void initBoard(chessboard * board)
     {
         board->w_locations[i] = location_boards[board->w_pieces[i]];
         board->b_locations[i] = location_boards[board->b_pieces[i]];
+        //Update population bitboard
+        board->all_w_pieces |= board->w_locations[i];
+        board->all_b_pieces |= board->b_locations[i];
     }
+
+#ifdef DEBUG
+    for (uint8_t i = 0; i < 16; ++i)
+    {
+        printf("w%d: %d\n", i, board->w_pieces[i]);
+        printf("wloc%d: %llx\n", i, board->w_locations[i]);
+        printf("b%d: %d\n", i, board->b_pieces[i]);
+        printf("bloc%d: %llx\n", i, board->b_locations[i]);
+    }
+    printf("woc: %llx\n", board->all_w_pieces);
+    printf("boc: %llx\n", board->all_b_pieces);
+#endif
 }
 
 /*
@@ -71,7 +86,7 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
     uint8_t (*moves)[7];
 
     //Allocate enough storage
-    realloc(storage, 35 * sizeof(chessboard));
+    storage = realloc(storage, 35 * sizeof(chessboard));
 
     //For each piece, get the set of moves it can make from its location
     for (i = 0; i < 16; ++i)
@@ -82,6 +97,9 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
             continue;
         }
 
+        printf("piece: %d, @%d\n", codes[i], pieces[i]);
+        printf("move0: %d\n", legal_moves[codes[i]][pieces[i]][0][0]);
+
         moves = legal_moves[codes[i]][pieces[i]];
         //Go through each move ray
         for (j = 0; j < 8; ++j)
@@ -89,6 +107,9 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
             //Go through each move in ray
             for (k = 0; k < 7; ++k)
             {
+#ifdef DEBUG
+                printf("making move: %d\n", moves[j][k]);
+#endif
                 //Check for end of ray, or own piece @ location
                 //Location check works as follows:
                 //  Get the bitboard representing the destination
@@ -109,7 +130,8 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
                     if (((states % 35) == 0))
                     {
                         //Allocate more storage
-                        realloc(storage, (states + 35) * sizeof(chessboard));
+                        storage = realloc(storage,
+                                (states + 35) * sizeof(chessboard));
                     }
                 }
             }
@@ -161,4 +183,5 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
         //update piece location
         new->b_pieces[piece] = location;
     }
+
 }

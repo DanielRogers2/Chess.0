@@ -19,9 +19,19 @@ int main()
         generateMoveTables();
     }
 
+    printf("addr_LM: %p\n", &legal_moves);
+    printf("move00: %d\n", legal_moves[0][0][0][0]);
+
     //Get a new board and initialize it
     chessboard current_state;
     initBoard(&current_state);
+
+    chessboard * newstates = malloc(35 * sizeof(chessboard));
+    uint8_t exp = expandStates(&current_state, newstates, true);
+
+    printf("expanded: %u\n", exp);
+    printf("%llx\n", newstates[0].all_w_pieces);
+    free(newstates);
 
     //Set up network code
 
