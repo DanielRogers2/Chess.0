@@ -92,7 +92,7 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
     for (i = 0; i < 16; ++i)
     {
         //Check if piece is captured
-        if (pieces[i] == 64)
+        if (pieces[i] == CAPTURED)
         {
             continue;
         }
@@ -176,29 +176,44 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
     //copy data
     memcpy(new, current, sizeof(chessboard));
 
-    //Update the location
-    if (white)
-    {
-        //Update the occupancy bitboard
-        //XOR out the old location, XOR in the new location
-        new->all_w_pieces ^= (new->w_locations[piece] ^ new_loc);
-        //Update position bitboard
-        new->w_locations[piece] = new_loc;
-        //update piece location
-        new->w_pieces[piece] = location;
-    }
-    else
-    {
-        //for black pieces
-        //Update the occupancy bitboard
-        //XOR out the old location, XOR in the new location
-        new->all_b_pieces ^= (new->b_locations[piece] ^ new_loc);
-        //Update position bitboard
-        new->b_locations[piece] = new_loc;
-        //update piece location
-        new->b_pieces[piece] = location;
-    }
+    //Set up data pointers
+    //All pieces
+    bitboard * self_all = (white) ? &new->all_w_pieces : &new->all_b_pieces;
+    bitboard * op_all = (white) ? &new->all_b_pieces : &new->all_w_pieces;
+    //location bitboards
+    bitboard * self_locs = (white) ? new->w_locations : new->b_locations;
+    bitboard * op_locs = (white) ? new->b_locations : new->w_locations;
+    //piece value
+    uint8_t * self_pcs = (white) ? new->w_pieces : new->b_pieces;
+    uint8_t * op_pcs = (white) ? new->b_pieces : new->w_pieces;
 
+    //Update the occupancy bitboard
+    //XOR out the old location, XOR in the new location
+    *self_all ^= (self_locs[piece] ^ new_loc);
+    //Update position bitboard
+    self_locs[piece] = new_loc;
+    //update piece location
+    self_pcs[piece] = location;
+
+    //Handle captures, capturing if opponent piece @ location
+    if ((*self_all) & new_loc)
+    {
+        for (uint8_t i = 0; i < 16; ++i)
+        {
+            //If opponent piece at same location as new location
+            if (op_locs[i] == new_loc)
+            {
+                //XOR out location in occupancy board
+                *op_all ^= op_locs[i];
+                //Set to invalid position
+                op_locs[i] = 0;
+                //Flag as captured
+                op_pcs[i] = CAPTURED;
+                //done
+                break;
+            }
+        }
+    }
 }
 
 /*
