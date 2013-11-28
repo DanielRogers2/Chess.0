@@ -11,7 +11,6 @@
 #ifndef BOARD_H_
 #define BOARD_H_
 
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -101,5 +100,13 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
  */
 void makeMove(uint8_t piece, uint8_t location, bool white,
         chessboard * const current, chessboard * new);
+
+/*
+ * Evaluates the value of a particular board
+ *
+ * @param board The board to evaluate
+ * @return The value of the board in a form usable in a negamax function
+ */
+int evaluateState(chessboard * const board);
 
 #endif /* BOARD_H_ */
