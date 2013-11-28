@@ -13,12 +13,13 @@
 #include "common_defs.h"
 
 //declare external
+extern int8_t modifier;
 extern uint8_t legal_moves[12][64][8][7];
 extern bitboard attacked_squares[12][64];
 extern const bitboard location_boards[65];
 extern const uint8_t w_codes[16];
 extern const uint8_t b_codes[16];
-extern const uint8_t piece_vals[12];
+extern const uint16_t piece_vals[12];
 extern const uint8_t white_initial[16];
 extern const uint8_t black_initial[16];
 extern const int8_t w_P_positions[64];
@@ -35,6 +36,7 @@ extern const int8_t w_K_m_positions[64];
 extern const int8_t b_K_m_positions[64];
 extern const int8_t w_K_e_positions[64];
 extern const int8_t b_K_e_positions[64];
+extern const int8_t * board_position_vals[12];
 extern HASHKEY key_table[12][64];
 
 #endif /* GLOBALS_H_ */

@@ -11,6 +11,16 @@
 #include "common_defs.h"
 
 /*
+ * Set to 1 if playing white, -1 if playing black
+ *
+ * @users board
+ * @modifiers ??? (whatever set of funcitons decides which side we're playing)
+ * @initializer (whatever function makes the actual determination of side)
+ */
+//TODO Initialize this
+int8_t modifier = 1;
+
+/*
  * At runtime, this will be pointed at a pre-generated table of valid moves for
  * a piece, given the piece and its location. This will include moves that are
  * only valid for a pawn if it is capturing.
@@ -101,7 +111,7 @@ const uint8_t b_codes[16] =
  * @users board
  */
 //White/black, P, R, N, B, Q, K
-const uint8_t piece_vals[12] =
+const uint16_t piece_vals[12] =
 { 100, 500, 320, 330, 900, 20000, 100, 500, 320, 330, 900, 20000 };
 
 /*
@@ -143,6 +153,7 @@ HASHKEY key_table[12][64];
  *      http://chessprogramming.wikispaces.com/Simplified+evaluation+function
  *
  * These are mirrored over X, so that's right... right?
+ *
  * @users board
  */
 //Pawns, white and black
@@ -222,4 +233,15 @@ const int8_t b_K_e_positions[64] =
         -30, -10, 20, 30, 30, 20, -10, -30, -30, -10, 30, 40, 40, 30, -10, -30,
         -30, -10, 30, 40, 40, 30, -10, -30, -30, -10, 20, 30, 30, 20, -10, -30,
         -30, -30, 0, 0, 0, 0, -30, -30, -50, -30, -30, -30, -30, -30, -30, -50 };
+
+/*
+ * The array of tables for easy lookup
+ * @users board
+ * @modifiers whatever function decides the difference between midgame/endgame
+ */
+//TODO Modify this so kin positions update to endgame state at right time
+const int8_t * board_position_vals[12] =
+{ w_P_positions, w_N_positions, w_B_positions, w_R_positions, w_Q_positions,
+        w_K_m_positions, b_P_positions, b_N_positions, b_B_positions,
+        b_R_positions, b_Q_positions, b_K_m_positions };
 
