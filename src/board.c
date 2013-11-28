@@ -116,14 +116,23 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
                 //  Then AND with pieces for own side -> all 0 if no pieces at
                 //      destination, meaning valid move. !0 if own piece at
                 //      location, meaning invalid move
-                //  If it's a pawn, diagonals are only allowed on capture
                 //location_boards[64] == 0xffffffffffffffff, so any AND will
                 //  make a non-0 value
-                if ((location_boards[moves[j][k]] & self)
-                        || ((codes[i] == W_P || codes[i] == B_P) && (j != 0)
-                                && (!(location_boards[moves[j][k]] & op))))
+                if (location_boards[moves[j][k]] & self)
                 {
                     //Stop looking through ray
+#ifdef DEBUG
+                    puts("breaking");
+#endif
+                    break;
+                }
+                else if ((codes[i] == W_P || codes[i] == B_P)
+                        && (((j != 0) && (!(location_boards[moves[j][k]] & op)))
+                                || ((j == 0)
+                                        && (location_boards[moves[j][k]] & op))))
+                {
+                    //  If it's a pawn, diagonals are only allowed on capture
+                    //  Can't capture by moving forward
 #ifdef DEBUG
                     puts("breaking");
 #endif
