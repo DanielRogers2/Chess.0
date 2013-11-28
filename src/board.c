@@ -58,7 +58,7 @@ void initBoard(chessboard * board)
  *
  * @owner Daniel Rogers
  *
- * @uses w_codes, b_codes, location_boards, legal_moves
+ * @uses location_boards, legal_moves
  *
  * @param board A pointer to the board to expand
  * @param storage A pointer to an array in which to store the expanded states
@@ -75,14 +75,13 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
     bitboard self = (white) ? board->all_w_pieces : board->all_b_pieces;
     bitboard op = (white) ? board->all_b_pieces : board->all_w_pieces;
     //Lookup table piece codes
-    const uint8_t * codes = (white) ? w_codes : b_codes;
+    const uint8_t * codes = (white) ? board->w_codes : board->b_codes;
 
     //Number of states generated
     uint8_t states = 0;
 
     //Loop variables
     uint8_t i, j, k;
-
     //The set of moves
     uint8_t (*moves)[7];
 
@@ -203,14 +202,55 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
  * @param new The new chessboard state to write to
  * @param promote_to If promoting, this is the piece code of the desired
  *                   promotion
- *
  */
-void moveSpecial(uint8_t pieces, uint8_t location, bool white,
+void moveSpecial(uint8_t piece, uint8_t location, bool white,
         chessboard * const current, chessboard * new, uint8_t promote_to)
 {
-    //TODO Handle en passant captures
-    //TODO Handle pawn promotions
-    //TODO Handle castling
+    //Generate the new location bitboard for the new location
+    bitboard new_loc = location_boards[location];
+
+    //copy data
+    memcpy(new, current, sizeof(chessboard));
+
+    //If it's a pawn, then it's a promotion or en passant
+    if (piece == W_P || piece == B_P)
+    {
+        //If in row 1 or row 8, then promoting pawn
+        if ((location / 8) == 7)
+        {
+            //Row 8, so it's white
+            //Update the occupancy bitboard
+            //XOR out the old location, XOR in the new location
+            new->all_w_pieces ^= (new->w_locations[piece] ^ new_loc);
+            //Update position bitboard
+            new->w_locations[piece] = new_loc;
+            //update piece location
+            new->w_pieces[piece] = location;
+            //Update piece code
+            new->w_codes[piece] = promote_to;
+        }
+        else if ((location / 8) == 0)
+        {
+            //Row 1, so it's black
+            //Update the occupancy bitboard
+            //XOR out the old location, XOR in the new location
+            new->all_b_pieces ^= (new->b_locations[piece] ^ new_loc);
+            //Update position bitboard
+            new->b_locations[piece] = new_loc;
+            //update piece location
+            new->b_pieces[piece] = location;
+            //Update piece code
+            new->b_codes[piece] = promote_to;
+        }
+        else
+        {
+            //TODO Handle en passant captures
+        }
+    }
+    else
+    {
+        //TODO Handle castling
+    }
 }
 
 /*
@@ -241,14 +281,14 @@ int evaluateState(chessboard * const board)
         w_val +=
                 (board->w_pieces[i] == CAPTURED) ?
                         0 :
-                        piece_vals[w_codes[i]]
-                                + board_position_vals[w_codes[i]][board->w_pieces[i]];
+                        piece_vals[board->w_codes[i]]
+                                + board_position_vals[board->w_codes[i]][board->w_pieces[i]];
         //Same for Black
         b_val +=
                 (board->b_pieces[i] == CAPTURED) ?
                         0 :
-                        piece_vals[b_codes[i]]
-                                + board_position_vals[b_codes[i]][board->b_pieces[i]];
+                        piece_vals[board->b_codes[i]]
+                                + board_position_vals[board->b_codes[i]][board->b_pieces[i]];
     }
 
     //Value = white - black

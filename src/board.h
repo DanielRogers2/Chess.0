@@ -21,18 +21,30 @@
 #include "globals.h"
 
 //Piece code definitions
+//white pawn
 #define W_P 0
+//white rook
 #define W_R 1
+//white knight
 #define W_N 2
+//white bishop
 #define W_B 3
+//white queen
 #define W_Q 4
+//white king
 #define W_K 5
 
+//black pawn
 #define B_P 6
+//black rook
 #define B_R 7
+//black knight
 #define B_N 8
+//black bishop
 #define B_B 9
+//black queen
 #define B_Q 10
+//black king
 #define B_K 11
 
 /*
@@ -52,6 +64,8 @@ typedef struct
     bitboard all_w_pieces;
     //Bitboards of individual piece locations for white
     bitboard w_locations[16];
+    //White Piece IDS
+    uint8_t w_codes[16];
 
     //Locations of all black pieces
     uint8_t b_pieces[16];
@@ -59,6 +73,9 @@ typedef struct
     bitboard all_b_pieces;
     //Bitboards of individual piece locations for black
     bitboard b_locations[16];
+    //White Piece IDS
+    uint8_t b_codes[16];
+
 } chessboard;
 
 /*
@@ -111,9 +128,8 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
  * @param new The new chessboard state to write to
  * @param promote_to If promoting, this is the piece code of the desired
  *                   promotion
- *
  */
-void moveSpecial(uint8_t pieces, uint8_t location, bool white,
+void moveSpecial(uint8_t piece, uint8_t location, bool white,
         chessboard * const current, chessboard * new, uint8_t promote_to);
 
 /*

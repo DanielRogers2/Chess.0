@@ -89,7 +89,6 @@ UINT64_MAX };
  *  King:   5   11
  *
  * @users board
- * @users pregame
  */
 const uint8_t w_codes[16] =
 { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 5 };
