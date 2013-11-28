@@ -12,7 +12,7 @@
 /*
  * Initializes the board to its base state, where no moves have been made yet
  *
- * @uses white_initial, black_initial, location_bitboards
+ * @uses white_initial, black_initial, location_bitboards, w_codes, b_codes
  *
  * @owner Daniel Rogers
  *
@@ -29,6 +29,10 @@ void initBoard(chessboard * board)
     //Set location arrays
     memcpy(board->w_pieces, white_initial, 16 * sizeof(uint8_t));
     memcpy(board->b_pieces, black_initial, 16 * sizeof(uint8_t));
+
+    //Set initial piece codes
+    memcpy(board->w_codes, w_codes, 16 * sizeof(uint8_t));
+    memcpy(board->b_codes, b_codes, 16 * sizeof(uint8_t));
 
     //Set location bitboards
     for (uint8_t i = 0; i < 16; ++i)
