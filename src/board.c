@@ -73,6 +73,7 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
     uint8_t * pieces = (white) ? board->w_pieces : board->b_pieces;
     //Side location occupancy boards
     bitboard self = (white) ? board->all_w_pieces : board->all_b_pieces;
+    bitboard op = (white) ? board->all_b_pieces : board->all_w_pieces;
     //Lookup table piece codes
     const uint8_t * codes = (white) ? w_codes : b_codes;
 
@@ -116,11 +117,17 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
                 //  Then AND with pieces for own side -> all 0 if no pieces at
                 //      destination, meaning valid move. !0 if own piece at
                 //      location, meaning invalid move
+                //  If it's a pawn, diagonals are only allowed on capture
                 //location_boards[64] == 0xffffffffffffffff, so any AND will
                 //  make a non-0 value
-                if (location_boards[moves[j][k]] & self)
+                if ((location_boards[moves[j][k]] & self)
+                        || ((codes[i] == W_P || codes[i] == B_P) && (j != 0)
+                                && (!(location_boards[moves[j][k]] & op))))
                 {
                     //Stop looking through ray
+#ifdef DEBUG
+                    puts("breaking");
+#endif
                     break;
                 }
                 else
