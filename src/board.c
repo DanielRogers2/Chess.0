@@ -165,10 +165,6 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
     //Generate the new location bitboard for the new location
     bitboard new_loc = location_boards[location];
 
-    //TODO Handle en passant captures (here or in another function?)
-    //TODO Handle pawn promotions (here or in another function?)
-    //TODO Handle castling
-
     //copy data
     memcpy(new, current, sizeof(chessboard));
 
@@ -195,6 +191,26 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
         new->b_pieces[piece] = location;
     }
 
+}
+
+/*
+ * Handles making special moves such as castling/en passant/promotion
+ *
+ * @param piece The index of the piece to move
+ * @param location The location to move to
+ * @param white true If the piece being moved is white
+ * @param current The chessboard state being referenced
+ * @param new The new chessboard state to write to
+ * @param promote_to If promoting, this is the piece code of the desired
+ *                   promotion
+ *
+ */
+void moveSpecial(uint8_t pieces, uint8_t location, bool white,
+        chessboard * const current, chessboard * new, uint8_t promote_to)
+{
+    //TODO Handle en passant captures
+    //TODO Handle pawn promotions
+    //TODO Handle castling
 }
 
 /*

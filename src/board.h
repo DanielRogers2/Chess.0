@@ -102,6 +102,21 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
         chessboard * const current, chessboard * new);
 
 /*
+ * Handles making special moves such as castling/en passant/promotion
+ *
+ * @param piece The index of the piece to move
+ * @param location The location to move to
+ * @param white true If the piece being moved is white
+ * @param current The chessboard state being referenced
+ * @param new The new chessboard state to write to
+ * @param promote_to If promoting, this is the piece code of the desired
+ *                   promotion
+ *
+ */
+void moveSpecial(uint8_t pieces, uint8_t location, bool white,
+        chessboard * const current, chessboard * new, uint8_t promote_to);
+
+/*
  * Evaluates the value of a particular board
  *
  * @owner Daniel Rogers
