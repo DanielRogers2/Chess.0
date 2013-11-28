@@ -200,6 +200,7 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
     self_pcs[piece] = location;
 
     //Handle captures, capturing if opponent piece @ location
+    //  (maybe should be in own function?)
     if ((*op_all) & new_loc)
     {
         for (uint8_t i = 0; i < 16; ++i)
@@ -223,6 +224,12 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
 /*
  * Handles making special moves such as castling/en passant/promotion
  *
+ * !!This function should ONLY BE CALLED if a special move has been made,
+ *   it is only responsible for handling board state updating, NOT validating
+ *   if a move is special or not!!
+ *
+ * @owner Daniel Rogers
+ *
  * @param piece The index of the piece to move
  * @param location The location to move to
  * @param white true If the piece being moved is white
@@ -237,20 +244,11 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
     //Generate the new location bitboard for the new location
     bitboard new_loc = location_boards[location];
 
-    //copy data
-    memcpy(new, current, sizeof(chessboard));
+    //do initial work with makeMove
+    //Capturing during a pawn promotion move will be handled by this
+    makeMove(piece, location, white, current, new);
 
-    //Set up data pointers
-    //All pieces
-    bitboard * self_all = (white) ? &new->all_w_pieces : &new->all_b_pieces;
-    bitboard * op_all = (white) ? &new->all_b_pieces : &new->all_w_pieces;
-    //location bitboards
-    bitboard * self_locs = (white) ? new->w_locations : new->b_locations;
-    bitboard * op_locs = (white) ? new->b_locations : new->w_locations;
-    //piece value
-    uint8_t * self_pcs = (white) ? new->w_pieces : new->b_pieces;
-    uint8_t * op_pcs = (white) ? new->b_pieces : new->w_pieces;
-
+    //Now that new is set up right
     //If it's a pawn, then it's a promotion or en passant
     if (piece == W_P || piece == B_P)
     {
@@ -260,38 +258,40 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
             //piece code pointers
             uint8_t * p_codes = (white) ? new->w_codes : new->b_codes;
 
-            //Update the occupancy bitboard
-            //XOR out the old location, XOR in the new location
-            *self_all ^= (self_locs[piece] ^ new_loc);
-            //Update position bitboard
-            self_locs[piece] = new_loc;
-            //update piece location
-            self_pcs[piece] = location;
             //Update piece code
             p_codes[piece] = promote_to;
-            //Check for captures, if opponent piece @ new_location
-            if ((*op_all) & new_loc)
-            {
-                for (uint8_t i = 0; i < 16; ++i)
-                {
-                    //If opponent piece at same location as new location
-                    if (op_locs[i] == new_loc)
-                    {
-                        //XOR out location in occupancy board
-                        *op_all ^= op_locs[i];
-                        //Set to invalid position
-                        op_locs[i] = 0;
-                        //Flag as captured
-                        op_pcs[i] = CAPTURED;
-                        //done
-                        break;
-                    }
-                }
-            }
         }
         else
         {
-            //TODO Handle en passant captures
+            //data pointers
+            bitboard * op_all =
+                    (white) ? &new->all_b_pieces : &new->all_w_pieces;
+            //location bitboards
+            bitboard * op_locs = (white) ? new->b_locations : new->w_locations;
+            //piece value
+            uint8_t * op_pcs = (white) ? new->b_pieces : new->w_pieces;
+
+            //It's an en passant capture, so the pawn must be +- 1 row from
+            //  location. It's +1 row if white, -1 row if black
+            int8_t delta = (white) ? 8 : -8;
+            //Get location of pawn being captured
+            bitboard cap_loc = location_boards[location + delta];
+
+            for (uint8_t i = 0; i < 16; ++i)
+            {
+                //If opponent piece at capture location
+                if (op_locs[i] == cap_loc)
+                {
+                    //XOR out location in occupancy board
+                    *op_all ^= op_locs[i];
+                    //Set to invalid position
+                    op_locs[i] = 0;
+                    //Flag as captured
+                    op_pcs[i] = CAPTURED;
+                    //done
+                    break;
+                }
+            }
         }
     }
     else

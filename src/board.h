@@ -121,6 +121,10 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
 /*
  * Handles making special moves such as castling/en passant/promotion
  *
+ * !!This function should ONLY BE CALLED if a special move has been made,
+ *   it is only responsible for handling board state updating, NOT validating
+ *   if a move is special or not!!
+ *
  * @param piece The index of the piece to move
  * @param location The location to move to
  * @param white true If the piece being moved is white
