@@ -165,6 +165,10 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
     //Generate the new location bitboard for the new location
     bitboard new_loc = location_boards[location];
 
+    //TODO Handle en passant captures (here or in another function?)
+    //TODO Handle pawn promotions (here or in another function?)
+    //TODO Handle castling
+
     //copy data
     memcpy(new, current, sizeof(chessboard));
 
