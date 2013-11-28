@@ -89,6 +89,9 @@ typedef struct
  */
 void initBoard(chessboard * board);
 
+//TODO Add function to convert opponent move string into a new board state
+//TODO Add function to convert own move into a move string to send to server
+
 /*
  * Expands the set of all possible board states from an initial state
  *
