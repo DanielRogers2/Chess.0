@@ -228,6 +228,8 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
  *   it is only responsible for handling board state updating, NOT validating
  *   if a move is special or not!!
  *
+ * @uses *_initial to determine index of rook for castling maneuver
+ *
  * @owner Daniel Rogers
  *
  * @param piece The index of the piece to move
@@ -241,9 +243,6 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
 void moveSpecial(uint8_t piece, uint8_t location, bool white,
         chessboard * const current, chessboard * new, uint8_t promote_to)
 {
-    //Generate the new location bitboard for the new location
-    bitboard new_loc = location_boards[location];
-
     //do initial work with makeMove
     //Capturing during a pawn promotion move will be handled by this
     makeMove(piece, location, white, current, new);
@@ -263,7 +262,7 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
         }
         else
         {
-            //data pointers
+            //opponent data pointers
             bitboard * op_all =
                     (white) ? &new->all_b_pieces : &new->all_w_pieces;
             //location bitboards
@@ -296,7 +295,31 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
     }
     else
     {
-        //TODO Handle castling
+        //Piece coming in will be a king (otherwise we won't know it's
+        //  a castling maneuver per the project spec
+        //King is in place because of makeMove, so need to determine rook to
+        //  move and put it in place
+        uint8_t rk;
+        uint8_t rk_to;
+        //Check for queenside vs kingside rook
+        if ((location / 8) == 6)
+        {
+            //kingside rook, index is 09 of array
+            rk = 9;
+            //it goes to f1 (white) or f8 (black)
+            //  These are -1 column back from king position (passed in)
+            rk_to = location - 1;
+        }
+        else
+        {
+            //queenside rook, index is 08 of array
+            rk = 8;
+            //it goes to d1 (white) or d8 (black)
+            //  These are +1 column back from king position (passed in)
+            rk_to = location + 1;
+        }
+        //Use makeMove to put rook in right location
+        makeMove(rk, rk_to, white, new, new);
     }
 }
 

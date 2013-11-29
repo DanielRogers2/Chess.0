@@ -118,6 +118,7 @@ const uint16_t piece_vals[12] =
  * Pawns:   indexes 0-7 of white/black position arrays
  *   8-15, 48-55
  * Rook:    indexes 08-09, squares 0,7 & 56,63
+ *          queenside, kingside
  * Knights: indexes 10-11, squares 1,6 & 57,62
  * Bishops: indexes 12-13, squares 2,5 & 58,61
  * Queen:   index 14, squares 3 & 59
@@ -238,7 +239,7 @@ const int8_t b_K_e_positions[64] =
  * @users board
  * @modifiers whatever function decides the difference between midgame/endgame
  */
-//TODO Modify this so kin positions update to endgame state at right time
+//TODO Modify this so king positions update to endgame state at right time
 const int8_t * board_position_vals[12] =
 { w_P_positions, w_N_positions, w_B_positions, w_R_positions, w_Q_positions,
         w_K_m_positions, b_P_positions, b_N_positions, b_B_positions,
