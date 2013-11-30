@@ -13,6 +13,8 @@
 /*
  * Does a search for and returns the best move for the board
  *
+ * @owner Daniel Rogers
+ *
  * @param self_white true if we are white
  * @param initial A pointer to the initial board state to use
  * @param result A pointer that will be filled with the new board state based
