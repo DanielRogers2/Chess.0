@@ -40,9 +40,18 @@ void selectBestMove(bool self_white, chessboard * const initial,
 #else
     int thread;
 
-    omp_set_num_threads(4);
-    boardset * threadstore[4];
-    for (uint8_t i = 0; i < 4; ++i)
+#ifdef USE_MAX_THREADS
+    int threadcount = omp_get_max_threads();
+#ifdef DEBUG
+    printf("MAX_THREADS: %d\n", threadcount);
+#endif
+#else
+    int threadcount = 4;
+#endif
+
+    omp_set_num_threads(threadcount);
+    boardset * threadstore[threadcount];
+    for (uint8_t i = 0; i < threadcount; ++i)
     {
         threadstore[i] = calloc(depth - 1, sizeof(boardset));
     }
@@ -68,10 +77,13 @@ void selectBestMove(bool self_white, chessboard * const initial,
     int best = INT_MIN;
     uint8_t best_indx = 0;
 #else
-    int best[4] =
-    { INT_MIN, INT_MIN, INT_MIN, INT_MIN };
-    uint8_t best_indx[4] =
-    { 0 };
+    int best[threadcount];
+    uint8_t best_indx[threadcount];
+    for (uint8_t i = 0; i < threadcount; ++i)
+    {
+        best[i] = INT_MAX;
+        best_indx[i] = 0;
+    }
 #endif
 
     //Currently seen value
@@ -131,7 +143,7 @@ void selectBestMove(bool self_white, chessboard * const initial,
     int th_best = best[0];
     uint8_t th_best_i = best_indx[0];
 
-    for (uint8_t i = 1; i < 4; ++i)
+    for (uint8_t i = 1; i < threadcount; ++i)
     {
         if (best[i] > th_best)
         {
@@ -147,7 +159,7 @@ void selectBestMove(bool self_white, chessboard * const initial,
     puts("freeing thread mem");
 #endif
     //Free used memory
-    for (uint8_t j = 0; j < 4; ++j)
+    for (uint8_t j = 0; j < threadcount; ++j)
     {
         for (uint8_t i = 0; i < depth - 1; ++i)
         {
