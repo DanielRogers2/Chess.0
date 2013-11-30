@@ -44,7 +44,7 @@ void initBoard(chessboard * board)
         board->all_b_pieces |= board->b_locations[i];
     }
 
-#ifdef DEBUG
+#ifdef DEBUG_INIT
     for (uint8_t i = 0; i < 16; ++i)
     {
         printf("w%d: %d\n", i, board->w_pieces[i]);
@@ -105,8 +105,10 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
             continue;
         }
 
+#ifdef DEBUG_MOVE
         printf("piece: %d, @%d\n", codes[i], pieces[i]);
         printf("move0: %d\n", legal_moves[codes[i]][pieces[i]][0][0]);
+#endif
 
         moves = legal_moves[codes[i]][pieces[i]];
         //Go through each move ray
@@ -115,7 +117,7 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
             //Go through each move in ray
             for (k = 0; k < 7; ++k)
             {
-#ifdef DEBUG
+#ifdef DEBUG_MOVE
                 printf("making move: %d\n", moves[j][k]);
 #endif
                 //Check for end of ray, or own piece @ location
@@ -129,7 +131,7 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                 if (location_boards[moves[j][k]] & self)
                 {
                     //Stop looking through ray
-#ifdef DEBUG
+#ifdef DEBUG_MOVE
                     puts("breaking");
 #endif
                     break;
@@ -141,7 +143,7 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                 {
                     //  If it's a pawn, diagonals are only allowed on capture
                     //  Can't capture by moving forward
-#ifdef DEBUG
+#ifdef DEBUG_MOVE
                     puts("breaking");
 #endif
                     break;

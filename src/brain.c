@@ -8,6 +8,11 @@
  */
 
 #include <stdbool.h>
+
+#ifdef PARALLEL_NEGAMAX
+#include <omp.h>
+#endif
+
 #include "brain.h"
 
 /*
@@ -25,41 +30,132 @@
 void selectBestMove(bool self_white, chessboard * const initial,
         chessboard * result, uint8_t depth)
 {
+#ifdef DEBUG
+    puts("setting up storage");
+#endif
+
     //Make the expansion store
+#ifndef PARALLEL_NEGAMAX
     boardset * store = calloc(depth, sizeof(boardset));
+#else
+    int thread;
+
+    omp_set_num_threads(4);
+    boardset * threadstore[4];
+    for (uint8_t i = 0; i < 4; ++i)
+    {
+        threadstore[i] = calloc(depth - 1, sizeof(boardset));
+    }
+
+    boardset store;
+    store.count = 0;
+    store.data = NULL;
+#endif
+
+#ifdef DEBUG
+    puts("doing initial expansion");
+#endif
 
     //Do the first expansion
+#ifndef PARALLEL_NEGAMAX
     uint8_t states = expandStates(initial, &store[0], self_white);
+#else
+    uint8_t states = expandStates(initial, &store, self_white);
+#endif
 
     //Best value seen
+#ifndef PARALLEL_NEGAMAX
     int best = INT_MIN;
+    uint8_t best_indx = 0;
+#else
+    int best[4] =
+    { INT_MIN, INT_MIN, INT_MIN, INT_MIN };
+    uint8_t best_indx[4] =
+    { 0 };
+#endif
+
     //Currently seen value
     int cur;
 
-    uint8_t best_indx = 0;
+#ifdef DEBUG
+    puts("staring search");
+#endif
 
     //Do the search
+#ifdef PARALLEL_NEGAMAX
+#pragma omp parallel for private(cur, thread) \
+    shared(best_indx, best, states, store, threadstore, self_white, depth)
+#endif
     for (uint8_t i = 0; i < states; ++i)
     {
         //Already did depth 0, so do the rest
         //  depth 0 values won't be over-written, so we can just look up
         //  the data we want after the loop ends
+#ifndef PARALLEL_NEGAMAX
         cur = -negamax(&store[0].data[i], !self_white, &store[1], depth - 1);
         if (cur > best)
         {
             best = cur;
             best_indx = i;
         }
+#else
+        thread = omp_get_thread_num();
+        cur = -negamax(&store.data[i], !self_white, threadstore[thread],
+                depth - 1);
+        if (cur > best[thread])
+        {
+            best[thread] = cur;
+            best_indx[thread] = i;
+        }
+#endif
+#ifdef DEBUG
+        printf("tl @ %d of %d\n", i + 1, states);
+#endif
     }
 
+#ifdef DEBUG
+    puts("search complete");
+#endif
+
+#ifndef PARALLEL_NEGAMAX
     //Get best board state
     memcpy(result, &store[0].data[best_indx], sizeof(chessboard));
     //Free used memory
-    for(uint8_t i = 0; i < depth; ++i)
+    for (uint8_t i = 0; i < depth; ++i)
     {
         free(store[i].data);
     }
     free(store);
+#else
+    //Get thread best
+    int th_best = best[0];
+    uint8_t th_best_i = best_indx[0];
+
+    for (uint8_t i = 1; i < 4; ++i)
+    {
+        if (best[i] > th_best)
+        {
+            th_best = best[i];
+            th_best_i = best_indx[i];
+        }
+    }
+
+    //copy into result
+    memcpy(result, &store.data[th_best_i], sizeof(chessboard));
+
+#ifdef DEBUG
+    puts("freeing thread mem");
+#endif
+    //Free used memory
+    for (uint8_t j = 0; j < 4; ++j)
+    {
+        for (uint8_t i = 0; i < depth - 1; ++i)
+        {
+            free(threadstore[j][i].data);
+        }
+        free(threadstore[j]);
+    }
+#endif
 }
 
 /*

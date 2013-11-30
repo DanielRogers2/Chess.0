@@ -123,8 +123,10 @@ bool loadMoveTables()
         fclose(atk_table);
         puts("Table files loaded successfully");
 
+#ifdef DEBUG_TABLES
         printf("addr_LLM: %p\n", &legal_moves);
         printf("moveL_00: %d\n", legal_moves[0][0][0][0]);
+#endif
         return (true);
     }
 }
