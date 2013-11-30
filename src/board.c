@@ -180,6 +180,10 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
     //copy data
     memcpy(new, current, sizeof(chessboard));
 
+    //Update last move
+    new->last_move = location;
+    new->last_piece = piece;
+
     //Set up data pointers
     //All pieces
     bitboard * self_all = (white) ? &new->all_w_pieces : &new->all_b_pieces;

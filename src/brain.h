@@ -16,6 +16,18 @@
 #include "board.h"
 
 /*
+ * Does a search for and returns the best move for the board
+ *
+ * @param self_white true if we are white
+ * @param initial A pointer to the initial board state to use
+ * @param result A pointer that will be filled with the new board state based
+ *               on the function's selected best move. last_piece and last_move
+ *               will be set to the value of the piece & location to move it to
+ */
+void selectBestMove(bool self_white, chessboard * const initial,
+        chessboard * result);
+
+/*
  * Performs a standard negamax search
  *
  * The callee is responsible for doing the first expansion & call to negamax
@@ -27,7 +39,7 @@
  * @param white If the current layer of the search is from white or black's
  *          perspective
  * @param expansionStore An array of chessboard * to use for storing expanded
- *                       states. These may be realloc'd durring execution of
+ *                       states. These may be realloc'd during execution of
  *                       the search.
  *                       !!! It is assumed to contain at least as many
  *                       pointers as the maximum depth of the search. Supplying
@@ -36,7 +48,7 @@
  *
  * @return The best score resulting from the negamax search
  */
-int negamax(chessboard * state, bool white, chessboard ** expansionStore,
+int negamax(chessboard * const state, bool white, chessboard ** expansionStore,
         uint8_t depth);
 
 #endif /* BRAIN_H_ */

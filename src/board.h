@@ -76,6 +76,12 @@ typedef struct
     //White Piece IDS
     uint8_t b_codes[16];
 
+    //Tracking data
+    //Last piece moved (as index of array)
+    uint8_t last_piece;
+    //Last location moved to
+    uint8_t last_move;
+
 } chessboard;
 
 /*
