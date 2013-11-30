@@ -20,11 +20,46 @@
  * @param result A pointer that will be filled with the new board state based
  *               on the function's selected best move. last_piece and last_move
  *               will be set to the value of the piece & location to move it to
+ * @param depth The depth to search to
  */
 void selectBestMove(bool self_white, chessboard * const initial,
-        chessboard * result)
+        chessboard * result, uint8_t depth)
 {
+    //Make the expansion store
+    boardset * store = calloc(depth, sizeof(boardset));
 
+    //Do the first expansion
+    uint8_t states = expandStates(initial, &store[0], self_white);
+
+    //Best value seen
+    int best = INT_MIN;
+    //Currently seen value
+    int cur;
+
+    uint8_t best_indx = 0;
+
+    //Do the search
+    for (uint8_t i = 0; i < states; ++i)
+    {
+        //Already did depth 0, so do the rest
+        //  depth 0 values won't be over-written, so we can just look up
+        //  the data we want after the loop ends
+        cur = -negamax(&store[0].data[i], !self_white, &store[1], depth - 1);
+        if (cur > best)
+        {
+            best = cur;
+            best_indx = i;
+        }
+    }
+
+    //Get best board state
+    memcpy(result, &store[0].data[best_indx], sizeof(chessboard));
+    //Free used memory
+    for(uint8_t i = 0; i < depth; ++i)
+    {
+        free(store[i].data);
+    }
+    free(store);
 }
 
 /*

@@ -31,6 +31,7 @@ int main()
 #ifdef DEBUG
     boardset newstates;
     newstates.count = 0;
+    newstates.data = NULL;
 
     uint8_t exp = expandStates(&current_state, &newstates, true);
 

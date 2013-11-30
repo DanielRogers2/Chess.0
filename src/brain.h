@@ -27,7 +27,7 @@
  *               will be set to the value of the piece & location to move it to
  */
 void selectBestMove(bool self_white, chessboard * const initial,
-        chessboard * result);
+        chessboard * result, uint8_t depth);
 
 /*
  * Performs a standard negamax search
