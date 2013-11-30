@@ -1,19 +1,14 @@
 /*
- * brain.h
+ * brain.c
  * 
- * Function definitions for running search
+ * Contains the implementations of the functions in brain.h
  * 
  * @author Daniel Rogers
  * 
  */
 
-#ifndef BRAIN_H_
-#define BRAIN_H_
-
-#include <inttypes.h>
-
-#include "common_defs.h"
-#include "board.h"
+#include <stdbool.h>
+#include "brain.h"
 
 /*
  * Performs a standard negamax search
@@ -37,6 +32,36 @@
  * @return The best score resulting from the negamax search
  */
 int negamax(chessboard * state, bool white, chessboard ** expansionStore,
-        uint8_t depth);
+        uint8_t depth)
+{
+    if (depth)
+    {
+        //Best value seen
+        int best = INT_MIN;
+        //Currently seen value
+        int cur;
+        //Storage of expanded states
+        chessboard * storage = expansionStore[depth - 1];
 
-#endif /* BRAIN_H_ */
+        //Do expansion, store result
+        uint8_t states = expandStates(state, storage, white);
+
+        //recurse negamax for each state expanded
+        for (uint8_t i = 0; i < states; ++i)
+        {
+            cur = -negamax(storage[i], !white, expansionStore, depth - 1);
+            if (cur > best)
+            {
+                best = cur;
+            }
+        }
+
+        //Return the best value
+        return (best);
+    }
+    else
+    {
+        //Return value of state
+        return (evaluateState(state, white));
+    }
+}
