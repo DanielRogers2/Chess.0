@@ -41,6 +41,7 @@ int main()
 
     chessboard res;
     //Test negamax
+    puts("negamax:");
     //for white
     selectBestMove(true, &current_state, &res, 6);
     puts("did sBM for white");
@@ -58,6 +59,73 @@ int main()
     printf("piece: %d, move: %d\n", res.last_piece, res.last_move);
     printf("value: %d\n", evaluateState(&res, false));
 
+    puts("testing game 4(w) vs 2(b)");
+    uint16_t counter = 0;
+    while (current_state.w_locations[15] && current_state.b_locations[15])
+    {
+        //white, to depth 4
+        selectBestMove(true, &current_state, &res, 4);
+        current_state = res;
+        //black, to depth 2
+        selectBestMove(false, &current_state, &res, 2);
+        if ((counter % 10) == 0)
+        {
+            printf("turn %d\n", counter);
+        }
+        ++counter;
+        if (counter == 1000)
+        {
+            puts("stalemate maybe...");
+        }
+    }
+
+    if (current_state.w_locations[15])
+    {
+        puts("winner was 4-ply white! yay it.. works?");
+    }
+    else if (current_state.b_locations[15])
+    {
+        puts("2-ply black won.. back to drawing board");
+    }
+    else
+    {
+        puts("uh-oh");
+    }
+
+    initBoard(&current_state);
+
+    puts("testing game 2(w) vs 4(b)");
+    counter = 0;
+    while (current_state.w_locations[15] && current_state.b_locations[15])
+    {
+        //white, to depth 4
+        selectBestMove(true, &current_state, &res, 2);
+        current_state = res;
+        //black, to depth 2
+        selectBestMove(false, &current_state, &res, 4);
+        if ((counter % 10) == 0)
+        {
+            printf("turn %d\n", counter);
+        }
+        ++counter;
+        if (counter == 1000)
+        {
+            puts("stalemate maybe...");
+        }
+    }
+
+    if (current_state.w_locations[15])
+    {
+        puts("2-ply white won.. back to drawing board");
+    }
+    else if (current_state.b_locations[15])
+    {
+        puts("winner was 4-ply black! yay it.. works?");
+    }
+    else
+    {
+        puts("uh-oh");
+    }
 #endif
 
     //Set up network code

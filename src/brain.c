@@ -30,7 +30,7 @@
 void selectBestMove(bool self_white, chessboard * const initial,
         chessboard * result, uint8_t depth)
 {
-#ifdef DEBUG
+#ifdef DEBUG_SEARCH
     puts("setting up storage");
 #endif
 
@@ -42,7 +42,7 @@ void selectBestMove(bool self_white, chessboard * const initial,
 
 #ifdef USE_MAX_THREADS
     int threadcount = omp_get_max_threads();
-#ifdef DEBUG
+#ifdef DEBUG_SEARCH
     printf("MAX_THREADS: %d\n", threadcount);
 #endif
 #else
@@ -61,7 +61,7 @@ void selectBestMove(bool self_white, chessboard * const initial,
     store.data = NULL;
 #endif
 
-#ifdef DEBUG
+#ifdef DEBUG_SEARCH
     puts("doing initial expansion");
 #endif
 
@@ -81,7 +81,7 @@ void selectBestMove(bool self_white, chessboard * const initial,
     uint8_t best_indx[threadcount];
     for (uint8_t i = 0; i < threadcount; ++i)
     {
-        best[i] = INT_MAX;
+        best[i] = INT_MIN;
         best_indx[i] = 0;
     }
 #endif
@@ -89,7 +89,7 @@ void selectBestMove(bool self_white, chessboard * const initial,
     //Currently seen value
     int cur;
 
-#ifdef DEBUG
+#ifdef DEBUG_SEARCH
     puts("staring search");
 #endif
 
@@ -120,12 +120,12 @@ void selectBestMove(bool self_white, chessboard * const initial,
             best_indx[thread] = i;
         }
 #endif
-#ifdef DEBUG
+#ifdef DEBUG_SEARCH
         printf("tl @ %d of %d\n", i + 1, states);
 #endif
     }
 
-#ifdef DEBUG
+#ifdef DEBUG_SEARCH
     puts("search complete");
 #endif
 
@@ -155,7 +155,7 @@ void selectBestMove(bool self_white, chessboard * const initial,
     //copy into result
     memcpy(result, &store.data[th_best_i], sizeof(chessboard));
 
-#ifdef DEBUG
+#ifdef DEBUG_SEARCH
     puts("freeing thread mem");
 #endif
     //Free used memory
