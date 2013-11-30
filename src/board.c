@@ -70,7 +70,7 @@ void initBoard(chessboard * board)
  * @param white true if expanding the set of white moves
  * @return The number of states expanded
  */
-uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
+uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
 {
     //Select the appropriate sets of data
     //Piece locations
@@ -89,8 +89,12 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
     //The set of moves
     uint8_t (*moves)[7];
 
-    //Allocate enough storage
-    storage = realloc(storage, 35 * sizeof(chessboard));
+    if (storage->count < 35)
+    {
+        //Allocate enough storage
+        storage->data = realloc(storage->data, 35 * sizeof(chessboard));
+        storage->count = 35;
+    }
 
     //For each piece, get the set of moves it can make from its location
     for (i = 0; i < 16; ++i)
@@ -145,12 +149,15 @@ uint8_t expandStates(chessboard * const board, chessboard * storage, bool white)
                 else
                 {
                     //Make the move with the piece
-                    makeMove(i, moves[j][k], white, board, &storage[states++]);
-                    if (((states % 35) == 0))
+                    makeMove(i, moves[j][k], white, board,
+                            &storage->data[states++]);
+
+                    if (storage->count <= states)
                     {
                         //Allocate more storage
-                        storage = realloc(storage,
-                                (states + 35) * sizeof(chessboard));
+                        storage->count += 10;
+                        storage->data = realloc(storage->data,
+                                storage->count * sizeof(chessboard));
                     }
                 }
             }

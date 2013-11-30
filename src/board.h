@@ -84,6 +84,12 @@ typedef struct
 
 } chessboard;
 
+typedef struct
+{
+    uint8_t count;
+    chessboard * data;
+} boardset;
+
 /*
  * Initializes the board to its base state, where no moves have been made yet
  *
@@ -111,7 +117,7 @@ void initBoard(chessboard * board);
  * @param white true if expanding the set of white moves
  * @return The number of states expanded
  */
-uint8_t expandStates(chessboard * const board, chessboard * storage, bool white);
+uint8_t expandStates(chessboard * const board, boardset * storage, bool white);
 
 /*
  * Generates a new board state based on a piece move

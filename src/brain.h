@@ -50,7 +50,7 @@ void selectBestMove(bool self_white, chessboard * const initial,
  *
  * @return The best score resulting from the negamax search
  */
-int negamax(chessboard * const state, bool white, chessboard ** expansionStore,
+int negamax(chessboard * const state, bool white, boardset * expansionStore,
         uint8_t depth);
 
 #endif /* BRAIN_H_ */

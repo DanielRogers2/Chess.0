@@ -29,13 +29,13 @@ int main()
     initBoard(&current_state);
 
 #ifdef DEBUG
-    chessboard * newstates = malloc(35 * sizeof(chessboard));
-    uint8_t exp = expandStates(&current_state, newstates, true);
+    boardset newstates;
+    newstates.count = 0;
+
+    uint8_t exp = expandStates(&current_state, &newstates, true);
 
     printf("expanded: %u\n", exp);
-    printf("%llx\n", newstates[0].all_w_pieces);
-
-    free(newstates);
+    printf("%llx\n", newstates.data[0].all_w_pieces);
 #endif
 
     //Set up network code

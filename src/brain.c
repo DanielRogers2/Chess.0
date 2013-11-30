@@ -24,7 +24,7 @@
 void selectBestMove(bool self_white, chessboard * const initial,
         chessboard * result)
 {
-    //TODO implement this
+
 }
 
 /*
@@ -38,8 +38,8 @@ void selectBestMove(bool self_white, chessboard * const initial,
  * @param state A pointer to the start state for the layer
  * @param white If the current layer of the search is from white or black's
  *          perspective
- * @param expansionStore An array of chessboard * to use for storing expanded
- *                       states. These may be realloc'd durring execution of
+ * @param expansionStore An array of boardsets to use for storing expanded
+ *                       states. These may be realloc'd during execution of
  *                       the search.
  *                       !!! It is assumed to contain at least as many
  *                       pointers as the maximum depth of the search. Supplying
@@ -48,7 +48,7 @@ void selectBestMove(bool self_white, chessboard * const initial,
  *
  * @return The best score resulting from the negamax search
  */
-int negamax(chessboard * const state, bool white, chessboard ** expansionStore,
+int negamax(chessboard * const state, bool white, boardset * expansionStore,
         uint8_t depth)
 {
     if (depth)
@@ -58,7 +58,7 @@ int negamax(chessboard * const state, bool white, chessboard ** expansionStore,
         //Currently seen value
         int cur;
         //Storage of expanded states
-        chessboard * storage = expansionStore[depth - 1];
+        boardset * storage = &expansionStore[depth - 1];
 
         //Do expansion, store result
         uint8_t states = expandStates(state, storage, white);
@@ -66,7 +66,8 @@ int negamax(chessboard * const state, bool white, chessboard ** expansionStore,
         //recurse negamax for each state expanded
         for (uint8_t i = 0; i < states; ++i)
         {
-            cur = -negamax(&storage[i], !white, expansionStore, depth - 1);
+            cur = -negamax(&storage->data[i], !white, expansionStore,
+                    depth - 1);
             if (cur > best)
             {
                 best = cur;
