@@ -336,7 +336,7 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
  * @param board The board to evaluate
  * @return The value of the board in a form usable in a negamax function
  */
-int evaluateState(chessboard * const board)
+int evaluateState(chessboard * const board, bool white)
 {
     int value = 0;
     int w_val = 0;
@@ -368,7 +368,7 @@ int evaluateState(chessboard * const board)
     //  have higher scores for better values for white
     //If black, then multiply by -1 to flip it so higher scores returned mean
     //  better values for black
-    value *= modifier;
+    value = (white) ? value : -value;
 
     return (value);
 }

@@ -11,16 +11,6 @@
 #include "common_defs.h"
 
 /*
- * Set to 1 if playing white, -1 if playing black
- *
- * @users board
- * @modifiers ??? (whatever set of funcitons decides which side we're playing)
- * @initializer (whatever function makes the actual determination of side)
- */
-//TODO Initialize this
-int8_t modifier = 1;
-
-/*
  * At runtime, this will be pointed at a pre-generated table of valid moves for
  * a piece, given the piece and its location. This will include moves that are
  * only valid for a pawn if it is capturing.

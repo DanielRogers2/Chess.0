@@ -13,7 +13,6 @@
 #include "common_defs.h"
 
 //declare external
-extern int8_t modifier;
 extern uint8_t legal_moves[12][64][8][7];
 extern bitboard attacked_squares[12][64];
 extern const bitboard location_boards[65];

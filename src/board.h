@@ -150,8 +150,9 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
  * @uses all of the *_*_positions globals
  *
  * @param board The board to evaluate
+ * @param white True if the call is being made from white's perspective
  * @return The value of the board in a form usable in a negamax function
  */
-int evaluateState(chessboard * const board);
+int evaluateState(chessboard * const board, bool white);
 
 #endif /* BOARD_H_ */
