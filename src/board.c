@@ -395,14 +395,26 @@ int evaluateState(chessboard * const board, bool white)
  */
 void printBoard(chessboard * const board)
 {
+    static const char cols[8] =
+    { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
+    static const char rows[9] =
+    { '1', '2', '3', '4', '5', '6', '7', '8', 'c' };
+
+    char pos_str[2];
+
     puts("White:");
-    for(uint8_t i = 0; i < 16; ++i)
+    for (uint8_t i = 0; i < 16; ++i)
     {
-        printf("    pid: %d @ %d\n", board->w_codes[i], board->w_pieces[i]);
+        pos_str[0] = cols[board->w_pieces[i] % 8];
+        pos_str[1] = rows[board->w_pieces[i] / 8];
+
+        printf("    pid: %d @ %s\n", board->w_codes[i], pos_str);
     }
     puts("Black:");
-    for(uint8_t i = 0; i < 16; ++i)
+    for (uint8_t i = 0; i < 16; ++i)
     {
-        printf("    pid: %d @ %d\n", board->b_codes[i], board->b_pieces[i]);
+        pos_str[0] = cols[board->b_pieces[i] % 8];
+        pos_str[1] = rows[board->b_pieces[i] / 8];
+        printf("    pid: %d @ %s\n", board->b_codes[i], pos_str);
     }
 }
