@@ -194,8 +194,20 @@ void selectBestMove(bool self_white, chessboard * const initial,
 int negamax(chessboard * const state, bool white, boardset * expansionStore,
         uint8_t depth)
 {
-    if (depth)
+    //Check if end of depth or opponent king captured
+    if (!depth || (state->b_pieces[15] == CAPTURED)
+            || (state->w_pieces[15] == CAPTURED))
     {
+        //Return value of state
+        return (evaluateState(state, white));
+    }
+    else
+    {
+#ifdef DEBUG_BEST
+        bool saw_cap = false;
+        uint8_t best_i = 0;
+#endif
+
         //Best value seen
         int best = INT_MIN;
         //Currently seen value
@@ -211,18 +223,27 @@ int negamax(chessboard * const state, bool white, boardset * expansionStore,
         {
             cur = -negamax(&storage->data[i], !white, expansionStore,
                     depth - 1);
+#ifdef DEBUG_BEST
+            saw_cap = (cur >= 20000 || cur <= -20000) ? true : saw_cap;
+#endif
             if (cur > best)
             {
                 best = cur;
+#ifdef DEBUG_BEST
+                best_i = i;
+#endif
             }
         }
 
+#ifdef DEBUG_BEST
+        if (depth >= 3 && saw_cap)
+        {
+            printf("w/cap: white: %d, best:%d, depth: %d\n", white, best,
+                    depth);
+            printBoard(&storage->data[best_i]);
+        }
+#endif
         //Return the best value
         return (best);
-    }
-    else
-    {
-        //Return value of state
-        return (evaluateState(state, white));
     }
 }
