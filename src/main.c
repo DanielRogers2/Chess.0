@@ -51,20 +51,20 @@ int main()
     //for white
     selectBestMove(true, &current_state, &res, 6);
     puts("did sBM for white");
-    printf("piece: %d, move: %d\n", res.last_piece, res.last_move);
+    printf("piece: %d, move: %d\n", res.w_last_piece, res.w_last_move);
     printf("value: %d\n", evaluateState(&res, true));
 
     //for black, same initial state... should come up with the same move
     //  and value
     selectBestMove(false, &current_state, &res, 6);
     puts("did sBM for black");
-    printf("piece: %d, move: %d\n", res.last_piece, res.last_move);
+    printf("piece: %d, move: %d\n", res.b_last_piece, res.b_last_move);
     printf("value: %d\n", evaluateState(&res, false));
 
     //Lower depth, for more info
     selectBestMove(false, &current_state, &res, 4);
     puts("did d4 sBM for black");
-    printf("piece: %d, move: %d\n", res.last_piece, res.last_move);
+    printf("piece: %d, move: %d\n", res.b_last_piece, res.b_last_move);
     printf("value: %d\n", evaluateState(&res, false));
 
     //Game examples
@@ -73,6 +73,9 @@ int main()
 
     puts("testing game 2(w) vs 4(b)");
     playSampleGame(2, 2, 4);
+
+    puts("testing game 2(w) vs 5(b)");
+    playSampleGame(2, 2, 5);
 
     //puts("testing game 4(w) vs 5(b)");
     //playSampleGame(3, 4, 5);
@@ -114,8 +117,8 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         selectBestMove(true, &current_state, &res, w_ply);
         tend = clock();
 
-        squareToString(res.last_move, mov_str);
-        pieceToString(res.last_piece, res.w_codes[res.last_piece], piece);
+        squareToString(res.w_last_move, mov_str);
+        pieceToString(res.w_last_piece, res.w_codes[res.w_last_piece], piece);
         tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
 
         printf("piece: %s, move: %s, value: %d in %f\n", piece, mov_str,
@@ -135,8 +138,8 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         selectBestMove(false, &current_state, &res, b_ply);
         tend = clock();
 
-        squareToString(res.last_move, mov_str);
-        pieceToString(res.last_piece, res.b_codes[res.last_piece], piece);
+        squareToString(res.b_last_move, mov_str);
+        pieceToString(res.b_last_piece, res.b_codes[res.b_last_piece], piece);
         tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
 
         printf("piece: %s, move: %s, value: %d in %f\n", piece, mov_str,

@@ -201,6 +201,12 @@ int negamax(chessboard * const state, bool white, boardset * expansionStore,
         //Return value of state
         return (evaluateState(state, white));
     }
+    //Check for stalemate
+    else if (state->w_ident_moves >= 3 || state->b_ident_moves >= 3)
+    {
+        //Nobody wins!
+        return (0);
+    }
     else
     {
 #ifdef DEBUG_BEST

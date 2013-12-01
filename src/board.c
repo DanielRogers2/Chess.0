@@ -34,6 +34,18 @@ void initBoard(chessboard * board)
     board->w_castlefree = 0;
     board->b_castlefree = 0;
 
+    //Initially no identical moves
+    board->b_ident_moves = 0;
+    board->w_ident_moves = 0;
+    //No last piece moved
+    board->w_last_piece = UINT8_MAX;
+    board->b_last_piece = UINT8_MAX;
+    //No position moved to
+    board->w_last_move = INVALID_SQUARE;
+    board->b_last_move = INVALID_SQUARE;
+    board->w_last_move2 = INVALID_SQUARE;
+    board->b_last_move2 = INVALID_SQUARE;
+
     //Set location arrays
     memcpy(board->w_pieces, white_initial, 16 * sizeof(uint8_t));
     memcpy(board->b_pieces, black_initial, 16 * sizeof(uint8_t));
@@ -277,9 +289,20 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
     //copy data
     memcpy(new, current, sizeof(chessboard));
 
+    uint8_t * ident_moves = (white) ? &new->w_ident_moves : &new->b_ident_moves;
+    uint8_t * last_move = (white) ? &new->w_last_move : &new->b_last_move;
+    uint8_t * last_move2 = (white) ? &new->w_last_move2 : &new->b_last_move2;
+    uint8_t * last_piece = (white) ? &new->w_last_piece : &new->b_last_piece;
+
     //Update last move
-    new->last_move = location;
-    new->last_piece = piece;
+    //See if moved to the same location last or two turns ago
+    //  if so, update ident count
+    *ident_moves =
+            (*last_move == location || *last_move2 == location) ?
+                    (*ident_moves) + 1 : 0;
+    *last_move2 = *last_move;
+    *last_move = location;
+    *last_piece = piece;
 
     //Set up data pointers
     //All pieces
@@ -293,7 +316,7 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
     uint8_t * op_pcs = (white) ? new->b_pieces : new->w_pieces;
 
     uint8_t * cancastle = (white) ? &new->w_cancastle : &new->b_cancastle;
-    uint8_t * castlefree = (white) ? &new->w_castlefree : & new->b_castlefree;
+    uint8_t * castlefree = (white) ? &new->w_castlefree : &new->b_castlefree;
     //Update appropriately for castling
     if (*cancastle)
     {
@@ -487,6 +510,15 @@ int evaluateState(chessboard * const board, bool white)
     int value = 0;
     int w_val = 0;
     int b_val = 0;
+
+#ifdef DEBUG
+    //Check for stalemate
+    if (board->w_ident_moves >= 3 || board->b_ident_moves >= 3)
+    {
+        //Nobody wins!
+        return (0);
+    }
+#endif
 
     //Sum up the values for white and black
     for (uint8_t i = 0; i < 16; ++i)

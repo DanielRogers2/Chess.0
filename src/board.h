@@ -102,9 +102,18 @@ typedef struct
 
     //Tracking data
     //Last piece moved (as index of array)
-    uint8_t last_piece;
+    uint8_t w_last_piece;
+    uint8_t b_last_piece;
     //Last location moved to
-    uint8_t last_move;
+    uint8_t w_last_move;
+    uint8_t b_last_move;
+    //Two moves ago
+    uint8_t w_last_move2;
+    uint8_t b_last_move2;
+    //how many times in a row the same move was made
+    uint8_t w_ident_moves;
+    uint8_t b_ident_moves;
+
 
 } chessboard;
 
