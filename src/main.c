@@ -72,13 +72,13 @@ int main()
     playSampleGame(1, 4, 2);
 
     puts("testing game 2(w) vs 4(b)");
-    playSampleGame(1, 2, 4);
+    playSampleGame(2, 2, 4);
 
     puts("testing game 4(w) vs 5(b)");
-    playSampleGame(1, 4, 5);
+    playSampleGame(3, 4, 5);
 
     puts("testing game 5(w) vs 5(b)");
-    playSampleGame(1, 5, 5);
+    playSampleGame(4, 5, 5);
 #endif
 
     //Set up network code
@@ -98,13 +98,15 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
     chessboard current_state;
     chessboard res;
 
+    bool white_won, draw;
+    draw = white_won = false;
+
     char mov_str[3];
     char piece;
 
     initBoard(&current_state);
     uint8_t counter = 0;
-    while (current_state.w_pieces[15] != CAPTURED
-            && current_state.b_pieces[15] != CAPTURED)
+    while (true)
     {
         //white
         printf("white: turn %d\n", counter);
@@ -121,6 +123,12 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         ++counter;
         current_state = res;
 
+        if (current_state.b_pieces[15] == CAPTURED)
+        {
+            white_won = true;
+            break;
+        }
+
         //black
         printf("black: turn %d\n", counter);
         tstart = clock();
@@ -136,14 +144,34 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         ++counter;
         current_state = res;
 
+        if (current_state.w_pieces[15] == CAPTURED)
+        {
+            white_won = false;
+            break;
+        }
+
         if (counter == 0)
         {
             puts("stalemate maybe...");
+            draw = true;
             break;
         }
     }
 
-    printf("board state %u", gamenum);
+    if (white_won)
+    {
+        puts("White wins!");
+    }
+    else if (!draw)
+    {
+        puts("Black wins!");
+    }
+    else
+    {
+        puts("Draw.. maybe?");
+    }
+
+    printf("board state %u\n", gamenum);
     printBoard(&current_state);
 }
 #endif
