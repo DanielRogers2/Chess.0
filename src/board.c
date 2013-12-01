@@ -342,33 +342,31 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
                 break;
             }
         }
-        else
-        {
-            if ((self_pcs[piece] / 8) == 0)
-            {
-                //Moving out of row 1 opening spot for castling
-                //Turn on bit at location
-                new->w_castlefree |= (1 << (self_pcs[piece] % 8));
-            }
-            else if ((self_pcs[piece] / 8) == 7)
-            {
-                //Moving out of row 8 opening spot for castling
-                //Turn on bit at location
-                new->b_castlefree |= (1 << (self_pcs[piece] % 8));
-            }
 
-            if ((location / 8) == 0)
-            {
-                //Moving into row 1 closing spot for castling
-                //Turn off bit at location
-                new->w_castlefree &= ~(1 << (location % 8));
-            }
-            else if ((location / 8) == 7)
-            {
-                //Moving into row 8 closing spot for castling
-                //Turn off bit at location
-                new->b_castlefree &= ~(1 << (location % 8));
-            }
+        if ((self_pcs[piece] / 8) == 0)
+        {
+            //Moving out of row 1 opening spot for castling
+            //Turn on bit at location
+            new->w_castlefree |= (1 << (self_pcs[piece] % 8));
+        }
+        else if ((self_pcs[piece] / 8) == 7)
+        {
+            //Moving out of row 8 opening spot for castling
+            //Turn on bit at location
+            new->b_castlefree |= (1 << (self_pcs[piece] % 8));
+        }
+
+        if ((location / 8) == 0)
+        {
+            //Moving into row 1 closing spot for castling
+            //Turn off bit at location
+            new->w_castlefree &= ~(1 << (location % 8));
+        }
+        else if ((location / 8) == 7)
+        {
+            //Moving into row 8 closing spot for castling
+            //Turn off bit at location
+            new->b_castlefree &= ~(1 << (location % 8));
         }
     }
 
