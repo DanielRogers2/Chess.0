@@ -209,7 +209,8 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                 castlefree =
                         (white) ? board->w_castlefree : board->b_castlefree;
 
-                if ((cancastle & KINGSIDE_ROOK) && (castlefree & KINGSIDE_FREE))
+                if ((cancastle & KINGSIDE_ROOK)
+                        && ((castlefree & KINGSIDE_FREE) == KINGSIDE_FREE))
                 {
                     castleto = (white) ? KINGSIDE_W_CASTLE : KINGSIDE_B_CASTLE;
                     //Do the castling, king to g1 or g1
@@ -222,9 +223,13 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                         storage->data = realloc(storage->data,
                                 storage->count * sizeof(chessboard));
                     }
+#ifdef DEBUG_MOVE
+                    printf("castled kingside: %d, %x\n", cancastle, castlefree);
+                    printBoard(&storage->data[states-1]);
+#endif
                 }
                 if ((cancastle & QUEENSIDE_ROOK)
-                        && (castlefree & QUEENSIDE_FREE))
+                        && ((castlefree & QUEENSIDE_FREE) == QUEENSIDE_FREE))
                 {
                     castleto =
                             (white) ? QUEENSIDE_W_CASTLE : QUEENSIDE_B_CASTLE;
@@ -237,6 +242,11 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                         storage->data = realloc(storage->data,
                                 storage->count * sizeof(chessboard));
                     }
+#ifdef DEBUG_MOVE
+                    printf("castled queenside: %d, %x\n", cancastle,
+                            castlefree);
+                    printBoard(&storage->data[states-1]);
+#endif
                 }
             }
         }
@@ -283,6 +293,7 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
     uint8_t * op_pcs = (white) ? new->b_pieces : new->w_pieces;
 
     uint8_t * cancastle = (white) ? &new->w_cancastle : &new->b_cancastle;
+    uint8_t * castlefree = (white) ? &new->w_castlefree : & new->b_castlefree;
     //Update appropriately for castling
     if (*cancastle)
     {
@@ -310,14 +321,14 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
         {
             //Moving out of back row, opening spot for castling
             //Turn on bit at location
-            new->w_castlefree |= 1 << (self_pcs[piece] % 8);
+            *castlefree |= (1 << (self_pcs[piece] % 8));
         }
         else if ((((self_pcs[piece] / 8) == 0) && ((location / 8) != 0))
                 || (((self_pcs[piece] / 8) == 7) && ((location / 8) != 7)))
         {
             //Moving into back row, closing spot for castling
             //Turn off bit at location
-            new->w_castlefree &= ~(1 << (location % 8));
+            *castlefree &= ~(1 << (location % 8));
         }
     }
 
@@ -436,7 +447,7 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
         uint8_t rk;
         uint8_t rk_to;
         //Check for queenside vs kingside rook
-        if ((location / 8) == 6)
+        if ((location % 8) == 6)
         {
             //kingside rook, index is 09 of array
             rk = 9;
