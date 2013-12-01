@@ -35,59 +35,62 @@ int main()
     initBoard(&current_state);
 
 #ifdef DEBUG
-    boardset newstates;
-    newstates.count = 0;
-    newstates.data = NULL;
 
-    uint8_t exp = expandStates(&current_state, &newstates, true);
+    /*
+     boardset newstates;
+     newstates.count = 0;
+     newstates.data = NULL;
 
-    printf("expanded: %u\n", exp);
-    printf("%llx\n", newstates.data[0].all_w_pieces);
+     uint8_t exp = expandStates(&current_state, &newstates, true);
 
-    chessboard res;
-    //Test negamax
-    puts("negamax:");
+     printf("expanded: %u\n", exp);
+     printf("%llx\n", newstates.data[0].all_w_pieces);
 
-    //for white
-    selectBestMove(true, &current_state, &res, 6);
-    puts("did sBM for white");
-    printf("piece: %d, move: %d\n", res.w_last_piece, res.w_last_move);
-    printf("value: %d\n", evaluateState(&res, true));
+     chessboard res;
+     //Test negamax
+     puts("negamax:");
 
-    //for black, same initial state... should come up with the same move
-    //  and value
-    selectBestMove(false, &current_state, &res, 6);
-    puts("did sBM for black");
-    printf("piece: %d, move: %d\n", res.b_last_piece, res.b_last_move);
-    printf("value: %d\n", evaluateState(&res, false));
+     //for white
+     selectBestMove(true, &current_state, &res, 6);
+     puts("did sBM for white");
+     printf("piece: %d, move: %d\n", res.w_last_piece, res.w_last_move);
+     printf("value: %d\n", evaluateState(&res, true));
 
-    //Lower depth, for more info
-    selectBestMove(false, &current_state, &res, 4);
-    puts("did d4 sBM for black");
-    printf("piece: %d, move: %d\n", res.b_last_piece, res.b_last_move);
-    printf("value: %d\n", evaluateState(&res, false));
+     //for black, same initial state... should come up with the same move
+     //  and value
+     selectBestMove(false, &current_state, &res, 6);
+     puts("did sBM for black");
+     printf("piece: %d, move: %d\n", res.b_last_piece, res.b_last_move);
+     printf("value: %d\n", evaluateState(&res, false));
 
+     //Lower depth, for more info
+     selectBestMove(false, &current_state, &res, 4);
+     puts("did d4 sBM for black");
+     printf("piece: %d, move: %d\n", res.b_last_piece, res.b_last_move);
+     printf("value: %d\n", evaluateState(&res, false));
+     */
     //Game examples
     puts("testing game 4(w) vs 2(b)");
     playSampleGame(1, 4, 2);
+    /*
+     puts("testing game 5(w) vs 2(b)");
+     playSampleGame(2, 5, 2);
 
-    puts("testing game 5(w) vs 2(b)");
-    playSampleGame(2, 5, 2);
+     puts("testing game 2(w) vs 4(b)");
+     playSampleGame(3, 2, 4);
 
-    puts("testing game 2(w) vs 4(b)");
-    playSampleGame(3, 2, 4);
+     puts("testing game 2(w) vs 5(b)");
+     playSampleGame(4, 2, 5);
 
-    puts("testing game 2(w) vs 5(b)");
-    playSampleGame(4, 2, 5);
+     puts("testing game 5(w) vs 4(b)");
+     playSampleGame(5, 5, 4);
 
-    puts("testing game 5(w) vs 4(b)");
-    playSampleGame(5, 5, 4);
+     puts("testing game 4(w) vs 5(b)");
+     playSampleGame(6, 4, 5);
 
-    puts("testing game 4(w) vs 5(b)");
-    playSampleGame(6, 4, 5);
-
-    puts("testing game 5(w) vs 5(b)");
-    playSampleGame(7, 5, 5);
+     puts("testing game 5(w) vs 5(b)");
+     playSampleGame(7, 5, 5);
+     */
 #endif
 
     //Set up network code
@@ -119,8 +122,8 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
     bool white_won, draw;
     draw = white_won = false;
 
-    char * mov_frm;
     char * mov_str;
+    char * mov_to;
 
     initBoard(&current_state);
     uint8_t counter = 0;
@@ -133,16 +136,16 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         selectBestMove(true, &current_state, &res, w_ply);
         tend = clock();
 
-        mov_frm = &plays[counter][0];
-        mov_str = &plays[counter][2];
+        mov_str = &plays[counter][0];
+        mov_to = &plays[counter][2];
 
-        squareToString(current_state.w_pieces[res.w_last_piece], mov_frm);
-        squareToString(res.w_last_move, mov_str);
+        squareToString(current_state.w_pieces[res.w_last_piece], mov_str);
+        squareToString(res.w_last_move, mov_to);
         tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
         //5 seconds back every move
         twhite -= (tex - 5);
 
-        printf("%s to %s, value: %d, time: %f\n", mov_frm, mov_str,
+        printf("move: %s value: %d, time: %f\n", mov_str,
                 evaluateState(&res, true), twhite);
         ++counter;
         current_state = res;
@@ -159,17 +162,17 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         selectBestMove(false, &current_state, &res, b_ply);
         tend = clock();
 
-        mov_frm = &plays[counter][0];
-        mov_str = &plays[counter][2];
+        mov_str = &plays[counter][0];
+        mov_to = &plays[counter][2];
 
-        squareToString(current_state.b_pieces[res.b_last_piece], mov_frm);
-        squareToString(res.b_last_move, mov_str);
+        squareToString(current_state.b_pieces[res.b_last_piece], mov_str);
+        squareToString(res.b_last_move, mov_to);
         tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
         //5 seconds back every move
         tblack -= (tex - 5);
 
-        printf("%s to %s, value: %d, time: %f\n", mov_frm, mov_str,
-                evaluateState(&res, false), tblack);
+        printf("move: %s value: %d, time: %f\n", mov_str,
+                evaluateState(&res, true), twhite);
         ++counter;
         current_state = res;
 
