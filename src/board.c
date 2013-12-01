@@ -400,7 +400,8 @@ void printBoard(chessboard * const board)
     static const char rows[9] =
     { '1', '2', '3', '4', '5', '6', '7', '8', 'c' };
 
-    char pos_str[2];
+    char pos_str[3];
+    pos_str[2] = '\0';
 
     puts("White:");
     for (uint8_t i = 0; i < 16; ++i)
