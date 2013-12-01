@@ -72,7 +72,7 @@ int main()
     playSampleGame(1, 4, 2);
 
     puts("testing game 5(w) vs 2(b)");
-    playSampleGame(2, 2, 5);
+    playSampleGame(2, 5, 2);
 
     puts("testing game 2(w) vs 4(b)");
     playSampleGame(3, 2, 4);
@@ -80,11 +80,14 @@ int main()
     puts("testing game 2(w) vs 5(b)");
     playSampleGame(4, 2, 5);
 
+    puts("testing game 5(w) vs 4(b)");
+    playSampleGame(5, 5, 4);
+
     puts("testing game 4(w) vs 5(b)");
-    playSampleGame(5, 4, 5);
+    playSampleGame(6, 4, 5);
 
     puts("testing game 5(w) vs 5(b)");
-    playSampleGame(6, 5, 5);
+    playSampleGame(7, 5, 5);
 #endif
 
     //Set up network code
