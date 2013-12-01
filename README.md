@@ -9,6 +9,9 @@ Build options:
     - -std=c11 -pedantic -pedantic-errors -Wall -Wextra
   - Flags after base functionality is complete:
     - -std=c11 -pedantic -pedantic-errors -Wall -Wextra -Werror
+  - If compiling the multi-threaded version, make sure that your system's
+    threadsafe stdc lib is used, since realloc will be called inside of a
+    parallel region .
       
 References:
   - http://stackoverflow.com/questions/494721/what-are-some-good-resources-for-writing-a-chess-engine
