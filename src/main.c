@@ -68,20 +68,23 @@ int main()
     printf("value: %d\n", evaluateState(&res, false));
 
     //Game examples
-    //puts("testing game 4(w) vs 2(b)");
-    //playSampleGame(1, 4, 2);
+    puts("testing game 4(w) vs 2(b)");
+    playSampleGame(1, 4, 2);
 
-    puts("testing game 2(w) vs 4(b)");
-    playSampleGame(2, 2, 4);
-
-    puts("testing game 2(w) vs 5(b)");
+    puts("testing game 5(w) vs 2(b)");
     playSampleGame(2, 2, 5);
 
-    //puts("testing game 4(w) vs 5(b)");
-    //playSampleGame(3, 4, 5);
+    puts("testing game 2(w) vs 4(b)");
+    playSampleGame(3, 2, 4);
 
-    //puts("testing game 5(w) vs 5(b)");
-    //playSampleGame(4, 5, 5);
+    puts("testing game 2(w) vs 5(b)");
+    playSampleGame(4, 2, 5);
+
+    puts("testing game 4(w) vs 5(b)");
+    playSampleGame(5, 4, 5);
+
+    puts("testing game 5(w) vs 5(b)");
+    playSampleGame(6, 5, 5);
 #endif
 
     //Set up network code
