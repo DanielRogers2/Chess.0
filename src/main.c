@@ -68,17 +68,17 @@ int main()
     printf("value: %d\n", evaluateState(&res, false));
 
     //Game examples
-    puts("testing game 4(w) vs 2(b)");
-    playSampleGame(1, 4, 2);
+    //puts("testing game 4(w) vs 2(b)");
+    //playSampleGame(1, 4, 2);
 
     puts("testing game 2(w) vs 4(b)");
     playSampleGame(2, 2, 4);
 
-    puts("testing game 4(w) vs 5(b)");
-    playSampleGame(3, 4, 5);
+    //puts("testing game 4(w) vs 5(b)");
+    //playSampleGame(3, 4, 5);
 
-    puts("testing game 5(w) vs 5(b)");
-    playSampleGame(4, 5, 5);
+    //puts("testing game 5(w) vs 5(b)");
+    //playSampleGame(4, 5, 5);
 #endif
 
     //Set up network code
@@ -102,7 +102,7 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
     draw = white_won = false;
 
     char mov_str[3];
-    char piece;
+    char piece[4];
 
     initBoard(&current_state);
     uint8_t counter = 0;
@@ -115,10 +115,10 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         tend = clock();
 
         squareToString(res.last_move, mov_str);
-        piece = piece_chars[res.w_codes[res.last_piece]];
+        pieceToString(res.last_piece, res.w_codes[res.last_piece], piece);
         tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
 
-        printf("piece: %c, move: %s, value: %d in %f\n", piece, mov_str,
+        printf("piece: %s, move: %s, value: %d in %f\n", piece, mov_str,
                 evaluateState(&res, true), tex);
         ++counter;
         current_state = res;
@@ -136,10 +136,10 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         tend = clock();
 
         squareToString(res.last_move, mov_str);
-        piece = piece_chars[res.b_codes[res.last_piece]];
+        pieceToString(res.last_piece, res.b_codes[res.last_piece], piece);
         tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
 
-        printf("piece: %c, move: %s, value: %d in %f\n", piece, mov_str,
+        printf("piece: %s, move: %s, value: %d in %f\n", piece, mov_str,
                 evaluateState(&res, false), tex);
         ++counter;
         current_state = res;
