@@ -114,7 +114,6 @@ typedef struct
     uint8_t w_ident_moves;
     uint8_t b_ident_moves;
 
-
 } chessboard;
 
 typedef struct
@@ -211,6 +210,17 @@ int evaluateState(chessboard * const board, bool white);
  * @param board The chessboard to print
  */
 void printBoard(chessboard * const board);
+
+/*
+ * Gets a movestring in the right format for the server
+ *
+ * @param board The board to generate a movestring for
+ * @param prev The board state prior to board
+ * @param white True if generating a movestring for white
+ * @param out An array of char[7] to fill with the movestring
+ */
+void getMoveString(chessboard * const board, chessboard * const prev,
+bool white, char out[7]);
 
 /*
  * Converts a board coordinate to a notation string

@@ -185,8 +185,6 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                         //pawn promotion, just make it a queen
                         moveSpecial(i, moves[j][k], white, board,
                                 &storage->data[states++], (white) ? W_Q : B_Q);
-                        //Pawns only move once anyways
-                        break;
                     }
                     else
                     {
@@ -615,6 +613,43 @@ void printBoard(chessboard * const board)
         squareToString(board->b_pieces[i], pos_str);
         printf("    pid: %d @ %s\n", board->b_codes[i], pos_str);
     }
+}
+
+/*
+ * Gets a movestring in the right format for the server
+ *
+ * @param board The board to generate a movestring for
+ * @param prev The board state prior to board
+ * @param white True if generating a movestring for white
+ * @param out An array of char[7] to fill with the movestring
+ */
+void getMoveString(chessboard * const board, chessboard * const prev,
+bool white, char out[7])
+{
+    //The piece that moved
+    uint8_t piece = (white) ? board->w_last_piece : board->b_last_piece;
+    //The location it was in
+    uint8_t last_loc = (white) ? prev->w_pieces[piece] : prev->b_pieces[piece];
+    //The location it moved to
+    uint8_t last_mv = (white) ? board->w_last_move : board->b_last_move;
+    //The piece ID
+    uint8_t pid = (white) ? prev->w_codes[piece] : prev->b_codes[piece];
+
+    //First get the piece code
+    out[0] = piece_chars[pid];
+    //then the square from, into 1,2 (3 will be \0)
+    squareToString(last_loc, &out[1]);
+    //And the square to, into 3, 4 (5 will be \0)
+    squareToString(last_mv, &out[3]);
+
+    if (pid == W_P || pid == B_P)
+    {
+        //Check for pawn promotion
+        uint8_t npid = (white) ? board->w_codes[piece] : prev->b_codes[piece];
+        //Record promotion (if applicable)
+        out[5] = (npid != pid) ? piece_chars[npid] : out[5];
+    }
+    out[6] = '\0';
 }
 
 /*
