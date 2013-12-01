@@ -177,4 +177,13 @@ int evaluateState(chessboard * const board, bool white);
  */
 void printBoard(chessboard * const board);
 
+/*
+ * Converts a board coordinate to a notation string
+ *
+ * @param pos The position (0-64) of the piece
+ * @param str An array of 3 characters to fill, string[2] will be null
+ *                  - ac indicates a capture
+ */
+void squareToString(uint8_t pos, char str[3]);
+
 #endif /* BOARD_H_ */

@@ -398,27 +398,39 @@ int evaluateState(chessboard * const board, bool white)
  */
 void printBoard(chessboard * const board)
 {
-    static const char cols[8] =
-    { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
-    static const char rows[9] =
-    { '1', '2', '3', '4', '5', '6', '7', '8', 'c' };
 
     char pos_str[3];
-    pos_str[2] = '\0';
 
     puts("White:");
     for (uint8_t i = 0; i < 16; ++i)
     {
-        pos_str[0] = cols[board->w_pieces[i] % 8];
-        pos_str[1] = rows[board->w_pieces[i] / 8];
+        squareToString(board->w_pieces[i], pos_str);
 
         printf("    pid: %d @ %s\n", board->w_codes[i], pos_str);
     }
     puts("Black:");
     for (uint8_t i = 0; i < 16; ++i)
     {
-        pos_str[0] = cols[board->b_pieces[i] % 8];
-        pos_str[1] = rows[board->b_pieces[i] / 8];
+        squareToString(board->b_pieces[i], pos_str);
         printf("    pid: %d @ %s\n", board->b_codes[i], pos_str);
     }
+}
+
+/*
+ * Converts a board coordinate to a notation string
+ *
+ * @param pos The position (0-64) of the piece
+ * @param str An array of 3 characters to fill, string[2] will be null
+ *                  - ac indicates a capture
+ */
+void squareToString(uint8_t pos, char str[3])
+{
+    static const char cols[8] =
+    { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
+    static const char rows[9] =
+    { '1', '2', '3', '4', '5', '6', '7', '8', 'c' };
+    str[2] = '\0';
+
+    str[0] = cols[pos % 8];
+    str[1] = rows[pos / 8];
 }
