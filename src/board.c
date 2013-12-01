@@ -315,8 +315,13 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
     uint8_t * self_pcs = (white) ? new->w_pieces : new->b_pieces;
     uint8_t * op_pcs = (white) ? new->b_pieces : new->w_pieces;
 
+    //Castling data
     uint8_t * cancastle = (white) ? &new->w_cancastle : &new->b_cancastle;
     uint8_t * castlefree = (white) ? &new->w_castlefree : &new->b_castlefree;
+
+    uint8_t * op_cancastle = (white) ? &new->b_cancastle : &new->w_cancastle;
+    uint8_t * op_castlefree = (white) ? &new->b_castlefree : &new->w_castlefree;
+
     //Update appropriately for castling
     if (*cancastle)
     {
@@ -339,19 +344,21 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
                 break;
             }
         }
-        else if ((((self_pcs[piece] / 8) == 0) && ((location / 8) != 0))
-                || (((self_pcs[piece] / 8) == 7) && ((location / 8) != 7)))
+        else
         {
-            //Moving out of back row, opening spot for castling
-            //Turn on bit at location
-            *castlefree |= (1 << (self_pcs[piece] % 8));
-        }
-        else if ((((self_pcs[piece] / 8) == 0) && ((location / 8) != 0))
-                || (((self_pcs[piece] / 8) == 7) && ((location / 8) != 7)))
-        {
-            //Moving into back row, closing spot for castling
-            //Turn off bit at location
-            *castlefree &= ~(1 << (location % 8));
+            if (((self_pcs[piece] / 8) == 0) || ((self_pcs[piece] / 8) == 7))
+            {
+                //Moving out of back row, opening spot for castling
+                //Turn on bit at location
+                *castlefree |= (1 << (self_pcs[piece] % 8));
+            }
+
+            if (((location / 8) == 0) || (location / 8) == 7)
+            {
+                //Moving into back row, closing spot for castling
+                //Turn off bit at location
+                *castlefree &= ~(1 << (location % 8));
+            }
         }
     }
 
@@ -378,6 +385,27 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
                 op_locs[i] = 0;
                 //Flag as captured
                 op_pcs[i] = CAPTURED;
+
+                //See if ability for opponent to castle has changed
+                if (*op_cancastle && (i == 15 || i == 8 || i == 9))
+                {
+                    //king or rook moved
+                    switch (piece)
+                    {
+                    case 15:
+                        //king moved
+                        *op_cancastle = 0;
+                        break;
+                    case 8:
+                        //queenside rook capped
+                        *op_cancastle &= KINGSIDE_ROOK;
+                        break;
+                    case 9:
+                        //kingside rook capped
+                        *op_cancastle &= QUEENSIDE_ROOK;
+                        break;
+                    }
+                }
                 //done
                 break;
             }
@@ -411,14 +439,15 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
 void moveSpecial(uint8_t piece, uint8_t location, bool white,
         chessboard * const current, chessboard * new, uint8_t promote_to)
 {
-    //do initial work with makeMove
-    //Capturing during a pawn promotion move will be handled by this
-    makeMove(piece, location, white, current, new);
 
     //Now that new is set up right
     //If it's a pawn, then it's a promotion or en passant
     if (piece == W_P || piece == B_P)
     {
+        //do initial work with makeMove
+        //Capturing during a pawn promotion move will be handled by this
+        makeMove(piece, location, white, current, new);
+
         //If in row 1 or row 8, then promoting pawn
         if ((location / 8) == 7 || (location / 8) == 0)
         {
@@ -486,8 +515,10 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
             //  These are +1 column back from king position (passed in)
             rk_to = location + 1;
         }
-        //Use makeMove to put rook in right location
-        makeMove(rk, rk_to, white, new, new);
+        //Use makeMove to put rook into right location & copy to new
+        makeMove(rk, rk_to, white, current, new);
+        //Move King into right location and update new
+        makeMove(piece, location, white, new, new);
     }
 }
 
