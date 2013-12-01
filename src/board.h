@@ -47,6 +47,19 @@
 //black king
 #define B_K 11
 
+#define KINGSIDE_FREE 0x60
+#define QUEENSIDE_FREE 0x0E
+#define KINGSIDE_ROOK 1
+#define QUEENSIDE_ROOK 2
+//Destination for kingside black castle is g8
+#define KINGSIDE_B_CASTLE 62
+//Destination for queenside black castle is c8
+#define QUEENSIDE_B_CASTLE 58
+//Destination for kingside white castle is g1
+#define KINGSIDE_W_CASTLE 6
+//Destination for queenside white castle is c1
+#define QUEENSIDE_W_CASTLE 2
+
 /*
  * Defines an overall board state for the program
  *
@@ -66,6 +79,11 @@ typedef struct
     bitboard w_locations[16];
     //White Piece IDS
     uint8_t w_codes[16];
+    //0 means cannot, 1 means queenside rook moved, 3 means kingside rook moved
+    uint8_t w_cancastle;
+    //0 means no squares free, 0x70 means queenside free,
+    //  0x03 means kingside free, 0x73 means both free,
+    uint8_t w_castlefree;
 
     //Locations of all black pieces
     uint8_t b_pieces[16];
@@ -75,6 +93,12 @@ typedef struct
     bitboard b_locations[16];
     //White Piece IDS
     uint8_t b_codes[16];
+    //0 means cannot, 1 means queenside rook moved, 2 means kingside rook moved
+    //  3 means neither moved
+    uint8_t b_cancastle;
+    //0 means no squares free, 0x70 means queenside free,
+    //  0x03 means kingside free, 0x73 means both free,
+    uint8_t b_castlefree;
 
     //Tracking data
     //Last piece moved (as index of array)
@@ -130,8 +154,10 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white);
  * @param white true If the piece being moved is white
  * @param current The chessboard state being referenced
  * @param new The new chessboard state to write to
+ *
+ * @return true if a capture took place
  */
-void makeMove(uint8_t piece, uint8_t location, bool white,
+bool makeMove(uint8_t piece, uint8_t location, bool white,
         chessboard * const current, chessboard * new);
 
 /*
@@ -185,5 +211,16 @@ void printBoard(chessboard * const board);
  *                  - ac indicates a capture
  */
 void squareToString(uint8_t pos, char str[3]);
+
+/*
+ * for readability/debugging purposes, should not be used for net moves
+ *
+ * @uses piece_chars
+ *
+ * @param pos Where in the array it came from
+ * @param piece_code the piece code
+ * @param str The string to write to, will be color|piece|#
+ */
+void pieceToString(uint8_t pos, uint8_t piece_code, char str[4]);
 
 #endif /* BOARD_H_ */

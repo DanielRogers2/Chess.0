@@ -26,6 +26,14 @@ void initBoard(chessboard * board)
     //Black pieces are in positions 48-63 -> low 48 off
     board->all_b_pieces = 0;
 
+    //none of the rooks or the king has moved yet
+    board->w_cancastle = KINGSIDE_ROOK | QUEENSIDE_ROOK;
+    board->b_cancastle = KINGSIDE_ROOK | QUEENSIDE_ROOK;
+
+    //No squares free between king and rooks
+    board->w_castlefree = 0;
+    board->b_castlefree = 0;
+
     //Set location arrays
     memcpy(board->w_pieces, white_initial, 16 * sizeof(uint8_t));
     memcpy(board->b_pieces, black_initial, 16 * sizeof(uint8_t));
@@ -86,8 +94,15 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
 
     //Loop variables
     uint8_t i, j, k;
+
+    //Used to check for castling
+    uint8_t cancastle, castlefree;
+    uint8_t castleto;
+
     //The set of moves
     uint8_t (*moves)[7];
+
+    bool capped = false;
 
     if (storage->count < 35)
     {
@@ -150,10 +165,71 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                 }
                 else
                 {
-                    //Make the move with the piece
-                    makeMove(i, moves[j][k], white, board,
-                            &storage->data[states++]);
+                    //Expand special moves, do pawn promotion here as it's a
+                    //  result of the move, rather than a unique move
+                    if ((codes[i] == W_P && (pieces[i] / 8) == 6)
+                            || (codes[i] == B_P && (pieces[i] / 8) == 1))
+                    {
+                        //pawn promotion, just make it a queen
+                        moveSpecial(i, moves[j][k], white, board,
+                                &storage->data[states++], (white) ? W_Q : B_Q);
+                        //Pawns only move once anyways
+                        break;
+                    }
+                    else
+                    {
+                        //Make the move with the piece
+                        capped = makeMove(i, moves[j][k], white, board,
+                                &storage->data[states++]);
+                    }
 
+                    if (storage->count <= states)
+                    {
+                        //Allocate more storage
+                        storage->count += 10;
+                        storage->data = realloc(storage->data,
+                                storage->count * sizeof(chessboard));
+                    }
+
+                    //See if this was a capturing move, and stop moving along
+                    //  ray if so
+                    if (capped)
+                        break;
+                }
+                //End making legal moves in ray
+            }
+            //End piece ray traversals
+            //do castling here
+            if ((codes[i] == W_K && board->w_cancastle && board->w_castlefree)
+                    || (codes[i] == B_K && board->b_cancastle
+                            && board->b_castlefree))
+            {
+                //Check if squares matching unoccupied space are free
+                cancastle = (white) ? board->w_cancastle : board->b_cancastle;
+                castlefree =
+                        (white) ? board->w_castlefree : board->b_castlefree;
+
+                if ((cancastle & KINGSIDE_ROOK) && (castlefree & KINGSIDE_FREE))
+                {
+                    castleto = (white) ? KINGSIDE_W_CASTLE : KINGSIDE_B_CASTLE;
+                    //Do the castling, king to g1 or g1
+                    moveSpecial(i, castleto, white, board,
+                            &storage->data[states++], 0);
+                    if (storage->count <= states)
+                    {
+                        //Allocate more storage
+                        storage->count += 10;
+                        storage->data = realloc(storage->data,
+                                storage->count * sizeof(chessboard));
+                    }
+                }
+                if ((cancastle & QUEENSIDE_ROOK)
+                        && (castlefree & QUEENSIDE_FREE))
+                {
+                    castleto =
+                            (white) ? QUEENSIDE_W_CASTLE : QUEENSIDE_B_CASTLE;
+                    moveSpecial(i, castleto, white, board,
+                            &storage->data[states++], 0);
                     if (storage->count <= states)
                     {
                         //Allocate more storage
@@ -180,7 +256,7 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
  * @param current The chessboard state being referenced
  * @param new The new chessboard state to write to
  */
-void makeMove(uint8_t piece, uint8_t location, bool white,
+bool makeMove(uint8_t piece, uint8_t location, bool white,
         chessboard * const current, chessboard * new)
 {
     //TODO Add in expansion of special moves such as castling/en passant/
@@ -205,6 +281,45 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
     //piece value
     uint8_t * self_pcs = (white) ? new->w_pieces : new->b_pieces;
     uint8_t * op_pcs = (white) ? new->b_pieces : new->w_pieces;
+
+    uint8_t * cancastle = (white) ? &new->w_cancastle : &new->b_cancastle;
+    //Update appropriately for castling
+    if (*cancastle)
+    {
+        if (piece == 15 || piece == 8 || piece == 9)
+        {
+            //king or rook moved
+            switch (piece)
+            {
+            case 15:
+                //king moved
+                *cancastle = 0;
+                break;
+            case 8:
+                //queenside rook moved
+                *cancastle &= KINGSIDE_ROOK;
+                break;
+            case 9:
+                //kingside rook moved
+                *cancastle &= QUEENSIDE_ROOK;
+                break;
+            }
+        }
+        else if ((((self_pcs[piece] / 8) == 0) && ((location / 8) != 0))
+                || (((self_pcs[piece] / 8) == 7) && ((location / 8) != 7)))
+        {
+            //Moving out of back row, opening spot for castling
+            //Turn on bit at location
+            new->w_castlefree |= 1 << (self_pcs[piece] % 8);
+        }
+        else if ((((self_pcs[piece] / 8) == 0) && ((location / 8) != 0))
+                || (((self_pcs[piece] / 8) == 7) && ((location / 8) != 7)))
+        {
+            //Moving into back row, closing spot for castling
+            //Turn off bit at location
+            new->w_castlefree &= ~(1 << (location % 8));
+        }
+    }
 
     //Update the occupancy bitboard
     //XOR out the old location, XOR in the new location
@@ -233,7 +348,11 @@ void makeMove(uint8_t piece, uint8_t location, bool white,
                 break;
             }
         }
+
+        return (true);
     }
+
+    return (false);
 }
 
 /*
@@ -377,13 +496,13 @@ int evaluateState(chessboard * const board, bool white)
                                 + board_position_vals[board->b_codes[i]][board->b_pieces[i]];
     }
 
-    //Value = white - black
+//Value = white - black
     value = w_val - b_val;
 
-    //If we are white, then we want max white, and this is already going to
-    //  have higher scores for better values for white
-    //If black, then multiply by -1 to flip it so higher scores returned mean
-    //  better values for black
+//If we are white, then we want max white, and this is already going to
+//  have higher scores for better values for white
+//If black, then multiply by -1 to flip it so higher scores returned mean
+//  better values for black
     value = (white) ? value : -value;
 
     return (value);
@@ -433,4 +552,20 @@ void squareToString(uint8_t pos, char str[3])
 
     str[0] = cols[pos % 8];
     str[1] = rows[pos / 8];
+}
+
+/*
+ * for readability/debugging purposes, should not be used for net moves
+ *
+ * @param pos Where in the array it came from
+ * @param piece_code the piece code
+ * @param str The string to write to, will be color|piece|#
+ */
+void pieceToString(uint8_t pos, uint8_t piece_code, char str[4])
+{
+    str[3] = '\0';
+    str[0] = (piece_code < 6) ? 'w' : 'b';
+    str[1] = piece_chars[piece_code];
+    str[2] = '1';
+    str[2] += (piece_code == 6 || piece_code == 0) ? pos % 6 : pos % 2;
 }

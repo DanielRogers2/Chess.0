@@ -91,10 +91,10 @@ const uint8_t b_codes[16] =
  * This may need to be upper case, for now it's just that white is lower and
  *  black is upper
  *
- * @users main
+ * @users board, main
  */
 const char piece_chars[12] =
-{ 'p', 'r', 'n', 'b', 'q', 'k', 'P', 'R', 'N', 'N', 'Q', 'K' };
+{ 'p', 'r', 'n', 'b', 'q', 'k', 'P', 'R', 'N', 'B', 'Q', 'K' };
 
 /*
  * Values for each piece
