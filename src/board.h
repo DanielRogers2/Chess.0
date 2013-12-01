@@ -102,6 +102,7 @@ typedef struct
 void initBoard(chessboard * board);
 
 //TODO Add function to convert opponent move string into a new board state
+//      - should also detect special moves (or maybe call a function to do so)
 //TODO Add function to convert own move into a move string to send to server
 
 /*

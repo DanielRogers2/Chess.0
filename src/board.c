@@ -183,6 +183,8 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
 void makeMove(uint8_t piece, uint8_t location, bool white,
         chessboard * const current, chessboard * new)
 {
+    //TODO Add in expansion of special moves such as castling/en passant/
+    //  pawn promotion
     //Generate the new location bitboard for the new location
     bitboard new_loc = location_boards[location];
 
@@ -351,6 +353,7 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
  */
 int evaluateState(chessboard * const board, bool white)
 {
+    //TODO Maybe this can be more complex? expansion is pretty fast
     int value = 0;
     int w_val = 0;
     int b_val = 0;
