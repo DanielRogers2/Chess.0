@@ -99,9 +99,9 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
     chessboard res;
 
     char mov_str[3];
+    char piece;
 
     initBoard(&current_state);
-    puts("testing game 4(w) vs 5(b)");
     uint8_t counter = 0;
     while (current_state.w_pieces[15] != CAPTURED
             && current_state.b_pieces[15] != CAPTURED)
@@ -113,11 +113,11 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         tend = clock();
 
         squareToString(res.last_move, mov_str);
+        piece = piece_chars[res.w_codes[res.last_piece]];
         tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
 
-        printf("piece: %c, move: %s, value: %d in %f\n",
-                piece_chars[res.last_piece], mov_str, evaluateState(&res, true),
-                tex);
+        printf("piece: %c, move: %s, value: %d in %f\n", piece, mov_str,
+                evaluateState(&res, true), tex);
         ++counter;
         current_state = res;
 
@@ -128,10 +128,10 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         tend = clock();
 
         squareToString(res.last_move, mov_str);
+        piece = piece_chars[res.b_codes[res.last_piece]];
         tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
 
-        printf("piece: %c, move: %s, value: %d in %f\n",
-                piece_chars[res.last_piece], mov_str,
+        printf("piece: %c, move: %s, value: %d in %f\n", piece, mov_str,
                 evaluateState(&res, false), tex);
         ++counter;
         current_state = res;
