@@ -28,7 +28,7 @@
  * @param depth The depth to search to
  */
 void selectBestMove(bool self_white, chessboard * const initial,
-        chessboard * result, uint8_t depth)
+        chessboard * result, uint8_t depth, double tlimit)
 {
 #ifdef DEBUG_SEARCH
     puts("setting up storage");
@@ -89,6 +89,19 @@ void selectBestMove(bool self_white, chessboard * const initial,
     //Currently seen value
     int cur;
 
+    //Dynamic setup of depth to prevent loss due to timeout
+    if (tlimit <= MED_DEPTH_CUTOFF)
+    {
+        if (tlimit < SMALL_DEPTH_CUTOFF)
+        {
+            depth = SMALLEST_DEPTH;
+        }
+        else
+        {
+            depth = MEDIUM_DEPTH;
+        }
+    }
+
 #ifdef DEBUG_SEARCH
     puts("staring search");
 #endif
@@ -113,7 +126,7 @@ void selectBestMove(bool self_white, chessboard * const initial,
 #else
         thread = omp_get_thread_num();
         cur = -negamax(&store.data[i], !self_white, threadstore[thread],
-                depth - 1);
+        INT_MIN + 1, INT_MAX, depth - 1);
         if (cur > best[thread])
         {
             best[thread] = cur;
@@ -173,7 +186,7 @@ void selectBestMove(bool self_white, chessboard * const initial,
 /*
  * Performs a standard negamax search
  *
- * The caller is responsible for doing the first expansion & call to negamax
+ * The callee is responsible for doing the first expansion & call to negamax
  *  for each root node, as well as determining which root node to use.
  *
  * @owner Daniel Rogers
@@ -181,18 +194,18 @@ void selectBestMove(bool self_white, chessboard * const initial,
  * @param state A pointer to the start state for the layer
  * @param white If the current layer of the search is from white or black's
  *          perspective
- * @param expansionStore An array of boardsets to use for storing expanded
+ * @param expansionStore An array of chessboard * to use for storing expanded
  *                       states. These may be realloc'd during execution of
  *                       the search.
  *                       !!! It is assumed to contain at least as many
  *                       pointers as the maximum depth of the search. Supplying
  *                       less will result in out of bounds memory access. !!!
+ * @param alpha Best value seen
+ * @param beta The cutoff, should initially be INT_MAX - 1, NOT INT_MAX
  * @param depth The depth to traverse to
- *
- * @return The best score resulting from the negamax search
  */
 int negamax(chessboard * const state, bool white, boardset * expansionStore,
-        uint8_t depth)
+        int alpha, int beta, uint8_t depth)
 {
     //Check if end of depth or opponent king captured
     if (!depth || (state->b_pieces[15] == CAPTURED)
@@ -209,13 +222,6 @@ int negamax(chessboard * const state, bool white, boardset * expansionStore,
     }
     else
     {
-#ifdef DEBUG_BEST
-        bool saw_cap = false;
-        uint8_t best_i = 0;
-#endif
-
-        //Best value seen
-        int best = INT_MIN;
         //Currently seen value
         int cur;
         //Storage of expanded states
@@ -227,29 +233,20 @@ int negamax(chessboard * const state, bool white, boardset * expansionStore,
         //recurse negamax for each state expanded
         for (uint8_t i = 0; i < states; ++i)
         {
-            cur = -negamax(&storage->data[i], !white, expansionStore,
-                    depth - 1);
-#ifdef DEBUG_BEST
-            saw_cap = (cur >= 20000 || cur <= -20000) ? true : saw_cap;
-#endif
-            if (cur > best)
+            cur = -negamax(&storage->data[i], !white, expansionStore, -beta,
+                    -alpha, depth - 1);
+            if (cur >= beta)
             {
-                best = cur;
-#ifdef DEBUG_BEST
-                best_i = i;
-#endif
+                // beta cutoff, will never be given choice of this value
+                return (beta);
+            }
+            if (cur > alpha)
+            {
+                //Found a better value
+                alpha = cur;
             }
         }
-
-#ifdef DEBUG_BEST
-        if (depth >= 3 && saw_cap)
-        {
-            printf("w/cap: white: %d, best:%d, depth: %d\n", white, best,
-                    depth);
-            printBoard(&storage->data[best_i]);
-        }
-#endif
         //Return the best value
-        return (best);
+        return (alpha);
     }
 }

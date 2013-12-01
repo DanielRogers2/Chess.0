@@ -36,7 +36,6 @@ int main()
 
 #ifdef DEBUG
 
-    /*
      boardset newstates;
      newstates.count = 0;
      newstates.data = NULL;
@@ -68,11 +67,9 @@ int main()
      puts("did d4 sBM for black");
      printf("piece: %d, move: %d\n", res.b_last_piece, res.b_last_move);
      printf("value: %d\n", evaluateState(&res, false));
-     */
     //Game examples
-    puts("testing game 4(w) vs 2(b)");
-    playSampleGame(1, 4, 2);
-    /*
+     puts("testing game 4(w) vs 2(b)");
+     playSampleGame(1, 4, 2);
      puts("testing game 5(w) vs 2(b)");
      playSampleGame(2, 5, 2);
 
@@ -90,7 +87,13 @@ int main()
 
      puts("testing game 5(w) vs 5(b)");
      playSampleGame(7, 5, 5);
-     */
+
+     puts("testing game 6(w) vs 5(b)");
+     playSampleGame(8, 6, 5);
+
+    puts("testing game 6(w) vs 7(b)");
+    playSampleGame(9, 6, 7);
+
 #endif
 
     //Set up network code
@@ -112,7 +115,7 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
     double tblack = 900;
 
     //Record a play string to allow animation if desired
-    char plays[256][5] =
+    char plays[256][7] =
     {
     { 0 } };
 
@@ -122,9 +125,6 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
     bool white_won, draw;
     draw = white_won = false;
 
-    char * mov_str;
-    char * mov_to;
-
     initBoard(&current_state);
     uint8_t counter = 0;
 
@@ -133,24 +133,20 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         //white
         printf("white: turn %d\n", counter);
         tstart = clock();
-        selectBestMove(true, &current_state, &res, w_ply);
+        selectBestMove(true, &current_state, &res, w_ply, twhite);
         tend = clock();
 
-        mov_str = &plays[counter][0];
-        mov_to = &plays[counter][2];
-
-        squareToString(current_state.w_pieces[res.w_last_piece], mov_str);
-        squareToString(res.w_last_move, mov_to);
+        getMoveString(&res, &current_state, true, plays[counter]);
         tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
         //5 seconds back every move
         twhite -= (tex - 5);
 
-        printf("move: %s value: %d, time: %f\n", mov_str,
+        printf("move: %s value: %d, time: %f\n", plays[counter],
                 evaluateState(&res, true), twhite);
         ++counter;
         current_state = res;
 
-        if (current_state.b_pieces[15] == CAPTURED)
+        if (current_state.b_pieces[15] == CAPTURED || tblack <= 0)
         {
             white_won = true;
             break;
@@ -159,24 +155,20 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         //black
         printf("black: turn %d\n", counter);
         tstart = clock();
-        selectBestMove(false, &current_state, &res, b_ply);
+        selectBestMove(false, &current_state, &res, b_ply, tblack);
         tend = clock();
 
-        mov_str = &plays[counter][0];
-        mov_to = &plays[counter][2];
-
-        squareToString(current_state.b_pieces[res.b_last_piece], mov_str);
-        squareToString(res.b_last_move, mov_to);
+        getMoveString(&res, &current_state, false, plays[counter]);
         tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
         //5 seconds back every move
         tblack -= (tex - 5);
 
-        printf("move: %s value: %d, time: %f\n", mov_str,
-                evaluateState(&res, true), twhite);
+        printf("move: %s value: %d, time: %f\n", plays[counter],
+                evaluateState(&res, false), tblack);
         ++counter;
         current_state = res;
 
-        if (current_state.w_pieces[15] == CAPTURED)
+        if (current_state.w_pieces[15] == CAPTURED || twhite <= 0)
         {
             white_won = false;
             break;
@@ -206,7 +198,7 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
     printf("board state %u\n", gamenum);
     printBoard(&current_state);
 
-    puts("move history: [ ");
+    puts("move history: \n[ ");
     for (uint8_t i = 0; i < (counter - 1); ++i)
     {
         printf("\"%s\",", plays[i]);

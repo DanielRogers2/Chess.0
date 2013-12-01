@@ -105,7 +105,8 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
     uint8_t states = 0;
 
     //Loop variables
-    uint8_t i, j, k;
+    int8_t i;
+    uint8_t j, k;
 
     //Used to check for castling
     uint8_t cancastle, castlefree;
@@ -124,7 +125,8 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
     }
 
     //For each piece, get the set of moves it can make from its location
-    for (i = 0; i < 16; ++i)
+    //  Traverse from king to pawns, because maybe this helps alphabeta
+    for (i = 15; i >= 0; --i)
     {
         //Check if piece is captured
         if (pieces[i] == CAPTURED)
@@ -279,8 +281,6 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
 bool makeMove(uint8_t piece, uint8_t location, bool white,
         chessboard * const current, chessboard * new)
 {
-    //TODO Add in expansion of special moves such as castling/en passant/
-    //  pawn promotion
     //Generate the new location bitboard for the new location
     bitboard new_loc = location_boards[location];
 
