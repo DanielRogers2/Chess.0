@@ -18,6 +18,7 @@ extern bitboard attacked_squares[12][64];
 extern const bitboard location_boards[65];
 extern const uint8_t w_codes[16];
 extern const uint8_t b_codes[16];
+extern const char piece_chars[12];
 extern const uint16_t piece_vals[12];
 extern const uint8_t white_initial[16];
 extern const uint8_t black_initial[16];
