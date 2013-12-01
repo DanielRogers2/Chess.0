@@ -578,5 +578,5 @@ void pieceToString(uint8_t pos, uint8_t piece_code, char str[4])
     str[0] = (piece_code < 6) ? 'w' : 'b';
     str[1] = piece_chars[piece_code];
     str[2] = '1';
-    str[2] += (piece_code == 6 || piece_code == 0) ? pos % 6 : pos % 2;
+    str[2] += (piece_code == 6 || piece_code == 0) ? pos % 8 : pos % 2;
 }
