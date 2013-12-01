@@ -167,4 +167,13 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
  */
 int evaluateState(chessboard * const board, bool white);
 
+/*
+ * Prints a board state
+ *
+ * @owner Daniel Rogers
+ *
+ * @param board The chessboard to print
+ */
+void printBoard(chessboard * const board);
+
 #endif /* BOARD_H_ */

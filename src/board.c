@@ -386,3 +386,23 @@ int evaluateState(chessboard * const board, bool white)
     return (value);
 }
 
+/*
+ * Prints a board state
+ *
+ * @owner Daniel Rogers
+ *
+ * @param board The chessboard to print
+ */
+void printBoard(chessboard * const board)
+{
+    puts("White:");
+    for(uint8_t i = 0; i < 16; ++i)
+    {
+        printf("    pid: %d @ %d\n", board->w_codes[i], board->w_pieces[i]);
+    }
+    puts("Black:");
+    for(uint8_t i = 0; i < 16; ++i)
+    {
+        printf("    pid: %d @ %d\n", board->b_codes[i], board->b_pieces[i]);
+    }
+}
