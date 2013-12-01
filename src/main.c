@@ -104,17 +104,27 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
     clock_t tstart, tend;
     double tex;
 
+    //15 mins each
+    double twhite = 900;
+    double tblack = 900;
+
+    //Record a play string to allow animation if desired
+    char plays[256][5] =
+    {
+    { 0 } };
+
     chessboard current_state;
     chessboard res;
 
     bool white_won, draw;
     draw = white_won = false;
 
-    char mov_str[3];
-    char piece[4];
+    char * mov_frm;
+    char * mov_str;
 
     initBoard(&current_state);
     uint8_t counter = 0;
+
     while (true)
     {
         //white
@@ -123,12 +133,17 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         selectBestMove(true, &current_state, &res, w_ply);
         tend = clock();
 
-        squareToString(res.w_last_move, mov_str);
-        pieceToString(res.w_last_piece, res.w_codes[res.w_last_piece], piece);
-        tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
+        mov_frm = &plays[counter][0];
+        mov_str = &plays[counter][2];
 
-        printf("piece: %s, move: %s, value: %d in %f\n", piece, mov_str,
-                evaluateState(&res, true), tex);
+        squareToString(current_state.w_pieces[res.w_last_piece], mov_frm);
+        squareToString(res.w_last_move, mov_str);
+        tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
+        //5 seconds back every move
+        twhite -= (tex - 5);
+
+        printf("%s to %s, value: %d, time: %f\n", mov_frm, mov_str,
+                evaluateState(&res, true), twhite);
         ++counter;
         current_state = res;
 
@@ -144,12 +159,17 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         selectBestMove(false, &current_state, &res, b_ply);
         tend = clock();
 
-        squareToString(res.b_last_move, mov_str);
-        pieceToString(res.b_last_piece, res.b_codes[res.b_last_piece], piece);
-        tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
+        mov_frm = &plays[counter][0];
+        mov_str = &plays[counter][2];
 
-        printf("piece: %s, move: %s, value: %d in %f\n", piece, mov_str,
-                evaluateState(&res, false), tex);
+        squareToString(current_state.b_pieces[res.b_last_piece], mov_frm);
+        squareToString(res.b_last_move, mov_str);
+        tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
+        //5 seconds back every move
+        tblack -= (tex - 5);
+
+        printf("%s to %s, value: %d, time: %f\n", mov_frm, mov_str,
+                evaluateState(&res, false), tblack);
         ++counter;
         current_state = res;
 
@@ -182,5 +202,12 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
 
     printf("board state %u\n", gamenum);
     printBoard(&current_state);
+
+    puts("move history: [ ");
+    for (uint8_t i = 0; i < (counter - 1); ++i)
+    {
+        printf("\"%s\",", plays[i]);
+    }
+    printf("\"%s\" ]\n", plays[counter - 1]);
 }
 #endif
