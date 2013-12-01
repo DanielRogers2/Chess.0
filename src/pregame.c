@@ -123,6 +123,18 @@ bool loadMoveTables()
         fclose(atk_table);
         puts("Table files loaded successfully");
 
+#ifdef DEBUG_QUEEN
+        for (uint8_t i = 0; i < 8; ++i)
+        {
+            printf("qray @d1 %d: [", i);
+            for (uint8_t j = 0; j < 7; ++j)
+            {
+                printf(" %d", legal_moves[W_Q][3][i][j]);
+            }
+            puts("]");
+        }
+#endif
+
 #ifdef DEBUG_TABLES
         printf("addr_LLM: %p\n", &legal_moves);
         printf("moveL_00: %d\n", legal_moves[0][0][0][0]);
@@ -295,6 +307,18 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
     //Extend rays
     for (uint8_t i = 0; i < 7; ++i)
     {
+        //Update ray positions on board
+        //Uses the fact that unsigned integer overflow has defined behavior
+        //Moving up a row and right a column
+        //  Don't go off the right edge of the board
+        NE = (NE % 8 < 7 && NE < INVALID_SQUARE) ? NE + 8 + 1 : INVALID_SQUARE;
+        //Moving down a row and right a column
+        SE = (SE % 8 < 7 && SE < INVALID_SQUARE) ? SE - 8 + 1 : INVALID_SQUARE;
+        //Moving down a row and left a column
+        SW = (SW % 8 > 0 && SW < INVALID_SQUARE) ? SW - 8 - 1 : INVALID_SQUARE;
+        //Moving up a row and left a column
+        NW = (NW % 8 > 0 && NW < INVALID_SQUARE) ? NW + 8 - 1 : INVALID_SQUARE;
+
         moves[0][i] = (NE < INVALID_SQUARE) ? NE : INVALID_SQUARE;
         moves[1][i] = (SE < INVALID_SQUARE) ? SE : INVALID_SQUARE;
         moves[2][i] = (SW < INVALID_SQUARE) ? SW : INVALID_SQUARE;
@@ -313,18 +337,6 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
         atkbboard =
                 (NW < INVALID_SQUARE) ?
                         atkbboard | (location_boards[moves[3][i]]) : atkbboard;
-
-        //Update ray positions on board
-        //Uses the fact that unsigned integer overflow has defined behavior
-        //Moving up a row and right a column
-        //  Don't go off the right edge of the board
-        NE = (NE % 8 < 7 && NE < INVALID_SQUARE) ? NE + 8 + 1 : INVALID_SQUARE;
-        //Moving down a row and right a column
-        SE = (SE % 8 < 7 && SE < INVALID_SQUARE) ? SE - 8 + 1 : INVALID_SQUARE;
-        //Moving down a row and left a column
-        SW = (SW % 8 > 0 && SW < INVALID_SQUARE) ? SW - 8 - 1 : INVALID_SQUARE;
-        //Moving up a row and left a column
-        NW = (NW % 8 > 0 && NW < INVALID_SQUARE) ? NW + 8 - 1 : INVALID_SQUARE;
     }
 }
 
@@ -354,6 +366,16 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
     //Extend rays
     for (uint8_t i = 0; i < 7; ++i)
     {
+        //Update ray positions on board
+        //Moving up a row
+        N = (N < INVALID_SQUARE) ? N + 8 : INVALID_SQUARE;
+        //Moving right a column
+        E = (E % 8 < 7 && E < INVALID_SQUARE) ? E + 1 : INVALID_SQUARE;
+        //Moving down a row
+        S = (S < INVALID_SQUARE) ? S - 8 : INVALID_SQUARE;
+        //Moving left a column
+        W = (W % 8 > 0 && W < INVALID_SQUARE) ? W - 1 : INVALID_SQUARE;
+
         moves[0][i] = (N < INVALID_SQUARE) ? N : INVALID_SQUARE;
         moves[1][i] = (E < INVALID_SQUARE) ? E : INVALID_SQUARE;
         moves[2][i] = (S < INVALID_SQUARE) ? S : INVALID_SQUARE;
@@ -372,16 +394,6 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
         atkbboard =
                 (W < INVALID_SQUARE) ?
                         atkbboard | (location_boards[moves[3][i]]) : atkbboard;
-
-        //Update ray positions on board
-        //Moving up a row
-        N = (N < INVALID_SQUARE) ? N + 8 : INVALID_SQUARE;
-        //Moving right a column
-        E = (E % 8 < 7 && E < INVALID_SQUARE) ? E + 1 : INVALID_SQUARE;
-        //Moving down a row
-        S = (S < INVALID_SQUARE) ? S - 8 : INVALID_SQUARE;
-        //Moving left a column
-        W = (W % 8 > 0 && W < INVALID_SQUARE) ? W - 1 : INVALID_SQUARE;
     }
 }
 
@@ -410,6 +422,28 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
     //Extend rays
     for (uint8_t i = 0; i < 7; ++i)
     {
+        //Update ray positions on board
+        //Moving up a row
+        N = (N < INVALID_SQUARE) ? N + 8 : INVALID_SQUARE;
+        //Moving up a row and right a column
+        //  Don't go off the right edge of the board
+        NE = (NE % 8 < 7 && NE < INVALID_SQUARE) ? NE + 8 + 1 : INVALID_SQUARE;
+        //Moving right a column
+        E = (E % 8 < 7 && E < INVALID_SQUARE) ? E + 1 : INVALID_SQUARE;
+        //Moving down a row and right a column
+        //  Since using unsigned integers
+        //  underflow (which has defined behavior) will cause the value to
+        //      be > 64 (INVALID_SQUARE)
+        SE = (SE % 8 < 7 && SE < INVALID_SQUARE) ? SE - 8 + 1 : INVALID_SQUARE;
+        //Moving down a row
+        S = (S < INVALID_SQUARE) ? S - 8 : INVALID_SQUARE;
+        //Moving down a row and left a column
+        SW = (SW % 8 > 0 && SW < INVALID_SQUARE) ? SW - 8 - 1 : INVALID_SQUARE;
+        //Moving left a column
+        W = (W % 8 > 0 && W < INVALID_SQUARE) ? W - 1 : INVALID_SQUARE;
+        //Moving up a row and left a column
+        NW = (NW % 8 > 0 && NW < INVALID_SQUARE) ? NW + 8 - 1 : INVALID_SQUARE;
+
         moves[0][i] = (N < INVALID_SQUARE) ? N : INVALID_SQUARE;
         moves[1][i] = (NE < INVALID_SQUARE) ? NE : INVALID_SQUARE;
         moves[2][i] = (E < INVALID_SQUARE) ? E : INVALID_SQUARE;
@@ -444,28 +478,6 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
         atkbboard =
                 (NW < INVALID_SQUARE) ?
                         atkbboard | (location_boards[moves[7][i]]) : atkbboard;
-
-        //Update ray positions on board
-        //Moving up a row
-        N = (N < INVALID_SQUARE) ? N + 8 : INVALID_SQUARE;
-        //Moving up a row and right a column
-        //  Don't go off the right edge of the board
-        NE = (NE % 8 < 7 && NE < INVALID_SQUARE) ? NE + 8 + 1 : INVALID_SQUARE;
-        //Moving right a column
-        E = (E % 8 < 7 && E < INVALID_SQUARE) ? E + 1 : INVALID_SQUARE;
-        //Moving down a row and right a column
-        //  Since using unsigned integers
-        //  underflow (which has defined behavior) will cause the value to
-        //      be > 64 (INVALID_SQUARE)
-        SE = (SE % 8 < 7 && SE < INVALID_SQUARE) ? SE - 8 + 1 : INVALID_SQUARE;
-        //Moving down a row
-        S = (S < INVALID_SQUARE) ? S - 8 : INVALID_SQUARE;
-        //Moving down a row and left a column
-        SW = (SW % 8 > 0 && SW < INVALID_SQUARE) ? SW - 8 - 1 : INVALID_SQUARE;
-        //Moving left a column
-        W = (W % 8 > 0 && W < INVALID_SQUARE) ? W - 1 : INVALID_SQUARE;
-        //Moving up a row and left a column
-        NW = (NW % 8 > 0 && NW < INVALID_SQUARE) ? NW + 8 - 1 : INVALID_SQUARE;
     }
 }
 
