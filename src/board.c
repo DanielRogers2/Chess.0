@@ -115,7 +115,7 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
     //The set of moves
     uint8_t (*moves)[7];
 
-    bool capped = false;
+    bool capped;
 
     if (storage->count < 35)
     {
@@ -140,6 +140,8 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
 #endif
 
         moves = legal_moves[codes[i]][pieces[i]];
+        capped = false;
+
         //Go through each move ray
         for (j = 0; j < 8; ++j)
         {
@@ -181,8 +183,8 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                 {
                     //Expand special moves, do pawn promotion here as it's a
                     //  result of the move, rather than a unique move
-                    if ((codes[i] == W_P && (pieces[i] / 8) == 6)
-                            || (codes[i] == B_P && (pieces[i] / 8) == 1))
+                    if (((codes[i] == W_P) && ((moves[j][k] / 8) == 7))
+                            || ((codes[i] == B_P) && ((moves[j][k] / 8) == 0)))
                     {
                         //pawn promotion, just make it a queen
                         moveSpecial(i, moves[j][k], white, board,
@@ -548,14 +550,23 @@ int evaluateState(chessboard * const board, bool white)
     int w_val = 0;
     int b_val = 0;
 
-#ifdef DEBUG
     //Check for stalemate
-    if (board->w_ident_moves >= 3 || board->b_ident_moves >= 3)
+    if (board->w_pieces[15] != CAPTURED && board->b_pieces[15] != CAPTURED
+            && (board->w_ident_moves >= 3 || board->b_ident_moves >= 3))
     {
         //Nobody wins!
         return (0);
     }
-#endif
+
+    //Check for endgame state
+    if (board->w_pieces[14] == CAPTURED && board->b_pieces[14] == CAPTURED)
+    {
+        board_position_vals[11] = b_K_e_positions;
+    }
+    else
+    {
+        board_position_vals[11] = b_K_m_positions;
+    }
 
     //Sum up the values for white and black
     for (uint8_t i = 0; i < 16; ++i)
@@ -576,13 +587,13 @@ int evaluateState(chessboard * const board, bool white)
                                 + board_position_vals[board->b_codes[i]][board->b_pieces[i]];
     }
 
-//Value = white - black
+    //Value = white - black
     value = w_val - b_val;
 
-//If we are white, then we want max white, and this is already going to
-//  have higher scores for better values for white
-//If black, then multiply by -1 to flip it so higher scores returned mean
-//  better values for black
+    //If we are white, then we want max white, and this is already going to
+    //  have higher scores for better values for white
+    //If black, then multiply by -1 to flip it so higher scores returned mean
+    //  better values for black
     value = (white) ? value : -value;
 
     return (value);
