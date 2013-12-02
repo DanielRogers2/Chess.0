@@ -552,7 +552,7 @@ int evaluateState(chessboard * const board, bool white)
 
     //Check for stalemate
     if (board->w_pieces[15] != CAPTURED && board->b_pieces[15] != CAPTURED
-            && (board->w_ident_moves >= 3 || board->b_ident_moves >= 3))
+            && (board->w_ident_moves == 3 || board->b_ident_moves == 3))
     {
         //Nobody wins!
         return (0);
