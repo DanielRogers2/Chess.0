@@ -126,7 +126,7 @@ void selectBestMove(bool self_white, chessboard * const initial,
 #else
         thread = omp_get_thread_num();
         cur = -negamax(&store.data[i], !self_white, threadstore[thread],
-        INT_MIN + 1, INT_MAX, depth - 1);
+                -INT_MAX, INT_MAX, depth - 1);
         if (cur > best[thread])
         {
             best[thread] = cur;
@@ -214,12 +214,6 @@ int negamax(chessboard * const state, bool white, boardset * expansionStore,
         //Return value of state
         return (evaluateState(state, white));
     }
-    //Check for stalemate
-    else if (state->w_ident_moves >= 3 || state->b_ident_moves >= 3)
-    {
-        //Nobody wins!
-        return (0);
-    }
     else
     {
         //Currently seen value
@@ -237,7 +231,11 @@ int negamax(chessboard * const state, bool white, boardset * expansionStore,
                     -alpha, depth - 1);
             if (cur >= beta)
             {
-                // beta cutoff, will never be given choice of this value
+                // beta cutoff
+                //  Beta is the the best value that the calling node has seen,
+                //  so if we return a value that is better for us than the
+                //  calling node, then the calling node will go ahead and
+                //  select the other value anyways.
                 return (beta);
             }
             if (cur > alpha)

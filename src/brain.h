@@ -16,11 +16,11 @@
 #include "board.h"
 
 //Safty margins for depth
-//100 seconds, switch to depth medium
-#define MED_DEPTH_CUTOFF 100
+//120 seconds, switch to depth medium
+#define MED_DEPTH_CUTOFF 200
 #define MEDIUM_DEPTH 6
-//15s, switch to depth small
-#define SMALL_DEPTH_CUTOFF 15
+//30s, switch to depth small
+#define SMALL_DEPTH_CUTOFF 30
 #define SMALLEST_DEPTH 5
 
 /*
