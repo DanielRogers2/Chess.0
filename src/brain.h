@@ -16,11 +16,11 @@
 #include "board.h"
 
 //Safty margins for depth
-//120 seconds, switch to depth medium
-#define MED_DEPTH_CUTOFF 200
+//4mins, switch to depth medium
+#define MED_DEPTH_CUTOFF 240
 #define MEDIUM_DEPTH 6
-//30s, switch to depth small
-#define SMALL_DEPTH_CUTOFF 30
+//45s, switch to depth small
+#define SMALL_DEPTH_CUTOFF 45
 #define SMALLEST_DEPTH 5
 
 /*
@@ -35,8 +35,8 @@
  *               will be set to the value of the piece & location to move it to
  * @param tlimit The amount of time left on the clock in seconds
  */
-void selectBestMove(bool self_white, chessboard * const initial,
-        chessboard * result, uint8_t depth, double tlimit);
+void selectBestMove(bool self_white, chessboard * restrict const initial,
+        chessboard * restrict result, uint8_t depth, double tlimit);
 
 /*
  * Performs a standard negamax search

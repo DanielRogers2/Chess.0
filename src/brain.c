@@ -27,8 +27,8 @@
  *               will be set to the value of the piece & location to move it to
  * @param depth The depth to search to
  */
-void selectBestMove(bool self_white, chessboard * const initial,
-        chessboard * result, uint8_t depth, double tlimit)
+void selectBestMove(bool self_white, chessboard * restrict const initial,
+        chessboard * restrict result, uint8_t depth, double tlimit)
 {
 #ifdef DEBUG_SEARCH
     puts("setting up storage");
@@ -216,6 +216,8 @@ int negamax(chessboard * const state, bool white, boardset * expansionStore,
     }
     else
     {
+        //best score at this height
+        int best = INT_MIN;
         //Currently seen value
         int cur;
         //Storage of expanded states
@@ -231,20 +233,25 @@ int negamax(chessboard * const state, bool white, boardset * expansionStore,
                     -alpha, depth - 1);
             if (cur >= beta)
             {
-                // beta cutoff
+                // fail-soft beta cutoff
                 //  Beta is the the best value that the calling node has seen,
                 //  so if we return a value that is better for us than the
                 //  calling node, then the calling node will go ahead and
                 //  select the other value anyways.
-                return (beta);
+                return (cur);
             }
-            if (cur > alpha)
+            if (cur > best)
             {
                 //Found a better value
-                alpha = cur;
+                best = cur;
+                if (cur > alpha)
+                {
+                    //Best score for level & better than alpha
+                    alpha = cur;
+                }
             }
         }
         //Return the best value
-        return (alpha);
+        return (best);
     }
 }
