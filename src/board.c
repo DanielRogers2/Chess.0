@@ -131,11 +131,8 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
         //Check if piece is captured
         if (pieces[i] == CAPTURED)
         {
-            puts("skipped cap");
             continue;
         }
-
-        printf("can move: %d\n", i);
 
 #ifdef DEBUG_MOVE
         printf("piece: %d, @%d\n", codes[i], pieces[i]);
@@ -614,7 +611,6 @@ int evaluateState(chessboard * const board, bool white)
  */
 void printBoard(chessboard * const board)
 {
-
     char pos_str[3];
 
     puts("White:");
