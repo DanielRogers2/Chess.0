@@ -99,7 +99,7 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
     bitboard self = (white) ? board->all_w_pieces : board->all_b_pieces;
     bitboard op = (white) ? board->all_b_pieces : board->all_w_pieces;
     //Lookup table piece codes
-    const uint8_t * codes = (white) ? board->w_codes : board->b_codes;
+    uint8_t * codes = (white) ? board->w_codes : board->b_codes;
 
     //Number of states generated
     uint8_t states = 0;
@@ -140,11 +140,11 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
 #endif
 
         moves = legal_moves[codes[i]][pieces[i]];
-        capped = false;
 
         //Go through each move ray
         for (j = 0; j < 8; ++j)
         {
+            capped = false;
             //Go through each move in ray
             for (k = 0; k < 7; ++k)
             {
@@ -168,7 +168,9 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                     break;
                 }
                 else if ((codes[i] == W_P || codes[i] == B_P)
+                //diagonals must capture
                         && (((j != 0) && (!(location_boards[moves[j][k]] & op)))
+                        //forward can't capture
                                 || ((j == 0)
                                         && (location_boards[moves[j][k]] & op))))
                 {
@@ -208,7 +210,9 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                     //See if this was a capturing move, and stop moving along
                     //  ray if so
                     if (capped)
+                    {
                         break;
+                    }
                 }
                 //End making legal moves in ray
             }
@@ -476,8 +480,8 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
             uint8_t * op_pcs = (white) ? new->b_pieces : new->w_pieces;
 
             //It's an en passant capture, so the pawn must be +- 1 row from
-            //  location. It's +1 row if white, -1 row if black
-            int8_t delta = (white) ? 8 : -8;
+            //  location. It's -1 row if white, +1 row if black
+            int8_t delta = (white) ? -8 : 8;
             //Get location of pawn being captured
             bitboard cap_loc = location_boards[location + delta];
 
@@ -550,11 +554,9 @@ int evaluateState(chessboard * const board, bool white)
     int w_val = 0;
     int b_val = 0;
 
-    //Check for stalemate
     if (board->w_pieces[15] != CAPTURED && board->b_pieces[15] != CAPTURED
             && (board->w_ident_moves == 3 || board->b_ident_moves == 3))
     {
-        //Nobody wins!
         return (0);
     }
 
