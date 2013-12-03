@@ -555,7 +555,7 @@ int evaluateState(chessboard * const board, bool white)
     int b_val = 0;
 
     if (board->w_pieces[15] != CAPTURED && board->b_pieces[15] != CAPTURED
-            && (board->w_ident_moves == 3 || board->b_ident_moves == 3))
+            && (board->w_ident_moves >= 3 || board->b_ident_moves >= 3))
     {
         return (0);
     }
