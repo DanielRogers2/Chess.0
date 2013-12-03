@@ -131,8 +131,11 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
         //Check if piece is captured
         if (pieces[i] == CAPTURED)
         {
+            puts("skipped cap");
             continue;
         }
+
+        printf("can move: %d\n", i);
 
 #ifdef DEBUG_MOVE
         printf("piece: %d, @%d\n", codes[i], pieces[i]);
@@ -291,7 +294,7 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
     bitboard new_loc = location_boards[location];
 
     //copy data
-    memcpy(new, current, sizeof(chessboard));
+    memmove(new, current, sizeof(chessboard));
 
     uint8_t * ident_moves = (white) ? &new->w_ident_moves : &new->b_ident_moves;
     uint8_t * last_move = (white) ? &new->w_last_move : &new->b_last_move;
@@ -454,7 +457,8 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
 
     //Now that new is set up right
     //If it's a pawn, then it's a promotion or en passant
-    if (piece == W_P || piece == B_P)
+    if ((white && current->w_codes[piece] == W_P)
+            || (!white && current->b_codes[piece] == B_P))
     {
         //do initial work with makeMove
         //Capturing during a pawn promotion move will be handled by this
