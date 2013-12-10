@@ -678,10 +678,10 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     char piece = move[0];
     //Get data for start position
     char col_start = move[1];
-    uint8_t row_start = atoi(move[2]);
+    uint8_t row_start = atoi(&move[2]);
     //Get data for end position
     char col_end = move[3];
-    uint8_t row_end = atoi(move[4]);
+    uint8_t row_end = atoi(&move[4]);
     //Get data for promotion
     char promote = move[5];
 
@@ -695,16 +695,59 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     //shhhhhh
     square_end += (col_end - 'a');
 
-    uint8_t code;
-    //Get the piece code
+    //Find the array index
+    uint8_t * pieces = (white) ? board->w_pieces : board->b_pieces;
+    uint8_t pindex;
 
+    bitboard op_oc = (white) ? board->all_b_pieces : board->all_w_pieces;
+
+    //Find matching location
+    for (pindex = 0; pindex < 6; ++pindex)
+    {
+        if (pieces[pindex] == square_start)
+        {
+            break;
+        }
+    }
 
     //See if it's a promotion
     if (promote != '\0')
     {
+        uint8_t promote_to = (white) ? 0 : 6;
+        //Get the piece code
+        for (uint8_t i = 0; i < 6; ++i, ++promote_to)
+        {
+            if (promote == piece_chars[i])
+            {
+                break;
+            }
+        }
 
+        //Do the promotion
+        moveSpecial(pindex, square_end, white, board, board, promote_to);
     }
-
+    //Pawn move, check for en passant
+    //  If moving diagonally, and not a piece @ location
+    else if ((piece == 'P') && (col_start != col_end)
+            && !(location_boards[square_end] & op_oc))
+    {
+        moveSpecial(pindex, square_end, white, board, board, 0);
+    }
+    //King move
+    //Starting in start column
+    //Staying in same row
+    //moving more than one column
+    //Must be a castling maneuver
+    else if (piece == 'K' && (col_start == 'e')
+            && (col_end != 'd' || col_end != 'f') && (row_start == row_end))
+    {
+        moveSpecial(pindex, square_end, white, board, board, 0);
+    }
+    //Normal move
+    else
+    {
+        makeMove(piece, square_end, white, board, board);
+    }
 }
 
 /*
