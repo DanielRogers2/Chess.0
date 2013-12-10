@@ -9,7 +9,7 @@
 
 #include "net.h"
 
-void getStatus(char * opponent_move, double * tleft, int gameid, int teamnum,
+void getStatus(char opponent_move[7], double * tleft, int gameid, int teamnum,
         const char * teamsecret)
 {
     //json Result data
@@ -29,6 +29,11 @@ void getStatus(char * opponent_move, double * tleft, int gameid, int teamnum,
     //Response from server
     char * response;
 
+#ifdef DEBUG
+    puts("inside poll server");
+    printf("url: %s\n", url);
+#endif
+
     //Loop until it's our turn
     do
     {
@@ -38,15 +43,31 @@ void getStatus(char * opponent_move, double * tleft, int gameid, int teamnum,
         //Ask server for data
         response = pollServer(url);
 
+#ifdef DEBUG
+        puts("polled");
+#endif
+
         //Read json data
         gamestate = json_loads(response, 0, &json_error);
         free(response);
 
+#ifdef DEBUG
+        puts("json loaded");
+#endif
+
         //Get the state of the game
         ready = json_object_get(gamestate, "ready");
 
+#ifdef DEBUG
+        puts("accessed ready");
+#endif
+
         //See if it's our turn
         myturn = json_is_true(ready);
+
+#ifdef DEBUG
+        printf("checked turn: %d\n", myturn);
+#endif
 
     } while (!myturn);
 
@@ -54,16 +75,35 @@ void getStatus(char * opponent_move, double * tleft, int gameid, int teamnum,
     secondsleft = json_object_get(gamestate, "secondsleft");
     lastmove = json_object_get(gamestate, "lastmove");
 
-    char * lmove_string;
+#ifdef DEBUG
+    puts("got seconds/lastmove");
+#endif
+
+    const char * lmove_string;
 
     //Unpack them
-    json_unpack(secondsleft, "f", tleft);
-    json_unpack(lastmove, "s", lmove_string);
+    *tleft = json_real_value(secondsleft);
+    lmove_string = json_string_value(lastmove);
 
-    memcpy(opponent_move, lmove_string, strlen(lmove_string));
+#ifdef DEBUG
+    printf("unpacked seconds/lastmove: %f, %s\n", tleft, lmove_string);
+#endif
+
+    for (uint8_t i = 0; i < 7; ++i)
+    {
+        opponent_move[i] = lmove_string[i];
+    }
+
+#ifdef DEBUG
+    puts("copied lastmove");
+#endif
 
     //free root
     json_decref(gamestate);
+#ifdef DEBUG
+    puts("freed root");
+#endif
+
 }
 
 char * pollServer(char * url)
@@ -122,6 +162,10 @@ void pushMove(int gameid, int teamnum, const char * teamsecret, char * move)
 
     char url[URL_SIZE];
     sprintf(url, MOVE_URL_FORMAT, gameid, teamnum, teamsecret, move);
+
+#ifdef DEBUG
+    printf("moveurl: %s\n", url);
+#endif
 
     curl = curl_easy_init();
     if (curl)

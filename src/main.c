@@ -43,35 +43,52 @@ int main(int argc, const char * argv[])
     //Need to know side, gameid, teamnumber, teamsecret
     if (argc < 5)
     {
-        puts("Usage: <w|b> <gameid> <teamnumber> <teamsecret>");
+        puts("Usage: <w|b> <teamnumber> <teamsecret> <gameid>");
         return (0);
     }
 
     bool self_white = (argv[1][0] == 'w') ? true : false;
-    int gameid = atoi(argv[2]);
-    int teamnumber = atoi(argv[3]);
-    const char * teamsecret = argv[4];
+    int teamnumber = atoi(argv[2]);
+    const char * teamsecret = argv[3];
+    int gameid = atoi(argv[4]);
 
     //The play they made/we made
     char move[7];
 
     double tlimit = INITIAL_TIME;
 
+    if (self_white)
+        goto WHITE_START;
+
     //Game loop
     while (true)
     {
+        puts("getting status");
         //Get their move
         getStatus(move, &tlimit, gameid, teamnumber, teamsecret);
 
+#ifdef DEBUG
+        printf("parsing move: %s\n", move);
+#endif
         //Parse the move
         parseMoveString(move, !self_white, &current_state);
 
+        puts("making move");
+
+        WHITE_START:
         //Make move
         selectBestMove(self_white, &current_state, &next_state, INITIAL_DEPTH,
                 tlimit);
 
+#ifdef DEBUG
+        puts("result board:");
+        printBoard(&next_state);
+        puts("getting move string");
+#endif
         //Extract the move
-        getMoveString(&next_state, &current_state, true, move);
+        getMoveString(&next_state, &current_state, self_white, move);
+
+        printf("sending move: %s\n", move);
 
         //Submit move to server
         pushMove(gameid, teamnumber, teamsecret, move);
@@ -142,15 +159,11 @@ int main(int argc, const char * argv[])
 
      puts("testing game 6(w) vs 7(b)");
      playSampleGame(9, 6, 7);
+     puts("testing game 7(w) vs 4(b)");
+     playSampleGame(1, 7, 4);
      */
-    puts("testing game 7(w) vs 4(b)");
-    playSampleGame(1, 7, 4);
 
 #endif
-
-    //Set up network code
-
-    //Run the main program loop
 
     return (0);
 }

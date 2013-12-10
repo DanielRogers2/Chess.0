@@ -15,6 +15,7 @@
 #include <jansson.h>
 #include <stdbool.h>
 #include <windows.h>
+#include <inttypes.h>
 
 #define URL_FORMAT "http://www.bencarle.com/chess/poll/%d/%d/%s/"
 #define MOVE_URL_FORMAT "http://www.bencarle.com/chess/move/%d/%d/%s/%s/"
@@ -31,7 +32,7 @@ typedef struct
  * Polls the server for updates
  *
  */
-void getStatus(char * opponent_move, double * tleft, int gameid, int teamnum,
+void getStatus(char opponent_move[7], double * tleft, int gameid, int teamnum,
         const char * teamsecret);
 
 /**
