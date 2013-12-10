@@ -620,12 +620,15 @@ void printBoard(chessboard * const board)
 
         printf("    pid: %d @ %s\n", board->w_codes[i], pos_str);
     }
+    //printf("    occupancy: %llx\n", board->all_w_pieces);
+
     puts("Black:");
     for (uint8_t i = 0; i < 16; ++i)
     {
         squareToString(board->b_pieces[i], pos_str);
         printf("    pid: %d @ %s\n", board->b_codes[i], pos_str);
     }
+    //printf("    occupancy: %llx\n", board->all_b_pieces);
 }
 
 /*
@@ -678,10 +681,20 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     char piece = move[0];
     //Get data for start position
     char col_start = move[1];
-    uint8_t row_start = atoi(&move[2]);
+    uint8_t row_start = atoi(&move[2]) - 1;
+
+#ifdef DEBUG
+    printf("cs: %c, rs: %d\n", col_start, row_start);
+#endif
+
     //Get data for end position
     char col_end = move[3];
-    uint8_t row_end = atoi(&move[4]);
+    uint8_t row_end = atoi(&move[4]) - 1;
+
+#ifdef DEBUG
+    printf("ce: %c, re: %d\n", col_end, row_end);
+#endif
+
     //Get data for promotion
     char promote = move[5];
 
@@ -689,9 +702,15 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     uint8_t square_start = row_start * 8;
     //shhhhhh
     square_start += (col_start - 'a');
+#ifdef DEBUG
+    printf("ss: %d\n", square_start);
+#endif
 
     //Compute square on board for end
     uint8_t square_end = row_end * 8;
+#ifdef DEBUG
+    printf("seinitial: %d\n", square_end);
+#endif
     //shhhhhh
     square_end += (col_end - 'a');
 
@@ -702,7 +721,7 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     bitboard op_oc = (white) ? board->all_b_pieces : board->all_w_pieces;
 
     //Find matching location
-    for (pindex = 0; pindex < 6; ++pindex)
+    for (pindex = 0; pindex < 16; ++pindex)
     {
         if (pieces[pindex] == square_start)
         {
@@ -710,9 +729,18 @@ void parseMoveString(char move[7], bool white, chessboard * board)
         }
     }
 
+#ifdef DEBUG
+    printf("making move [piece, dest, white]: %d, %d, %d\n", pindex, square_end,
+            white);
+#endif
+
     //See if it's a promotion
     if (promote != '\0')
     {
+#ifdef DEBUG
+        printf("promotion to: %c\n", promote);
+#endif
+
         uint8_t promote_to = (white) ? 0 : 6;
         //Get the piece code
         for (uint8_t i = 0; i < 6; ++i, ++promote_to)
@@ -731,6 +759,9 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     else if ((piece == 'P') && (col_start != col_end)
             && !(location_boards[square_end] & op_oc))
     {
+#ifdef DEBUG
+        puts("en passant");
+#endif
         moveSpecial(pindex, square_end, white, board, board, 0);
     }
     //King move
@@ -739,14 +770,17 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     //moving more than one column
     //Must be a castling maneuver
     else if (piece == 'K' && (col_start == 'e')
-            && (col_end != 'd' || col_end != 'f') && (row_start == row_end))
+            && (col_end != 'd' && col_end != 'f') && (row_start == row_end))
     {
+#ifdef DEBUG
+        puts("castle");
+#endif
         moveSpecial(pindex, square_end, white, board, board, 0);
     }
     //Normal move
     else
     {
-        makeMove(piece, square_end, white, board, board);
+        makeMove(pindex, square_end, white, board, board);
     }
 }
 
