@@ -222,6 +222,15 @@ void printBoard(chessboard * const board);
 void getMoveString(chessboard * const board, chessboard * const prev,
 bool white, char out[7]);
 
+/**
+ * Parses a move string and makes the appropriate move
+ *
+ * @param move The move string to process
+ * @param white true if the move was made by white
+ * @param board The board to update
+ */
+void parseMoveString(char move[7], bool white, chessboard * board);
+
 /*
  * Converts a board coordinate to a notation string
  *

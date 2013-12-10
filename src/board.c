@@ -665,6 +665,48 @@ bool white, char out[7])
     out[6] = '\0';
 }
 
+/**
+ * Parses a move string and makes the appropriate move
+ *
+ * @param move The move string to process
+ * @param white true if the move was made by white
+ * @param board The board to update
+ */
+void parseMoveString(char move[7], bool white, chessboard * board)
+{
+    //Get piece character
+    char piece = move[0];
+    //Get data for start position
+    char col_start = move[1];
+    uint8_t row_start = atoi(move[2]);
+    //Get data for end position
+    char col_end = move[3];
+    uint8_t row_end = atoi(move[4]);
+    //Get data for promotion
+    char promote = move[5];
+
+    //Compute square on board for start
+    uint8_t square_start = row_start * 8;
+    //shhhhhh
+    square_start += (col_start - 'a');
+
+    //Compute square on board for end
+    uint8_t square_end = row_end * 8;
+    //shhhhhh
+    square_end += (col_end - 'a');
+
+    uint8_t code;
+    //Get the piece code
+
+
+    //See if it's a promotion
+    if (promote != '\0')
+    {
+
+    }
+
+}
+
 /*
  * Converts a board coordinate to a notation string
  *

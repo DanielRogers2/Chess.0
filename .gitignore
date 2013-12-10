@@ -6,3 +6,5 @@
 /Release
 /atk_boards.bin
 /move_table.bin
+/curl
+/jansson
