@@ -17,10 +17,10 @@
 
 //Safty margins for depth
 //4mins, switch to depth medium
-#define MED_DEPTH_CUTOFF 240
+#define MED_DEPTH_CUTOFF 300
 #define MEDIUM_DEPTH 6
 //45s, switch to depth small
-#define SMALL_DEPTH_CUTOFF 45
+#define SMALL_DEPTH_CUTOFF 60
 #define SMALLEST_DEPTH 5
 
 /*
