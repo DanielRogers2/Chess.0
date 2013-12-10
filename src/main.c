@@ -13,7 +13,7 @@
 #include "brain.h"
 #include "net.h"
 
-#define INITIAL_DEPTH 4
+#define INITIAL_DEPTH 6
 #define INITIAL_TIME 900
 
 #ifdef DEBUG
@@ -43,7 +43,8 @@ int main(int argc, const char * argv[])
     //Need to know side, gameid, teamnumber, teamsecret
     if (argc < 5)
     {
-        puts("Usage: <w|b> <teamnumber> <teamsecret> <gameid>");
+        puts(
+                "Usage: <w|b> <teamnumber> <teamsecret> <gameid> [<initial_depth>]");
         return (0);
     }
 
@@ -51,6 +52,8 @@ int main(int argc, const char * argv[])
     int teamnumber = atoi(argv[2]);
     const char * teamsecret = argv[3];
     int gameid = atoi(argv[4]);
+
+    int depth = (argc >= 6) ? atoi(argv[5]) : INITIAL_DEPTH;
 
     //The play they made/we made
     char move[7];
@@ -73,12 +76,11 @@ int main(int argc, const char * argv[])
         //Parse the move
         parseMoveString(move, !self_white, &current_state);
 
-        puts("making move");
+        printf("making move, with tleft: %f\n", tlimit);
 
         WHITE_START:
         //Make move
-        selectBestMove(self_white, &current_state, &next_state, INITIAL_DEPTH,
-                tlimit);
+        selectBestMove(self_white, &current_state, &next_state, depth, tlimit);
 
 #ifdef DEBUG
         puts("result board:");
@@ -96,74 +98,6 @@ int main(int argc, const char * argv[])
         //Update current state
         current_state = next_state;
     }
-
-#ifdef DEBUG
-
-    /*
-     boardset newstates;
-     newstates.count = 0;
-     newstates.data = NULL;
-
-     uint8_t exp = expandStates(&current_state, &newstates, true);
-
-     printf("expanded: %u\n", exp);
-     printf("%llx\n", newstates.data[0].all_w_pieces);
-
-     chessboard res;
-     //Test negamax
-     puts("negamax:");
-
-     //for white
-     selectBestMove(true, &current_state, &res, 6);
-     puts("did sBM for white");
-     printf("piece: %d, move: %d\n", res.w_last_piece, res.w_last_move);
-     printf("value: %d\n", evaluateState(&res, true));
-
-     //for black, same initial state... should come up with the same move
-     //  and value
-     selectBestMove(false, &current_state, &res, 6);
-     puts("did sBM for black");
-     printf("piece: %d, move: %d\n", res.b_last_piece, res.b_last_move);
-     printf("value: %d\n", evaluateState(&res, false));
-
-     //Lower depth, for more info
-     selectBestMove(false, &current_state, &res, 4);
-     puts("did d4 sBM for black");
-     printf("piece: %d, move: %d\n", res.b_last_piece, res.b_last_move);
-     printf("value: %d\n", evaluateState(&res, false));
-     */
-    //Game examples
-    /*
-     puts("testing game 4(w) vs 2(b)");
-     playSampleGame(1, 4, 2);
-     puts("testing game 5(w) vs 2(b)");
-     playSampleGame(2, 5, 2);
-
-     puts("testing game 2(w) vs 4(b)");
-     playSampleGame(3, 2, 4);
-
-     puts("testing game 2(w) vs 5(b)");
-     playSampleGame(4, 2, 5);
-
-     puts("testing game 5(w) vs 4(b)");
-     playSampleGame(5, 5, 4);
-
-     puts("testing game 4(w) vs 5(b)");
-     playSampleGame(6, 4, 5);
-
-     puts("testing game 5(w) vs 5(b)");
-     playSampleGame(7, 5, 5);
-
-     puts("testing game 6(w) vs 5(b)");
-     playSampleGame(8, 6, 5);
-
-     puts("testing game 6(w) vs 7(b)");
-     playSampleGame(9, 6, 7);
-     puts("testing game 7(w) vs 4(b)");
-     playSampleGame(1, 7, 4);
-     */
-
-#endif
 
     return (0);
 }
