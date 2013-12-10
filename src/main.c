@@ -11,12 +11,16 @@
 #include "board.h"
 #include "pregame.h"
 #include "brain.h"
+#include "net.h"
+
+#define INITIAL_DEPTH 4
+#define INITIAL_TIME 900
 
 #ifdef DEBUG
 void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply);
 #endif
 
-int main()
+int main(int argc, const char * argv[])
 {
     //Load or generate tables
     if (!loadMoveTables())
@@ -32,10 +36,53 @@ int main()
 
     //Get a new board and initialize it
     chessboard current_state;
+    chessboard next_state;
+
     initBoard(&current_state);
+
+    //Need to know side, gameid, teamnumber, teamsecret
+    if (argc < 5)
+    {
+        puts("Usage: <w|b> <gameid> <teamnumber> <teamsecret>");
+        return (0);
+    }
+
+    bool self_white = (argv[1][0] == 'w') ? true : false;
+    int gameid = atoi(argv[2]);
+    int teamnumber = atoi(argv[3]);
+    const char * teamsecret = argv[4];
+
+    //The play they made/we made
+    char move[7];
+
+    double tlimit = INITIAL_TIME;
+
+    //Game loop
+    while (true)
+    {
+        //Get their move
+        getStatus(move, &tlimit, gameid, teamnumber, teamsecret);
+
+        //Parse the move
+        parseMoveString(move, !self_white, &current_state);
+
+        //Make move
+        selectBestMove(self_white, &current_state, &next_state, INITIAL_DEPTH,
+                tlimit);
+
+        //Extract the move
+        getMoveString(&next_state, &current_state, true, move);
+
+        //Submit move to server
+        pushMove(gameid, teamnumber, teamsecret, move);
+
+        //Update current state
+        current_state = next_state;
+    }
 
 #ifdef DEBUG
 
+    /*
      boardset newstates;
      newstates.count = 0;
      newstates.data = NULL;
@@ -67,7 +114,9 @@ int main()
      puts("did d4 sBM for black");
      printf("piece: %d, move: %d\n", res.b_last_piece, res.b_last_move);
      printf("value: %d\n", evaluateState(&res, false));
+     */
     //Game examples
+    /*
      puts("testing game 4(w) vs 2(b)");
      playSampleGame(1, 4, 2);
      puts("testing game 5(w) vs 2(b)");
@@ -91,8 +140,11 @@ int main()
      puts("testing game 6(w) vs 5(b)");
      playSampleGame(8, 6, 5);
 
-    puts("testing game 6(w) vs 7(b)");
-    playSampleGame(9, 6, 7);
+     puts("testing game 6(w) vs 7(b)");
+     playSampleGame(9, 6, 7);
+     */
+    puts("testing game 7(w) vs 4(b)");
+    playSampleGame(1, 7, 4);
 
 #endif
 
@@ -126,7 +178,7 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
     draw = white_won = false;
 
     initBoard(&current_state);
-    uint8_t counter = 0;
+    uint16_t counter = 0;
 
     while (true)
     {
@@ -174,7 +226,7 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
             break;
         }
 
-        if (counter == 0)
+        if (counter == 500)
         {
             puts("stalemate maybe...");
             draw = true;
@@ -198,11 +250,13 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
     printf("board state %u\n", gamenum);
     printBoard(&current_state);
 
+    counter = counter - 1;
+
     puts("move history: \n[ ");
-    for (uint8_t i = 0; i < (counter - 1); ++i)
+    for (uint8_t i = 0; i < counter; ++i)
     {
         printf("\"%s\",", plays[i]);
     }
-    printf("\"%s\" ]\n", plays[counter - 1]);
+    printf("\"%s\" ]\n", plays[counter]);
 }
 #endif
