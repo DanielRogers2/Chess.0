@@ -66,7 +66,7 @@ int main(int argc, const char * argv[])
     //Game loop
     while (true)
     {
-        puts("getting status");
+        puts("\ngetting status");
         //Get their move
         getStatus(move, &tlimit, gameid, teamnumber, teamsecret);
 
