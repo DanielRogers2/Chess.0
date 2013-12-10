@@ -1,17 +1,19 @@
-/*
- * net.h
- * 
- * Network code definitions
- * 
- * @author Daniel Rogers
- * 
- */
+#ifndef NET_H
+#define NET_H
 
-#ifndef NET_H_
-#define NET_H_
+#include <string>
+#include <curl/curl.h>
 
-//TODO Add function to poll server for updates
-//TODO Add function to extract data resulting from successful poll
-//TODO Add function to send move to server
+class net {
+public:
+    static std::string getFromServer(std::string site);
+    static std::string getFromServer(std::string site, std::string parameters);
+    ~net();
+private:
+    static CURL* initialize();
+    CURL* curl;
+    static net* instance;
+    net();
+};
 
-#endif /* NET_H_ */
+#endif // NET_H
