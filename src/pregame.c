@@ -1,8 +1,8 @@
 /*
  * pregame.c
- * 
+ *
  * Implementations of the functions described in pregame.h
- * 
+ *
  * @author Daniel Rogers
  *
  */
@@ -28,7 +28,7 @@ void generateMoveTables()
         //Set all the legal moves to INVALID_SQUARE initially
         memset(legal_moves[i], INVALID_SQUARE, 64 * 8 * 7 * sizeof(uint8_t));
     }
-
+    
     //Loop through the squares and generate each set of moves for the squares
     //  Technically there are duplicates/overlapping values in here, but space
     //  is very cheap for this, and this will make it simpler and faster to
@@ -49,7 +49,7 @@ void generateMoveTables()
         calcQueenMoves(i, legal_moves[W_Q][i], attacked_squares[W_Q][i]);
         //king
         calcKingMoves(i, legal_moves[W_K][i], attacked_squares[W_K][i]);
-
+        
         //Generate black moves
         //pawns
         calcPawnMoves(i, legal_moves[B_P][i], attacked_squares[B_P][i], false);
@@ -64,11 +64,11 @@ void generateMoveTables()
         //king
         calcKingMoves(i, legal_moves[B_K][i], attacked_squares[B_K][i]);
     }
-
+    
     //Table files in local directory
     FILE * move_table = fopen("move_table.bin", "wb");
     FILE * atk_table = fopen("atk_boards.bin", "wb");
-
+    
     if (!move_table || !atk_table)
     {
         puts("Unable to write table files. Work will not be saved!");
@@ -80,10 +80,10 @@ void generateMoveTables()
         fwrite(legal_moves, sizeof(uint8_t), 12 * 64 * 8 * 7, move_table);
         //12 different pieces, 64 squares
         fwrite(attacked_squares, sizeof(bitboard), 12 * 64, atk_table);
-
+        
         fclose(move_table);
         fclose(atk_table);
-
+        
         puts("Table files generated successfully");
     }
 }
@@ -105,7 +105,7 @@ bool loadMoveTables()
     //Table files in local directory
     FILE * move_table = fopen("move_table.bin", "rb");
     FILE * atk_table = fopen("atk_boards.bin", "rb");
-
+    
     if (!move_table || !atk_table)
     {
         puts("Unable to open table files for reading...");
@@ -118,11 +118,11 @@ bool loadMoveTables()
         fread(legal_moves, sizeof(uint8_t), 12 * 64 * 8 * 7, move_table);
         //12 different pieces, 64 squares
         fread(attacked_squares, sizeof(bitboard), 12 * 64, atk_table);
-
+        
         fclose(move_table);
         fclose(atk_table);
         puts("Table files loaded successfully");
-
+        
 #ifdef DEBUG_QUEEN
         for (uint8_t i = 0; i < 8; ++i)
         {
@@ -134,7 +134,7 @@ bool loadMoveTables()
             puts("]");
         }
 #endif
-
+        
 #ifdef DEBUG_TABLES
         printf("addr_LLM: %p\n", &legal_moves);
         printf("moveL_00: %d\n", legal_moves[0][0][0][0]);
@@ -172,7 +172,7 @@ void generateHashkeys()
  * @param white true if calculating moves for the white pieces
  */
 void calcPawnMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard,
-bool white)
+                   bool white)
 {
     int8_t delta = (white) ? 8 : -8;
     //If location / 8 == 7, then it's a value in the range 56-63
@@ -187,13 +187,13 @@ bool white)
         //Valid moves are up and left, up, up and right
         //up
         moves[0][0] = location + delta;
-
+        
         //Check for right edge, if location %8 == 7, then it's a rightmost square
         //Update the attack bitboard, pawns can only cap diagonally
         // This does not account for en passant captures
         moves[1][0] = (col == 7) ? INVALID_SQUARE : (moves[0][0] + 1);
         atkbboard |= location_boards[moves[1][0]];
-
+        
         //Check for left edge, if location % 8 == 0, then it's a leftmost square
         //  and can have no up/left value, otherwise move up a row and back 1
         moves[7][0] = (col == 0) ? INVALID_SQUARE : (moves[0][0] - 1);
@@ -236,18 +236,18 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
             //if location % 8 < 7, then can move one right
             //  Knight moves 2 up, 1 over, so set to 2*8 + 1 for + 2 rows + 1 col
             moves[0][0] =
-                    (location % 8 > 6) ? INVALID_SQUARE : location + 16 + 1;
+            (location % 8 > 6) ? INVALID_SQUARE : location + 16 + 1;
             //  if location % 8 > 0, then can move one left
             moves[7][0] =
-                    (location % 8 == 0) ? INVALID_SQUARE : location + 16 - 1;
+            (location % 8 == 0) ? INVALID_SQUARE : location + 16 - 1;
         }
-
+        
         //If location % 8 < 6, then can move 2 right and up 1
         moves[1][0] = (location % 8 > 5) ? INVALID_SQUARE : location + 2 + 8;
         //if location % 8 > 1, then can move 2 left and up 1
         moves[6][0] = (location % 8 < 2) ? INVALID_SQUARE : location - 2 + 8;
     }
-
+    
     //Check for movement downwards and how much
     //  Needed for right2/down, down2/right, down2/left, left2/down
     if (location / 8 > 0)
@@ -258,25 +258,25 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
         {
             //if location % 8 < 7, then able to move right at least 1
             moves[3][0] =
-                    (location % 8 > 6) ? INVALID_SQUARE : location - 16 + 1;
+            (location % 8 > 6) ? INVALID_SQUARE : location - 16 + 1;
             //if location % 8 > 0, then able to move left at least 1
             moves[4][0] = (location % 8 == 0) ?
             INVALID_SQUARE :
-                                                location - 16 - 1;
+            location - 16 - 1;
         }
-
+        
         //if location % 8 < 6, then able to move right at least 2
         moves[2][0] = (location % 8 > 5) ? INVALID_SQUARE : location + 2 - 8;
         //if location % 8 > 1, then able to move left at least 2
         moves[5][0] = (location % 8 < 2) ? INVALID_SQUARE : location - 2 - 8;
     }
-
+    
     //update the attack bitboard
     for (uint8_t i = 0; i < 8; ++i)
     {
         atkbboard =
-                (moves[i][0] != INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[i][0]]) : atkbboard;
+        (moves[i][0] != INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[i][0]]) : atkbboard;
     }
 }
 
@@ -303,7 +303,7 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
     //  vertical/horizontal moves
     uint8_t NE, SE, SW, NW;
     NE = SE = SW = NW = location;
-
+    
     //Extend rays
     for (uint8_t i = 0; i < 7; ++i)
     {
@@ -318,25 +318,25 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
         SW = (SW % 8 > 0 && SW < INVALID_SQUARE) ? SW - 8 - 1 : INVALID_SQUARE;
         //Moving up a row and left a column
         NW = (NW % 8 > 0 && NW < INVALID_SQUARE) ? NW + 8 - 1 : INVALID_SQUARE;
-
+        
         moves[0][i] = (NE < INVALID_SQUARE) ? NE : INVALID_SQUARE;
         moves[1][i] = (SE < INVALID_SQUARE) ? SE : INVALID_SQUARE;
         moves[2][i] = (SW < INVALID_SQUARE) ? SW : INVALID_SQUARE;
         moves[3][i] = (NW < INVALID_SQUARE) ? NW : INVALID_SQUARE;
-
+        
         //Update attack bitboards
         atkbboard =
-                (NE < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[0][i]]) : atkbboard;
+        (NE < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[0][i]]) : atkbboard;
         atkbboard =
-                (SE < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[1][i]]) : atkbboard;
+        (SE < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[1][i]]) : atkbboard;
         atkbboard =
-                (SW < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[2][i]]) : atkbboard;
+        (SW < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[2][i]]) : atkbboard;
         atkbboard =
-                (NW < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[3][i]]) : atkbboard;
+        (NW < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[3][i]]) : atkbboard;
     }
 }
 
@@ -362,7 +362,7 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
     //Same as for queen, but only horizontal/vertical
     uint8_t N, E, S, W;
     N = E = S = W = location;
-
+    
     //Extend rays
     for (uint8_t i = 0; i < 7; ++i)
     {
@@ -375,25 +375,25 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
         S = (S < INVALID_SQUARE) ? S - 8 : INVALID_SQUARE;
         //Moving left a column
         W = (W % 8 > 0 && W < INVALID_SQUARE) ? W - 1 : INVALID_SQUARE;
-
+        
         moves[0][i] = (N < INVALID_SQUARE) ? N : INVALID_SQUARE;
         moves[1][i] = (E < INVALID_SQUARE) ? E : INVALID_SQUARE;
         moves[2][i] = (S < INVALID_SQUARE) ? S : INVALID_SQUARE;
         moves[3][i] = (W < INVALID_SQUARE) ? W : INVALID_SQUARE;
-
+        
         //Update attack bitboards
         atkbboard =
-                (N < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[0][i]]) : atkbboard;
+        (N < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[0][i]]) : atkbboard;
         atkbboard =
-                (E < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[1][i]]) : atkbboard;
+        (E < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[1][i]]) : atkbboard;
         atkbboard =
-                (S < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[2][i]]) : atkbboard;
+        (S < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[2][i]]) : atkbboard;
         atkbboard =
-                (W < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[3][i]]) : atkbboard;
+        (W < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[3][i]]) : atkbboard;
     }
 }
 
@@ -418,7 +418,7 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
 {
     uint8_t N, NE, E, SE, S, SW, W, NW;
     N = NE = E = SE = S = SW = W = NW = location;
-
+    
     //Extend rays
     for (uint8_t i = 0; i < 7; ++i)
     {
@@ -443,7 +443,7 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
         W = (W % 8 > 0 && W < INVALID_SQUARE) ? W - 1 : INVALID_SQUARE;
         //Moving up a row and left a column
         NW = (NW % 8 > 0 && NW < INVALID_SQUARE) ? NW + 8 - 1 : INVALID_SQUARE;
-
+        
         moves[0][i] = (N < INVALID_SQUARE) ? N : INVALID_SQUARE;
         moves[1][i] = (NE < INVALID_SQUARE) ? NE : INVALID_SQUARE;
         moves[2][i] = (E < INVALID_SQUARE) ? E : INVALID_SQUARE;
@@ -452,32 +452,32 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
         moves[5][i] = (SW < INVALID_SQUARE) ? SW : INVALID_SQUARE;
         moves[6][i] = (W < INVALID_SQUARE) ? W : INVALID_SQUARE;
         moves[7][i] = (NW < INVALID_SQUARE) ? NW : INVALID_SQUARE;
-
+        
         //Update attack bitboards
         atkbboard =
-                (N < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[0][i]]) : atkbboard;
+        (N < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[0][i]]) : atkbboard;
         atkbboard =
-                (NE < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[1][i]]) : atkbboard;
+        (NE < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[1][i]]) : atkbboard;
         atkbboard =
-                (E < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[2][i]]) : atkbboard;
+        (E < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[2][i]]) : atkbboard;
         atkbboard =
-                (SE < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[3][i]]) : atkbboard;
+        (SE < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[3][i]]) : atkbboard;
         atkbboard =
-                (S < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[4][i]]) : atkbboard;
+        (S < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[4][i]]) : atkbboard;
         atkbboard =
-                (SW < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[5][i]]) : atkbboard;
+        (SW < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[5][i]]) : atkbboard;
         atkbboard =
-                (W < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[6][i]]) : atkbboard;
+        (W < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[6][i]]) : atkbboard;
         atkbboard =
-                (NW < INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[7][i]]) : atkbboard;
+        (NW < INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[7][i]]) : atkbboard;
     }
 }
 
@@ -503,7 +503,7 @@ void calcKingMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
     bool can_down = (location / 8 > 0);
     bool can_right = (location % 8 < 7);
     bool can_left = (location % 8 > 0);
-
+    
     //Move up 1
     moves[0][0] = (can_up) ? location + 8 : INVALID_SQUARE;
     //Move up 1 and right 1
@@ -520,12 +520,11 @@ void calcKingMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
     moves[6][0] = (can_left) ? location - 1 : INVALID_SQUARE;
     //Move left 1 and up 1
     moves[7][0] = (can_left && can_up) ? location - 1 + 8 : INVALID_SQUARE;
-
+    
     for (uint8_t i = 0; i < 8; ++i)
     {
         atkbboard =
-                (moves[i][0] != INVALID_SQUARE) ?
-                        atkbboard | (location_boards[moves[i][0]]) : atkbboard;
+        (moves[i][0] != INVALID_SQUARE) ?
+        atkbboard | (location_boards[moves[i][0]]) : atkbboard;
     }
 }
-

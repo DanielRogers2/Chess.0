@@ -5,7 +5,7 @@
  * of pre-generated structures.
  *
  * @author Daniel Rogers
- * 
+ *
  */
 
 #ifndef PREGAME_H_
@@ -71,7 +71,7 @@ void generateHashkeys();
  * @param white true if calculating moves for the white pieces
  */
 void calcPawnMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard,
-bool white);
+                   bool white);
 
 /*
  * Calculates the moves available to a knight piece from a location

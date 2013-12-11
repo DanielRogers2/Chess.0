@@ -1,10 +1,10 @@
 /*
  * board.c
- * 
+ *
  * Implementations of the functions defined in board.h
- * 
+ *
  * @author Daniel Rogers
- * 
+ *
  */
 
 #include "board.h"
@@ -25,15 +25,15 @@ void initBoard(chessboard * board)
     board->all_w_pieces = 0;
     //Black pieces are in positions 48-63 -> low 48 off
     board->all_b_pieces = 0;
-
+    
     //none of the rooks or the king has moved yet
     board->w_cancastle = KINGSIDE_ROOK | QUEENSIDE_ROOK;
     board->b_cancastle = KINGSIDE_ROOK | QUEENSIDE_ROOK;
-
+    
     //No squares free between king and rooks
     board->w_castlefree = 0;
     board->b_castlefree = 0;
-
+    
     //Initially no identical moves
     board->b_ident_moves = 0;
     board->w_ident_moves = 0;
@@ -45,15 +45,15 @@ void initBoard(chessboard * board)
     board->b_last_move = INVALID_SQUARE;
     board->w_last_move2 = INVALID_SQUARE;
     board->b_last_move2 = INVALID_SQUARE;
-
+    
     //Set location arrays
     memcpy(board->w_pieces, white_initial, 16 * sizeof(uint8_t));
     memcpy(board->b_pieces, black_initial, 16 * sizeof(uint8_t));
-
+    
     //Set initial piece codes
     memcpy(board->w_codes, w_codes, 16 * sizeof(uint8_t));
     memcpy(board->b_codes, b_codes, 16 * sizeof(uint8_t));
-
+    
     //Set location bitboards
     for (uint8_t i = 0; i < 16; ++i)
     {
@@ -63,7 +63,7 @@ void initBoard(chessboard * board)
         board->all_w_pieces |= board->w_locations[i];
         board->all_b_pieces |= board->b_locations[i];
     }
-
+    
 #ifdef DEBUG_INIT
     for (uint8_t i = 0; i < 16; ++i)
     {
@@ -100,30 +100,30 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
     bitboard op = (white) ? board->all_b_pieces : board->all_w_pieces;
     //Lookup table piece codes
     uint8_t * codes = (white) ? board->w_codes : board->b_codes;
-
+    
     //Number of states generated
     uint8_t states = 0;
-
+    
     //Loop variables
     int8_t i;
     uint8_t j, k;
-
+    
     //Used to check for castling
     uint8_t cancastle, castlefree;
     uint8_t castleto;
-
+    
     //The set of moves
     uint8_t (*moves)[7];
-
+    
     bool capped;
-
+    
     if (storage->count < 35)
     {
         //Allocate enough storage
         storage->data = realloc(storage->data, 35 * sizeof(chessboard));
         storage->count = 35;
     }
-
+    
     //For each piece, get the set of moves it can make from its location
     //  Traverse from king to pawns, because maybe this helps alphabeta
     for (i = 15; i >= 0; --i)
@@ -133,14 +133,14 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
         {
             continue;
         }
-
+        
 #ifdef DEBUG_MOVE
         printf("piece: %d, @%d\n", codes[i], pieces[i]);
         printf("move0: %d\n", legal_moves[codes[i]][pieces[i]][0][0]);
 #endif
-
+        
         moves = legal_moves[codes[i]][pieces[i]];
-
+        
         //Go through each move ray
         for (j = 0; j < 8; ++j)
         {
@@ -168,11 +168,11 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                     break;
                 }
                 else if ((codes[i] == W_P || codes[i] == B_P)
-                //diagonals must capture
-                        && (((j != 0) && (!(location_boards[moves[j][k]] & op)))
-                        //forward can't capture
-                                || ((j == 0)
-                                        && (location_boards[moves[j][k]] & op))))
+                         //diagonals must capture
+                         && (((j != 0) && (!(location_boards[moves[j][k]] & op)))
+                             //forward can't capture
+                             || ((j == 0)
+                                 && (location_boards[moves[j][k]] & op))))
                 {
                     //  If it's a pawn, diagonals are only allowed on capture
                     //  Can't capture by moving forward
@@ -186,27 +186,27 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                     //Expand special moves, do pawn promotion here as it's a
                     //  result of the move, rather than a unique move
                     if (((codes[i] == W_P) && ((moves[j][k] / 8) == 7))
-                            || ((codes[i] == B_P) && ((moves[j][k] / 8) == 0)))
+                        || ((codes[i] == B_P) && ((moves[j][k] / 8) == 0)))
                     {
                         //pawn promotion, just make it a queen
                         moveSpecial(i, moves[j][k], white, board,
-                                &storage->data[states++], (white) ? W_Q : B_Q);
+                                    &storage->data[states++], (white) ? W_Q : B_Q);
                     }
                     else
                     {
                         //Make the move with the piece
                         capped = makeMove(i, moves[j][k], white, board,
-                                &storage->data[states++]);
+                                          &storage->data[states++]);
                     }
-
+                    
                     if (storage->count <= states)
                     {
                         //Allocate more storage
                         storage->count += 10;
                         storage->data = realloc(storage->data,
-                                storage->count * sizeof(chessboard));
+                                                storage->count * sizeof(chessboard));
                     }
-
+                    
                     //See if this was a capturing move, and stop moving along
                     //  ray if so
                     if (capped)
@@ -219,27 +219,27 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
             //End piece ray traversals
             //do castling here
             if ((codes[i] == W_K && board->w_cancastle && board->w_castlefree)
-                    || (codes[i] == B_K && board->b_cancastle
-                            && board->b_castlefree))
+                || (codes[i] == B_K && board->b_cancastle
+                    && board->b_castlefree))
             {
                 //Check if squares matching unoccupied space are free
                 cancastle = (white) ? board->w_cancastle : board->b_cancastle;
                 castlefree =
-                        (white) ? board->w_castlefree : board->b_castlefree;
-
+                (white) ? board->w_castlefree : board->b_castlefree;
+                
                 if ((cancastle & KINGSIDE_ROOK)
-                        && ((castlefree & KINGSIDE_FREE) == KINGSIDE_FREE))
+                    && ((castlefree & KINGSIDE_FREE) == KINGSIDE_FREE))
                 {
                     castleto = (white) ? KINGSIDE_W_CASTLE : KINGSIDE_B_CASTLE;
                     //Do the castling, king to g1 or g1
                     moveSpecial(i, castleto, white, board,
-                            &storage->data[states++], 0);
+                                &storage->data[states++], 0);
                     if (storage->count <= states)
                     {
                         //Allocate more storage
                         storage->count += 10;
                         storage->data = realloc(storage->data,
-                                storage->count * sizeof(chessboard));
+                                                storage->count * sizeof(chessboard));
                     }
 #ifdef DEBUG_MOVE
                     printf("castled kingside: %d, %x\n", cancastle, castlefree);
@@ -247,29 +247,29 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
 #endif
                 }
                 if ((cancastle & QUEENSIDE_ROOK)
-                        && ((castlefree & QUEENSIDE_FREE) == QUEENSIDE_FREE))
+                    && ((castlefree & QUEENSIDE_FREE) == QUEENSIDE_FREE))
                 {
                     castleto =
-                            (white) ? QUEENSIDE_W_CASTLE : QUEENSIDE_B_CASTLE;
+                    (white) ? QUEENSIDE_W_CASTLE : QUEENSIDE_B_CASTLE;
                     moveSpecial(i, castleto, white, board,
-                            &storage->data[states++], 0);
+                                &storage->data[states++], 0);
                     if (storage->count <= states)
                     {
                         //Allocate more storage
                         storage->count += 10;
                         storage->data = realloc(storage->data,
-                                storage->count * sizeof(chessboard));
+                                                storage->count * sizeof(chessboard));
                     }
 #ifdef DEBUG_MOVE
                     printf("castled queenside: %d, %x\n", cancastle,
-                            castlefree);
+                           castlefree);
                     printBoard(&storage->data[states-1]);
 #endif
                 }
             }
         }
     }
-
+    
     return (states);
 }
 
@@ -285,29 +285,29 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
  * @param new The new chessboard state to write to
  */
 bool makeMove(uint8_t piece, uint8_t location, bool white,
-        chessboard * const current, chessboard * new)
+              chessboard * const current, chessboard * new)
 {
     //Generate the new location bitboard for the new location
     bitboard new_loc = location_boards[location];
-
+    
     //copy data
     memmove(new, current, sizeof(chessboard));
-
+    
     uint8_t * ident_moves = (white) ? &new->w_ident_moves : &new->b_ident_moves;
     uint8_t * last_move = (white) ? &new->w_last_move : &new->b_last_move;
     uint8_t * last_move2 = (white) ? &new->w_last_move2 : &new->b_last_move2;
     uint8_t * last_piece = (white) ? &new->w_last_piece : &new->b_last_piece;
-
+    
     //Update last move
     //See if moved to the same location last or two turns ago
     //  if so, update ident count
     *ident_moves =
-            (*last_move == location || *last_move2 == location) ?
-                    (*ident_moves) + 1 : 0;
+    (*last_move == location || *last_move2 == location) ?
+    (*ident_moves) + 1 : 0;
     *last_move2 = *last_move;
     *last_move = location;
     *last_piece = piece;
-
+    
     //Set up data pointers
     //All pieces
     bitboard * self_all = (white) ? &new->all_w_pieces : &new->all_b_pieces;
@@ -318,12 +318,12 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
     //piece value
     uint8_t * self_pcs = (white) ? new->w_pieces : new->b_pieces;
     uint8_t * op_pcs = (white) ? new->b_pieces : new->w_pieces;
-
+    
     //Castling data
     uint8_t * cancastle = (white) ? &new->w_cancastle : &new->b_cancastle;
-
+    
     uint8_t * op_cancastle = (white) ? &new->b_cancastle : &new->w_cancastle;
-
+    
     //Update appropriately for castling
     if (*cancastle)
     {
@@ -332,21 +332,21 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
             //king or rook moved
             switch (piece)
             {
-            case 15:
-                //king moved
-                *cancastle = 0;
-                break;
-            case 8:
-                //queenside rook moved
-                *cancastle &= KINGSIDE_ROOK;
-                break;
-            case 9:
-                //kingside rook moved
-                *cancastle &= QUEENSIDE_ROOK;
-                break;
+                case 15:
+                    //king moved
+                    *cancastle = 0;
+                    break;
+                case 8:
+                    //queenside rook moved
+                    *cancastle &= KINGSIDE_ROOK;
+                    break;
+                case 9:
+                    //kingside rook moved
+                    *cancastle &= QUEENSIDE_ROOK;
+                    break;
             }
         }
-
+        
         if ((self_pcs[piece] / 8) == 0)
         {
             //Moving out of row 1 opening spot for castling
@@ -359,7 +359,7 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
             //Turn on bit at location
             new->b_castlefree |= (1 << (self_pcs[piece] % 8));
         }
-
+        
         if ((location / 8) == 0)
         {
             //Moving into row 1 closing spot for castling
@@ -373,7 +373,7 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
             new->b_castlefree &= ~(1 << (location % 8));
         }
     }
-
+    
     //Update the occupancy bitboard
     //XOR out the old location, XOR in the new location
     *self_all ^= (self_locs[piece] ^ new_loc);
@@ -381,7 +381,7 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
     self_locs[piece] = new_loc;
     //update piece location
     self_pcs[piece] = location;
-
+    
     //Handle captures, capturing if opponent piece @ location
     //  (maybe should be in own function?)
     if ((*op_all) & new_loc)
@@ -397,35 +397,35 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
                 op_locs[i] = 0;
                 //Flag as captured
                 op_pcs[i] = CAPTURED;
-
+                
                 //See if ability for opponent to castle has changed
                 if (*op_cancastle && (i == 15 || i == 8 || i == 9))
                 {
                     //king or rook moved
                     switch (piece)
                     {
-                    case 15:
-                        //king moved
-                        *op_cancastle = 0;
-                        break;
-                    case 8:
-                        //queenside rook capped
-                        *op_cancastle &= KINGSIDE_ROOK;
-                        break;
-                    case 9:
-                        //kingside rook capped
-                        *op_cancastle &= QUEENSIDE_ROOK;
-                        break;
+                        case 15:
+                            //king moved
+                            *op_cancastle = 0;
+                            break;
+                        case 8:
+                            //queenside rook capped
+                            *op_cancastle &= KINGSIDE_ROOK;
+                            break;
+                        case 9:
+                            //kingside rook capped
+                            *op_cancastle &= QUEENSIDE_ROOK;
+                            break;
                     }
                 }
                 //done
                 break;
             }
         }
-
+        
         return (true);
     }
-
+    
     return (false);
 }
 
@@ -449,24 +449,24 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
  *                   promotion
  */
 void moveSpecial(uint8_t piece, uint8_t location, bool white,
-        chessboard * const current, chessboard * new, uint8_t promote_to)
+                 chessboard * const current, chessboard * new, uint8_t promote_to)
 {
-
+    
     //Now that new is set up right
     //If it's a pawn, then it's a promotion or en passant
     if ((white && current->w_codes[piece] == W_P)
-            || (!white && current->b_codes[piece] == B_P))
+        || (!white && current->b_codes[piece] == B_P))
     {
         //do initial work with makeMove
         //Capturing during a pawn promotion move will be handled by this
         makeMove(piece, location, white, current, new);
-
+        
         //If in row 1 or row 8, then promoting pawn
         if ((location / 8) == 7 || (location / 8) == 0)
         {
             //piece code pointers
             uint8_t * p_codes = (white) ? new->w_codes : new->b_codes;
-
+            
             //Update piece code
             p_codes[piece] = promote_to;
         }
@@ -474,18 +474,18 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
         {
             //opponent data pointers
             bitboard * op_all =
-                    (white) ? &new->all_b_pieces : &new->all_w_pieces;
+            (white) ? &new->all_b_pieces : &new->all_w_pieces;
             //location bitboards
             bitboard * op_locs = (white) ? new->b_locations : new->w_locations;
             //piece value
             uint8_t * op_pcs = (white) ? new->b_pieces : new->w_pieces;
-
+            
             //It's an en passant capture, so the pawn must be +- 1 row from
             //  location. It's -1 row if white, +1 row if black
             int8_t delta = (white) ? -8 : 8;
             //Get location of pawn being captured
             bitboard cap_loc = location_boards[location + delta];
-
+            
             for (uint8_t i = 0; i < 16; ++i)
             {
                 //If opponent piece at capture location
@@ -554,13 +554,13 @@ int evaluateState(chessboard * const board, bool white)
     int value = 0;
     int w_val = 0;
     int b_val = 0;
-
+    
     if (board->w_pieces[15] != CAPTURED && board->b_pieces[15] != CAPTURED
-            && (board->w_ident_moves >= 3 || board->b_ident_moves >= 3))
+        && (board->w_ident_moves >= 3 || board->b_ident_moves >= 3))
     {
         return (0);
     }
-
+    
     //Check for endgame state
     if (board->w_pieces[14] == CAPTURED && board->b_pieces[14] == CAPTURED)
     {
@@ -570,7 +570,7 @@ int evaluateState(chessboard * const board, bool white)
     {
         board_position_vals[11] = b_K_m_positions;
     }
-
+    
     //Sum up the values for white and black
     for (uint8_t i = 0; i < 16; ++i)
     {
@@ -578,27 +578,27 @@ int evaluateState(chessboard * const board, bool white)
         //If it's captured, then add 0
         //White
         w_val +=
-                (board->w_pieces[i] == CAPTURED) ?
-                        0 :
-                        piece_vals[board->w_codes[i]]
-                                + board_position_vals[board->w_codes[i]][board->w_pieces[i]];
+        (board->w_pieces[i] == CAPTURED) ?
+        0 :
+        piece_vals[board->w_codes[i]]
+        + board_position_vals[board->w_codes[i]][board->w_pieces[i]];
         //Same for Black
         b_val +=
-                (board->b_pieces[i] == CAPTURED) ?
-                        0 :
-                        piece_vals[board->b_codes[i]]
-                                + board_position_vals[board->b_codes[i]][board->b_pieces[i]];
+        (board->b_pieces[i] == CAPTURED) ?
+        0 :
+        piece_vals[board->b_codes[i]]
+        + board_position_vals[board->b_codes[i]][board->b_pieces[i]];
     }
-
+    
     //Value = white - black
     value = w_val - b_val;
-
+    
     //If we are white, then we want max white, and this is already going to
     //  have higher scores for better values for white
     //If black, then multiply by -1 to flip it so higher scores returned mean
     //  better values for black
     value = (white) ? value : -value;
-
+    
     return (value);
 }
 
@@ -612,12 +612,12 @@ int evaluateState(chessboard * const board, bool white)
 void printBoard(chessboard * const board)
 {
     char pos_str[3];
-
+    
     puts("White:");
     for (uint8_t i = 0; i < 16; ++i)
     {
         squareToString(board->w_pieces[i], pos_str);
-
+        
         printf("    pid: %d @ %s\n", board->w_codes[i], pos_str);
     }
     puts("Black:");
@@ -637,7 +637,7 @@ void printBoard(chessboard * const board)
  * @param out An array of char[7] to fill with the movestring
  */
 void getMoveString(chessboard * const board, chessboard * const prev,
-bool white, char out[7])
+                   bool white, char out[7])
 {
     //The piece that moved
     uint8_t piece = (white) ? board->w_last_piece : board->b_last_piece;
@@ -647,14 +647,14 @@ bool white, char out[7])
     uint8_t last_mv = (white) ? board->w_last_move : board->b_last_move;
     //The piece ID
     uint8_t pid = (white) ? prev->w_codes[piece] : prev->b_codes[piece];
-
+    
     //First get the piece code
     out[0] = piece_chars[pid];
     //then the square from, into 1,2 (3 will be \0)
     squareToString(last_loc, &out[1]);
     //And the square to, into 3, 4 (5 will be \0)
     squareToString(last_mv, &out[3]);
-
+    
     if (pid == W_P || pid == B_P)
     {
         //Check for pawn promotion
@@ -679,7 +679,7 @@ void squareToString(uint8_t pos, char str[3])
     static const char rows[9] =
     { '1', '2', '3', '4', '5', '6', '7', '8', 'c' };
     str[2] = '\0';
-
+    
     str[0] = cols[pos % 8];
     str[1] = rows[pos / 8];
 }

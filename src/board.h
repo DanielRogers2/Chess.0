@@ -84,7 +84,7 @@ typedef struct
     //0 means no squares free, 0x70 means queenside free,
     //  0x03 means kingside free, 0x73 means both free,
     uint8_t w_castlefree;
-
+    
     //Locations of all black pieces
     uint8_t b_pieces[16];
     //Bitboard of all black pieces
@@ -99,7 +99,7 @@ typedef struct
     //0 means no squares free, 0x70 means queenside free,
     //  0x03 means kingside free, 0x73 means both free,
     uint8_t b_castlefree;
-
+    
     //Tracking data
     //Last piece moved (as index of array)
     uint8_t w_last_piece;
@@ -113,7 +113,7 @@ typedef struct
     //how many times in a row the same move was made
     uint8_t w_ident_moves;
     uint8_t b_ident_moves;
-
+    
 } chessboard;
 
 typedef struct
@@ -166,7 +166,7 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white);
  * @return true if a capture took place
  */
 bool makeMove(uint8_t piece, uint8_t location, bool white,
-        chessboard * const current, chessboard * new);
+              chessboard * const current, chessboard * new_state);
 
 /*
  * Handles making special moves such as castling/en passant/promotion
@@ -184,7 +184,7 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
  *                   promotion
  */
 void moveSpecial(uint8_t piece, uint8_t location, bool white,
-        chessboard * const current, chessboard * new, uint8_t promote_to);
+                 chessboard * const current, chessboard * new_state, uint8_t promote_to);
 
 /*
  * Evaluates the value of a particular board
@@ -220,7 +220,7 @@ void printBoard(chessboard * const board);
  * @param out An array of char[7] to fill with the movestring
  */
 void getMoveString(chessboard * const board, chessboard * const prev,
-bool white, char out[7]);
+                   bool white, char out[7]);
 
 /*
  * Converts a board coordinate to a notation string

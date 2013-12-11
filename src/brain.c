@@ -1,14 +1,14 @@
 /*
  * brain.c
- * 
+ *
  * Contains the implementations of the functions in brain.h
- * 
+ *
  * @author Daniel Rogers
- * 
+ *
  */
 
 #include <stdbool.h>
-
+#include <limits.h>
 #ifdef PARALLEL_NEGAMAX
 #include <omp.h>
 #endif
@@ -28,18 +28,18 @@
  * @param depth The depth to search to
  */
 void selectBestMove(bool self_white, chessboard * restrict const initial,
-        chessboard * restrict result, uint8_t depth, double tlimit)
+                    chessboard * restrict result, uint8_t depth, double tlimit)
 {
 #ifdef DEBUG_SEARCH
     puts("setting up storage");
 #endif
-
+    
     //Make the expansion store
 #ifndef PARALLEL_NEGAMAX
     boardset * store = calloc(depth, sizeof(boardset));
 #else
     int thread;
-
+    
 #ifdef USE_MAX_THREADS
     int threadcount = omp_get_max_threads();
 #ifdef DEBUG_SEARCH
@@ -48,30 +48,30 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
 #else
     int threadcount = 4;
 #endif
-
+    
     omp_set_num_threads(threadcount);
     boardset * threadstore[threadcount];
     for (uint8_t i = 0; i < threadcount; ++i)
     {
         threadstore[i] = calloc(depth - 1, sizeof(boardset));
     }
-
+    
     boardset store;
     store.count = 0;
     store.data = NULL;
 #endif
-
+    
 #ifdef DEBUG_SEARCH
     puts("doing initial expansion");
 #endif
-
+    
     //Do the first expansion
 #ifndef PARALLEL_NEGAMAX
     uint8_t states = expandStates(initial, &store[0], self_white);
 #else
     uint8_t states = expandStates(initial, &store, self_white);
 #endif
-
+    
     //Best value seen
 #ifndef PARALLEL_NEGAMAX
     int best = INT_MIN;
@@ -85,10 +85,10 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
         best_indx[i] = 0;
     }
 #endif
-
+    
     //Currently seen value
     int cur;
-
+    
     //Dynamic setup of depth to prevent loss due to timeout
     if (tlimit <= MED_DEPTH_CUTOFF)
     {
@@ -101,15 +101,15 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
             depth = MEDIUM_DEPTH;
         }
     }
-
+    
 #ifdef DEBUG_SEARCH
     puts("staring search");
 #endif
-
+    
     //Do the search
 #ifdef PARALLEL_NEGAMAX
 #pragma omp parallel for private(cur, thread) \
-    shared(best_indx, best, states, store, threadstore, self_white, depth)
+shared(best_indx, best, states, store, threadstore, self_white, depth)
 #endif
     for (uint8_t i = 0; i < states; ++i)
     {
@@ -117,7 +117,7 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
         //  depth 0 values won't be over-written, so we can just look up
         //  the data we want after the loop ends
 #ifndef PARALLEL_NEGAMAX
-        cur = -negamax(&store[0].data[i], !self_white, &store[1], depth - 1);
+        cur = -negamax(&store[0].data[i], !self_white, &store[1], depth - 1, 0, 0);
         if (cur > best)
         {
             best = cur;
@@ -126,7 +126,7 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
 #else
         thread = omp_get_thread_num();
         cur = -negamax(&store.data[i], !self_white, threadstore[thread],
-                -INT_MAX, INT_MAX, depth - 1);
+                       -INT_MAX, INT_MAX, depth - 1);
         if (cur > best[thread])
         {
             best[thread] = cur;
@@ -137,11 +137,11 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
         printf("tl @ %d of %d\n", i + 1, states);
 #endif
     }
-
+    
 #ifdef DEBUG_SEARCH
     puts("search complete");
 #endif
-
+    
 #ifndef PARALLEL_NEGAMAX
     //Get best board state
     memcpy(result, &store[0].data[best_indx], sizeof(chessboard));
@@ -155,7 +155,7 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
     //Get thread best
     int th_best = best[0];
     uint8_t th_best_i = best_indx[0];
-
+    
     for (uint8_t i = 1; i < threadcount; ++i)
     {
         if (best[i] > th_best)
@@ -164,10 +164,10 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
             th_best_i = best_indx[i];
         }
     }
-
+    
     //copy into result
     memcpy(result, &store.data[th_best_i], sizeof(chessboard));
-
+    
 #ifdef DEBUG_SEARCH
     puts("freeing thread mem");
 #endif
@@ -205,11 +205,11 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
  * @param depth The depth to traverse to
  */
 int negamax(chessboard * const state, bool white, boardset * expansionStore,
-        int alpha, int beta, uint8_t depth)
+            int alpha, int beta, uint8_t depth)
 {
     //Check if end of depth or opponent king captured
     if (!depth || (state->b_pieces[15] == CAPTURED)
-            || (state->w_pieces[15] == CAPTURED))
+        || (state->w_pieces[15] == CAPTURED))
     {
         //Return value of state
         return (evaluateState(state, white));
@@ -222,15 +222,15 @@ int negamax(chessboard * const state, bool white, boardset * expansionStore,
         int cur;
         //Storage of expanded states
         boardset * storage = &expansionStore[depth - 1];
-
+        
         //Do expansion, store result
         uint8_t states = expandStates(state, storage, white);
-
+        
         //recurse negamax for each state expanded
         for (uint8_t i = 0; i < states; ++i)
         {
             cur = -negamax(&storage->data[i], !white, expansionStore, -beta,
-                    -alpha, depth - 1);
+                           -alpha, depth - 1);
             if (cur >= beta)
             {
                 // fail-soft beta cutoff

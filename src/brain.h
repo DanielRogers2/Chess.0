@@ -1,10 +1,10 @@
 /*
  * brain.h
- * 
+ *
  * Function definitions for running search
- * 
+ *
  * @author Daniel Rogers
- * 
+ *
  */
 
 #ifndef BRAIN_H_
@@ -35,8 +35,8 @@
  *               will be set to the value of the piece & location to move it to
  * @param tlimit The amount of time left on the clock in seconds
  */
-void selectBestMove(bool self_white, chessboard * restrict const initial,
-        chessboard * restrict result, uint8_t depth, double tlimit);
+void selectBestMove(bool self_white, chessboard * __restrict__ const initial,
+                    chessboard * __restrict__ result, uint8_t depth, double tlimit);
 
 /*
  * Performs a standard negamax search
@@ -62,6 +62,6 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
  * @return The best score resulting from the negamax search
  */
 int negamax(chessboard * const state, bool white, boardset * expansionStore,
-        int alpha, int beta, uint8_t depth);
+            int alpha, int beta, uint8_t depth);
 
 #endif /* BRAIN_H_ */

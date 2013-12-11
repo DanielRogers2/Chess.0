@@ -1,10 +1,10 @@
 /*
  * common_defs.h
- * 
- * 
- * 
+ *
+ *
+ *
  * @author Daniel Rogers
- * 
+ *
  */
 
 #ifndef COMMON_DEFS_H_
