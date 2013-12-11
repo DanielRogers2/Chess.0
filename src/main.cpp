@@ -13,7 +13,7 @@
 
 extern "C" {
 #include <sys/time.h>
-
+    
 #include "board.h"
 #include "pregame.h"
 #include "brain.h"
@@ -77,7 +77,7 @@ int main() {
     {
         { 0 } };
     
-
+    
     
     bool white_won, draw;
     draw = white_won = false;
@@ -86,55 +86,55 @@ int main() {
     
     uint8_t w_ply = 7;
     uint8_t b_ply = 7;
-
-
+    
+    
     bool playing = true;
     while(playing) {
         // white
         if(color == "white") {
-        tstart = clock();
-        tend = clock();
-        
-        std::string opponentMove = poll(gameId, teamNum + "/" + teamSecret);
-        cout << opponentMove << endl;
-        if(opponentMove != "") {
+            tstart = clock();
+            tend = clock();
             
-            std::string pieceStr = opponentMove.substr(1, 2);
-            std::string locationStr = opponentMove.substr(3, 2);
-            int piece = getLocation(pieceStr);
-            piece = getPiece(piece, "black", &current_state);
-            int location = getLocation(locationStr);
-        
-            if(opponentMove == "Ke1g1" | opponentMove == "Ke1c1" | opponentMove == "Ke8g8" | opponentMove == "Ke8c8" | opponentMove.length() == 6) {
-                moveSpecial(piece, location, false, &current_state, &res, (false) ? W_Q : B_Q);
-                current_state = res;
-            } else {
-            makeMove(piece, location, false, &current_state, &res);
-            current_state = res;
+            std::string opponentMove = poll(gameId, teamNum + "/" + teamSecret);
+            cout << opponentMove << endl;
+            if(opponentMove != "") {
+                
+                std::string pieceStr = opponentMove.substr(1, 2);
+                std::string locationStr = opponentMove.substr(3, 2);
+                int piece = getLocation(pieceStr);
+                piece = getPiece(piece, "black", &current_state);
+                int location = getLocation(locationStr);
+                
+                if(opponentMove == "Ke1g1" | opponentMove == "Ke1c1" | opponentMove == "Ke8g8" | opponentMove == "Ke8c8" | opponentMove.length() == 6) {
+                    moveSpecial(piece, location, false, &current_state, &res, (false) ? W_Q : B_Q);
+                    current_state = res;
+                } else {
+                    makeMove(piece, location, false, &current_state, &res);
+                    current_state = res;
+                }
             }
-        }
-        
-        selectBestMove(true, &current_state, &res, w_ply, twhite);
-        
-        getMoveString(&res, &current_state, true, plays[counter]);
-        
-        
-        std::string move = plays[counter];
-        
-        std::string result = net::getFromServer("http://www.bencarle.com/chess/move/" + gameId + "/" + teamNum + "/" + teamSecret + "/" + move + "/");
-        
-        tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
-        //5 seconds back every move
-        twhite -= (tex - 5);
-        
-        ++counter;
-        current_state = res;
-        
-        if (current_state.b_pieces[15] == CAPTURED || tblack <= 0)
-        {
-            white_won = true;
-            break;
-        }
+            
+            selectBestMove(true, &current_state, &res, w_ply, twhite);
+            
+            getMoveString(&res, &current_state, true, plays[counter]);
+            
+            
+            std::string move = plays[counter];
+            
+            std::string result = net::getFromServer("http://www.bencarle.com/chess/move/" + gameId + "/" + teamNum + "/" + teamSecret + "/" + move + "/");
+            
+            tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
+            //5 seconds back every move
+            twhite -= (tex - 5);
+            
+            ++counter;
+            current_state = res;
+            
+            if (current_state.b_pieces[15] == CAPTURED || tblack <= 0)
+            {
+                white_won = true;
+                break;
+            }
         }
         // end white
         
@@ -142,82 +142,59 @@ int main() {
         
         //black
         if(color == "black") {
-        tstart = clock();
-        tend = clock();
-        
-        std::string opponentMove = poll(gameId, teamNum + "/" + teamSecret);
-        
-        std::string pieceStr = opponentMove.substr(1, 2);
-        std::string locationStr = opponentMove.substr(3, 2);
-        int piece = getLocation(pieceStr);
-        piece = getPiece(piece, "white", &current_state);
-        int location = getLocation(locationStr);
-        
-
-
-        if(opponentMove == "Ke1g1" | opponentMove == "Ke1c1" | opponentMove == "Ke8g8" | opponentMove == "Ke8c8" | opponentMove.length() == 6) {
-            moveSpecial(piece, location, false, &current_state, &res, (false) ? W_Q : B_Q);
-            current_state = res;
-        } else {
-            makeMove(piece, location, true, &current_state, &res);
-            current_state = res;
-        }
-        
-        selectBestMove(false, &current_state, &res, b_ply, tblack);
-        
-        getMoveString(&res, &current_state, false, plays[counter]);
-        
-        std::string move = plays[counter];
-        
-        std::string result = net::getFromServer("http://www.bencarle.com/chess/move/" + gameId + "/" + teamNum + "/" + teamSecret + "/" + move + "/");
-        
-        
-        
-        tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
-        //5 seconds back every move
-        tblack -= (tex - 5);
+            tstart = clock();
+            tend = clock();
             
-        ++counter;
-        current_state = res;
-        
-        if (current_state.w_pieces[15] == CAPTURED || twhite <= 0)
-        {
-            white_won = false;
-            break;
-        }
-        
-        if (counter == 0)
-        {
-            puts("stalemate maybe...");
-            draw = true;
-            break;
-        }
+            std::string opponentMove = poll(gameId, teamNum + "/" + teamSecret);
+            
+            std::string pieceStr = opponentMove.substr(1, 2);
+            std::string locationStr = opponentMove.substr(3, 2);
+            int piece = getLocation(pieceStr);
+            piece = getPiece(piece, "white", &current_state);
+            int location = getLocation(locationStr);
+            
+            
+            
+            if(opponentMove == "Ke1g1" | opponentMove == "Ke1c1" | opponentMove == "Ke8g8" | opponentMove == "Ke8c8" | opponentMove.length() == 6) {
+                moveSpecial(piece, location, true, &current_state, &res, (true) ? W_Q : B_Q);
+                current_state = res;
+            } else {
+                makeMove(piece, location, true, &current_state, &res);
+                current_state = res;
+            }
+            
+            selectBestMove(false, &current_state, &res, b_ply, tblack);
+            
+            getMoveString(&res, &current_state, false, plays[counter]);
+            
+            std::string move = plays[counter];
+            
+            std::string result = net::getFromServer("http://www.bencarle.com/chess/move/" + gameId + "/" + teamNum + "/" + teamSecret + "/" + move + "/");
+            
+            
+            
+            tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
+            //5 seconds back every move
+            tblack -= (tex - 5);
+            
+            ++counter;
+            current_state = res;
+            
+            if (current_state.w_pieces[15] == CAPTURED || twhite <= 0)
+            {
+                white_won = false;
+                break;
+            }
+            
+            if (counter == 0)
+            {
+                puts("stalemate maybe...");
+                draw = true;
+                break;
+            }
         }
         // end black
     }
-    
-    /**
-     if (white_won)
-     {
-     puts("White wins!");
-     }
-     else if (!draw)
-     {
-     puts("Black wins!");
-     }
-     else
-     {
-     puts("Draw.. maybe?");
-     }
-     printBoard(&current_state);
-     
-     puts("move history: \n[ ");
-     for (uint8_t i = 0; i < (counter - 1); ++i)
-     {
-     printf("\"%s\",", plays[i]);
-     }
-     printf("\"%s\" ]\n", plays[counter - 1]);
-     */
     
     return 0;
 };
@@ -263,7 +240,7 @@ int getLocation(std::string location) {
     } else if(col == "h") {
         colId = 7;
     }
-
+    
     return (rowId * 8) + colId;
 }
 
