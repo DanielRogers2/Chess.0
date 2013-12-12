@@ -29,11 +29,6 @@ int main(int argc, const char * argv[])
         generateMoveTables();
     }
 
-#ifdef DEBUG_TABLES
-    printf("addr_LM: %p\n", &legal_moves);
-    printf("move00: %d\n", legal_moves[0][0][0][0]);
-#endif
-
     //Get a new board and initialize it
     chessboard current_state;
     chessboard next_state;
@@ -70,9 +65,8 @@ int main(int argc, const char * argv[])
         //Get their move
         getStatus(move, &tlimit, gameid, teamnumber, teamsecret);
 
-#ifdef DEBUG
-        printf("parsing move: %s\n", move);
-#endif
+        printf("received move: %s\n", move);
+
         //Parse the move
         parseMoveString(move, !self_white, &current_state);
 
@@ -116,7 +110,7 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
     //Record a play string to allow animation if desired
     char plays[256][7] =
     {
-    { 0 } };
+        {   0}};
 
     chessboard current_state;
     chessboard res;
