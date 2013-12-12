@@ -72,7 +72,7 @@
 typedef struct
 {
     //Locations of all white pieces
-    uint8_t w_pieces[16];
+    uint8_t w_piece_posns[16];
     //Bitboard of all white pieces
     bitboard all_w_pieces;
     //Bitboards of individual piece locations for white
@@ -86,7 +86,7 @@ typedef struct
     uint8_t w_castlefree;
 
     //Locations of all black pieces
-    uint8_t b_pieces[16];
+    uint8_t b_piece_posns[16];
     //Bitboard of all black pieces
     bitboard all_b_pieces;
     //Bitboards of individual piece locations for black
@@ -133,10 +133,6 @@ typedef struct
  */
 void initBoard(chessboard * board);
 
-//TODO Add function to convert opponent move string into a new board state
-//      - should also detect special moves (or maybe call a function to do so)
-//TODO Add function to convert own move into a move string to send to server
-
 /*
  * Expands the set of all possible board states from an initial state
  *
@@ -157,7 +153,7 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white);
  *
  * @owner Daniel Rogers
  *
- * @param piece The index of the piece to move
+ * @param pindex The index of the piece to move
  * @param location The location to move to
  * @param white true If the piece being moved is white
  * @param current The chessboard state being referenced
@@ -165,7 +161,7 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white);
  *
  * @return true if a capture took place
  */
-bool makeMove(uint8_t piece, uint8_t location, bool white,
+bool makeMove(uint8_t pindex, uint8_t location, bool white,
         chessboard * const current, chessboard * new);
 
 /*
@@ -175,7 +171,7 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
  *   it is only responsible for handling board state updating, NOT validating
  *   if a move is special or not!!
  *
- * @param piece The index of the piece to move
+ * @param pindex The index of the piece to move
  * @param location The location to move to
  * @param white true If the piece being moved is white
  * @param current The chessboard state being referenced
@@ -183,7 +179,7 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
  * @param promote_to If promoting, this is the piece code of the desired
  *                   promotion
  */
-void moveSpecial(uint8_t piece, uint8_t location, bool white,
+void moveSpecial(uint8_t pindex, uint8_t location, bool white,
         chessboard * const current, chessboard * new, uint8_t promote_to);
 
 /*

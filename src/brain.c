@@ -208,8 +208,8 @@ int negamax(chessboard * const state, bool white, boardset * expansionStore,
         int alpha, int beta, uint8_t depth)
 {
     //Check if end of depth or opponent king captured
-    if (!depth || (state->b_pieces[15] == CAPTURED)
-            || (state->w_pieces[15] == CAPTURED))
+    if (!depth || (state->b_piece_posns[15] == CAPTURED)
+            || (state->w_piece_posns[15] == CAPTURED))
     {
         //Return value of state
         return (evaluateState(state, white));
