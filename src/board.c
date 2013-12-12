@@ -47,8 +47,8 @@ void initBoard(chessboard * board)
     board->b_last_move2 = INVALID_SQUARE;
 
     //Set location arrays
-    memcpy(board->w_pieces, white_initial, 16 * sizeof(uint8_t));
-    memcpy(board->b_pieces, black_initial, 16 * sizeof(uint8_t));
+    memcpy(board->w_piece_posns, white_initial, 16 * sizeof(uint8_t));
+    memcpy(board->b_piece_posns, black_initial, 16 * sizeof(uint8_t));
 
     //Set initial piece codes
     memcpy(board->w_codes, w_codes, 16 * sizeof(uint8_t));
@@ -57,8 +57,8 @@ void initBoard(chessboard * board)
     //Set location bitboards
     for (uint8_t i = 0; i < 16; ++i)
     {
-        board->w_locations[i] = location_boards[board->w_pieces[i]];
-        board->b_locations[i] = location_boards[board->b_pieces[i]];
+        board->w_locations[i] = location_boards[board->w_piece_posns[i]];
+        board->b_locations[i] = location_boards[board->b_piece_posns[i]];
         //Update population bitboard
         board->all_w_pieces |= board->w_locations[i];
         board->all_b_pieces |= board->b_locations[i];
@@ -67,9 +67,9 @@ void initBoard(chessboard * board)
 #ifdef DEBUG_INIT
     for (uint8_t i = 0; i < 16; ++i)
     {
-        printf("w%d: %d\n", i, board->w_pieces[i]);
+        printf("w%d: %d\n", i, board->w_piece_posns[i]);
         printf("wloc%d: %llx\n", i, board->w_locations[i]);
-        printf("b%d: %d\n", i, board->b_pieces[i]);
+        printf("b%d: %d\n", i, board->b_piece_posns[i]);
         printf("bloc%d: %llx\n", i, board->b_locations[i]);
     }
     printf("woc: %llx\n", board->all_w_pieces);
@@ -94,7 +94,7 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
 {
     //Select the appropriate sets of data
     //Piece locations
-    uint8_t * pieces = (white) ? board->w_pieces : board->b_pieces;
+    uint8_t * pieces = (white) ? board->w_piece_posns : board->b_piece_posns;
     //Side location occupancy boards
     bitboard self = (white) ? board->all_w_pieces : board->all_b_pieces;
     bitboard op = (white) ? board->all_b_pieces : board->all_w_pieces;
@@ -278,13 +278,13 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
  *
  * @owner Daniel Rogers
  *
- * @param piece The index of the piece to move
+ * @param pindex The index of the piece to move
  * @param location The location to move to
  * @param white true If the piece being moved is white
  * @param current The chessboard state being referenced
  * @param new The new chessboard state to write to
  */
-bool makeMove(uint8_t piece, uint8_t location, bool white,
+bool makeMove(uint8_t pindex, uint8_t location, bool white,
         chessboard * const current, chessboard * new)
 {
     //Generate the new location bitboard for the new location
@@ -306,7 +306,7 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
                     (*ident_moves) + 1 : 0;
     *last_move2 = *last_move;
     *last_move = location;
-    *last_piece = piece;
+    *last_piece = pindex;
 
     //Set up data pointers
     //All pieces
@@ -316,8 +316,8 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
     bitboard * self_locs = (white) ? new->w_locations : new->b_locations;
     bitboard * op_locs = (white) ? new->b_locations : new->w_locations;
     //piece value
-    uint8_t * self_pcs = (white) ? new->w_pieces : new->b_pieces;
-    uint8_t * op_pcs = (white) ? new->b_pieces : new->w_pieces;
+    uint8_t * self_pcs = (white) ? new->w_piece_posns : new->b_piece_posns;
+    uint8_t * op_pcs = (white) ? new->b_piece_posns : new->w_piece_posns;
 
     //Castling data
     uint8_t * cancastle = (white) ? &new->w_cancastle : &new->b_cancastle;
@@ -327,10 +327,10 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
     //Update appropriately for castling
     if (*cancastle)
     {
-        if (piece == 15 || piece == 8 || piece == 9)
+        if (pindex == 15 || pindex == 8 || pindex == 9)
         {
             //king or rook moved
-            switch (piece)
+            switch (pindex)
             {
             case 15:
                 //king moved
@@ -347,17 +347,17 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
             }
         }
 
-        if ((self_pcs[piece] / 8) == 0)
+        if ((self_pcs[pindex] / 8) == 0)
         {
             //Moving out of row 1 opening spot for castling
             //Turn on bit at location
-            new->w_castlefree |= (1 << (self_pcs[piece] % 8));
+            new->w_castlefree |= (1 << (self_pcs[pindex] % 8));
         }
-        else if ((self_pcs[piece] / 8) == 7)
+        else if ((self_pcs[pindex] / 8) == 7)
         {
             //Moving out of row 8 opening spot for castling
             //Turn on bit at location
-            new->b_castlefree |= (1 << (self_pcs[piece] % 8));
+            new->b_castlefree |= (1 << (self_pcs[pindex] % 8));
         }
 
         if ((location / 8) == 0)
@@ -376,11 +376,11 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
 
     //Update the occupancy bitboard
     //XOR out the old location, XOR in the new location
-    *self_all ^= (self_locs[piece] ^ new_loc);
+    *self_all ^= (self_locs[pindex] ^ new_loc);
     //Update position bitboard
-    self_locs[piece] = new_loc;
+    self_locs[pindex] = new_loc;
     //update piece location
-    self_pcs[piece] = location;
+    self_pcs[pindex] = location;
 
     //Handle captures, capturing if opponent piece @ location
     //  (maybe should be in own function?)
@@ -402,7 +402,7 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
                 if (*op_cancastle && (i == 15 || i == 8 || i == 9))
                 {
                     //king or rook moved
-                    switch (piece)
+                    switch (pindex)
                     {
                     case 15:
                         //king moved
@@ -440,7 +440,7 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
  *
  * @owner Daniel Rogers
  *
- * @param piece The index of the piece to move
+ * @param pindex The index of the piece to move
  * @param location The location to move to
  * @param white true If the piece being moved is white
  * @param current The chessboard state being referenced
@@ -448,18 +448,18 @@ bool makeMove(uint8_t piece, uint8_t location, bool white,
  * @param promote_to If promoting, this is the piece code of the desired
  *                   promotion
  */
-void moveSpecial(uint8_t piece, uint8_t location, bool white,
+void moveSpecial(uint8_t pindex, uint8_t location, bool white,
         chessboard * const current, chessboard * new, uint8_t promote_to)
 {
 
     //Now that new is set up right
     //If it's a pawn, then it's a promotion or en passant
-    if ((white && current->w_codes[piece] == W_P)
-            || (!white && current->b_codes[piece] == B_P))
+    if ((white && current->w_codes[pindex] == W_P)
+            || (!white && current->b_codes[pindex] == B_P))
     {
         //do initial work with makeMove
         //Capturing during a pawn promotion move will be handled by this
-        makeMove(piece, location, white, current, new);
+        makeMove(pindex, location, white, current, new);
 
         //If in row 1 or row 8, then promoting pawn
         if ((location / 8) == 7 || (location / 8) == 0)
@@ -468,7 +468,7 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
             uint8_t * p_codes = (white) ? new->w_codes : new->b_codes;
 
             //Update piece code
-            p_codes[piece] = promote_to;
+            p_codes[pindex] = promote_to;
         }
         else
         {
@@ -478,7 +478,7 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
             //location bitboards
             bitboard * op_locs = (white) ? new->b_locations : new->w_locations;
             //piece value
-            uint8_t * op_pcs = (white) ? new->b_pieces : new->w_pieces;
+            uint8_t * op_pcs = (white) ? new->b_piece_posns : new->w_piece_posns;
 
             //It's an en passant capture, so the pawn must be +- 1 row from
             //  location. It's -1 row if white, +1 row if black
@@ -531,7 +531,7 @@ void moveSpecial(uint8_t piece, uint8_t location, bool white,
         //Use makeMove to put rook into right location & copy to new
         makeMove(rk, rk_to, white, current, new);
         //Move King into right location and update new
-        makeMove(piece, location, white, new, new);
+        makeMove(pindex, location, white, new, new);
     }
 }
 
@@ -555,14 +555,14 @@ int evaluateState(chessboard * const board, bool white)
     int w_val = 0;
     int b_val = 0;
 
-    if (board->w_pieces[15] != CAPTURED && board->b_pieces[15] != CAPTURED
+    if (board->w_piece_posns[15] != CAPTURED && board->b_piece_posns[15] != CAPTURED
             && (board->w_ident_moves >= 3 || board->b_ident_moves >= 3))
     {
         return (0);
     }
 
     //Check for endgame state
-    if (board->w_pieces[14] == CAPTURED && board->b_pieces[14] == CAPTURED)
+    if (board->w_piece_posns[14] == CAPTURED && board->b_piece_posns[14] == CAPTURED)
     {
         board_position_vals[11] = b_K_e_positions;
     }
@@ -578,16 +578,16 @@ int evaluateState(chessboard * const board, bool white)
         //If it's captured, then add 0
         //White
         w_val +=
-                (board->w_pieces[i] == CAPTURED) ?
+                (board->w_piece_posns[i] == CAPTURED) ?
                         0 :
                         piece_vals[board->w_codes[i]]
-                                + board_position_vals[board->w_codes[i]][board->w_pieces[i]];
+                                + board_position_vals[board->w_codes[i]][board->w_piece_posns[i]];
         //Same for Black
         b_val +=
-                (board->b_pieces[i] == CAPTURED) ?
+                (board->b_piece_posns[i] == CAPTURED) ?
                         0 :
                         piece_vals[board->b_codes[i]]
-                                + board_position_vals[board->b_codes[i]][board->b_pieces[i]];
+                                + board_position_vals[board->b_codes[i]][board->b_piece_posns[i]];
     }
 
     //Value = white - black
@@ -616,7 +616,7 @@ void printBoard(chessboard * const board)
     puts("White:");
     for (uint8_t i = 0; i < 16; ++i)
     {
-        squareToString(board->w_pieces[i], pos_str);
+        squareToString(board->w_piece_posns[i], pos_str);
 
         printf("    pid: %d @ %s\n", board->w_codes[i], pos_str);
     }
@@ -625,7 +625,7 @@ void printBoard(chessboard * const board)
     puts("Black:");
     for (uint8_t i = 0; i < 16; ++i)
     {
-        squareToString(board->b_pieces[i], pos_str);
+        squareToString(board->b_piece_posns[i], pos_str);
         printf("    pid: %d @ %s\n", board->b_codes[i], pos_str);
     }
     //printf("    occupancy: %llx\n", board->all_b_pieces);
@@ -645,7 +645,7 @@ bool white, char out[7])
     //The piece that moved
     uint8_t piece = (white) ? board->w_last_piece : board->b_last_piece;
     //The location it was in
-    uint8_t last_loc = (white) ? prev->w_pieces[piece] : prev->b_pieces[piece];
+    uint8_t last_loc = (white) ? prev->w_piece_posns[piece] : prev->b_piece_posns[piece];
     //The location it moved to
     uint8_t last_mv = (white) ? board->w_last_move : board->b_last_move;
     //The piece ID
@@ -715,7 +715,7 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     square_end += (col_end - 'a');
 
     //Find the array index
-    uint8_t * pieces = (white) ? board->w_pieces : board->b_pieces;
+    uint8_t * pieces = (white) ? board->w_piece_posns : board->b_piece_posns;
     uint8_t pindex;
 
     bitboard op_oc = (white) ? board->all_b_pieces : board->all_w_pieces;
