@@ -144,7 +144,7 @@ const uint8_t black_initial[16] =
  *              prior to game start. Hashkeys are not currently saved, and
  *              must be regenerated during each startup.
  */
-HASHKEY key_table[12][64];
+//HASHKEY key_table[12][64];
 
 /*
  * Lookup tables for evalutation function based on the article here:

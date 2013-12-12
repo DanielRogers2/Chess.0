@@ -148,11 +148,11 @@ bool loadMoveTables()
  * values, where N is the bitwidth of HASHKEY.
  *
  * @modifies key_table
+ void generateHashkeys()
+ {
+ //TODO Generate the hashkey tables
+ }
  */
-void generateHashkeys()
-{
-    //TODO Generate the hashkey tables
-}
 
 /*
  * Calculates the moves available to a pawn piece from a location
