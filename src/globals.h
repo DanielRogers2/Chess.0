@@ -37,6 +37,6 @@ extern const int8_t b_K_m_positions[64];
 extern const int8_t w_K_e_positions[64];
 extern const int8_t b_K_e_positions[64];
 extern const int8_t * board_position_vals[12];
-extern HASHKEY key_table[12][64];
+//extern HASHKEY key_table[12][64];
 
 #endif /* GLOBALS_H_ */
