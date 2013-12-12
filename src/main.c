@@ -13,7 +13,7 @@
 #include "brain.h"
 #include "net.h"
 
-#define INITIAL_DEPTH 6
+#define INITIAL_DEPTH 7
 #define INITIAL_TIME 900
 
 #ifdef DEBUG
