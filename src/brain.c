@@ -3,7 +3,7 @@
  * 
  * Contains the implementations of the functions in brain.h
  * 
- * @author Daniel Rogers
+ * @author Js
  * 
  */
 
@@ -18,7 +18,7 @@
 /*
  * Does a search for and returns the best move for the board
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @param self_white true if we are white
  * @param initial A pointer to the initial board state to use
@@ -189,7 +189,7 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
  * The callee is responsible for doing the first expansion & call to negamax
  *  for each root node, as well as determining which root node to use.
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @param state A pointer to the start state for the layer
  * @param white If the current layer of the search is from white or black's

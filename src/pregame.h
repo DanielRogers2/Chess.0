@@ -4,7 +4,7 @@
  * Contains the functions associated with pre-game generation work & loading
  * of pre-generated structures.
  *
- * @author Daniel Rogers
+ * @author Js
  * 
  */
 
@@ -25,7 +25,7 @@
  * resulting table will be exported as a binary file to be used by
  * loadMoveTables()
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @modifies legal_moves, attacked_squares
  */
@@ -35,7 +35,7 @@ void generateMoveTables();
  * Loads in a binary file created by generateMoveTable to initializer the
  * pre-calculated move tables.
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @modifies legal_moves, attacked_squares
  *
@@ -56,7 +56,7 @@ bool loadMoveTables();
 /*
  * Calculates the moves available to a pawn piece from a location
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @uses location_boards
  *
@@ -76,7 +76,7 @@ bool white);
 /*
  * Calculates the moves available to a knight piece from a location
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @uses location_boards
  *
@@ -93,7 +93,7 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard);
 /*
  * Calculates the moves available to a bishop piece from a location
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @uses location_boards
  *
@@ -112,7 +112,7 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard);
 /*
  * Calculates the moves available to a rook piece from a location
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @uses location_boards
  *
@@ -131,7 +131,7 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard);
 /*
  * Calculates the moves available to a queen piece from a location
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @uses location_boards
  *
@@ -150,7 +150,7 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard);
 /*
  * Calculates the moves available to a king from a location
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @uses location_boards
  *

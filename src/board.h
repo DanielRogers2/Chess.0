@@ -4,7 +4,7 @@
  * Contains the function definitions & data structures for manipulating the
  * board state.
  *
- * @author Daniel Rogers
+ * @author Js
  *
  */
 
@@ -125,7 +125,7 @@ typedef struct
 /*
  * Initializes the board to its base state, where no moves have been made yet
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @uses white_initial, black_initial, w_codes, b_codes
  *
@@ -136,7 +136,7 @@ void initBoard(chessboard * board);
 /*
  * Expands the set of all possible board states from an initial state
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @uses w_codes, b_codes, location_boards, legal_moves
  *
@@ -151,7 +151,7 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white);
 /*
  * Generates a new board state based on a piece move
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @param pindex The index of the piece to move
  * @param location The location to move to
@@ -185,7 +185,7 @@ void moveSpecial(uint8_t pindex, uint8_t location, bool white,
 /*
  * Evaluates the value of a particular board
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * Based on:
  *   http://chessprogramming.wikispaces.com/Simplified+evaluation+function
@@ -201,7 +201,7 @@ int evaluateState(chessboard * const board, bool white);
 /*
  * Prints a board state
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @param board The chessboard to print
  */
