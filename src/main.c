@@ -3,7 +3,7 @@
  * 
  * Executes the program
  * 
- * @author Daniel Rogers
+ * @author Js
  * 
  */
 #include <sys/time.h>

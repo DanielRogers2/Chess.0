@@ -3,7 +3,7 @@
  * 
  * Network code definitions
  * 
- * @author Daniel Rogers
+ * @author Js
  * 
  */
 

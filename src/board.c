@@ -3,7 +3,7 @@
  * 
  * Implementations of the functions defined in board.h
  * 
- * @author Daniel Rogers
+ * @author Js
  * 
  */
 
@@ -14,7 +14,7 @@
  *
  * @uses white_initial, black_initial, location_bitboards, w_codes, b_codes
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @param board The chessboard to initialize.
  */
@@ -80,7 +80,7 @@ void initBoard(chessboard * board)
 /*
  * Expands the set of all possible board states from an initial state
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @uses location_boards, legal_moves
  *
@@ -276,7 +276,7 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
 /*
  * Generates a new board state based on a piece move
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @param pindex The index of the piece to move
  * @param location The location to move to
@@ -438,7 +438,7 @@ bool makeMove(uint8_t pindex, uint8_t location, bool white,
  *
  * @uses *_initial to determine index of rook for castling maneuver
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @param pindex The index of the piece to move
  * @param location The location to move to
@@ -538,7 +538,7 @@ void moveSpecial(uint8_t pindex, uint8_t location, bool white,
 /*
  * Evaluates the value of a particular board
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * Based on:
  *   http://chessprogramming.wikispaces.com/Simplified+evaluation+function
@@ -605,7 +605,7 @@ int evaluateState(chessboard * const board, bool white)
 /*
  * Prints a board state
  *
- * @owner Daniel Rogers
+ * @owner Js
  *
  * @param board The chessboard to print
  */
