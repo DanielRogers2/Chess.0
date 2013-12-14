@@ -20,6 +20,9 @@
  */
 void initBoard(chessboard * board)
 {
+    //Initialize location board
+    memset(board->pieces, NO_PIECE, 64 * sizeof(uint8_t));
+
     //Set up the occupation bitboards for all white/black pieces
     //White pieces are in positions 0-15 -> low 16 bits on
     board->all_w_pieces = 0;
@@ -49,6 +52,12 @@ void initBoard(chessboard * board)
     //Set location arrays
     memcpy(board->w_piece_posns, white_initial, 16 * sizeof(uint8_t));
     memcpy(board->b_piece_posns, black_initial, 16 * sizeof(uint8_t));
+
+    for (uint8_t i = 0; i < 16; ++i)
+    {
+        board->pieces[board->w_piece_posns[i]] = i;
+        board->pieces[board->b_piece_posns[i]] = i;
+    }
 
     //Set initial piece codes
     memcpy(board->w_codes, w_codes, 16 * sizeof(uint8_t));
@@ -315,7 +324,7 @@ bool makeMove(uint8_t pindex, uint8_t location, bool white,
     //location bitboards
     bitboard * self_locs = (white) ? new->w_locations : new->b_locations;
     bitboard * op_locs = (white) ? new->b_locations : new->w_locations;
-    //piece value
+    //piece positions
     uint8_t * self_pcs = (white) ? new->w_piece_posns : new->b_piece_posns;
     uint8_t * op_pcs = (white) ? new->b_piece_posns : new->w_piece_posns;
 
@@ -379,54 +388,54 @@ bool makeMove(uint8_t pindex, uint8_t location, bool white,
     *self_all ^= (self_locs[pindex] ^ new_loc);
     //Update position bitboard
     self_locs[pindex] = new_loc;
+    //Invalidate the old location
+    new->pieces[self_pcs[pindex]] = NO_PIECE;
     //update piece location
     self_pcs[pindex] = location;
+
+    //Return capped/not capped
+    bool capped = false;
 
     //Handle captures, capturing if opponent piece @ location
     //  (maybe should be in own function?)
     if ((*op_all) & new_loc)
     {
-        for (uint8_t i = 0; i < 16; ++i)
-        {
-            //If opponent piece at same location as new location
-            if (op_locs[i] == new_loc)
-            {
-                //XOR out location in occupancy board
-                *op_all ^= op_locs[i];
-                //Set to invalid position
-                op_locs[i] = 0;
-                //Flag as captured
-                op_pcs[i] = CAPTURED;
+        //Look up array index in piece board
+        uint8_t cap_indx = new->pieces[location];
 
-                //See if ability for opponent to castle has changed
-                if (*op_cancastle && (i == 15 || i == 8 || i == 9))
-                {
-                    //king or rook moved
-                    switch (pindex)
-                    {
-                    case 15:
-                        //king moved
-                        *op_cancastle = 0;
-                        break;
-                    case 8:
-                        //queenside rook capped
-                        *op_cancastle &= KINGSIDE_ROOK;
-                        break;
-                    case 9:
-                        //kingside rook capped
-                        *op_cancastle &= QUEENSIDE_ROOK;
-                        break;
-                    }
-                }
-                //done
+        //XOR out location in occupancy board
+        *op_all ^= op_locs[cap_indx];
+        //Set to invalid position
+        op_locs[cap_indx] = 0;
+        //Flag as captured
+        op_pcs[cap_indx] = CAPTURED;
+
+        //See if ability for opponent to castle has changed
+        if (*op_cancastle && (cap_indx == 15 || cap_indx == 8 || cap_indx == 9))
+        {
+            //king or rook moved
+            switch (pindex)
+            {
+            case 15:
+                //king moved
+                *op_cancastle = 0;
+                break;
+            case 8:
+                //queenside rook capped
+                *op_cancastle &= KINGSIDE_ROOK;
+                break;
+            case 9:
+                //kingside rook capped
+                *op_cancastle &= QUEENSIDE_ROOK;
                 break;
             }
         }
-
-        return (true);
     }
 
-    return (false);
+    //Update the location index
+    new->pieces[location] = pindex;
+
+    return (capped);
 }
 
 /*
@@ -484,24 +493,17 @@ void moveSpecial(uint8_t pindex, uint8_t location, bool white,
             //It's an en passant capture, so the pawn must be +- 1 row from
             //  location. It's -1 row if white, +1 row if black
             int8_t delta = (white) ? -8 : 8;
-            //Get location of pawn being captured
-            bitboard cap_loc = location_boards[location + delta];
+            //Get array index
+            uint8_t cap_indx = new->pieces[location + delta];
+            //Invalidate old location data
+            new->pieces[location + delta] = NO_PIECE;
 
-            for (uint8_t i = 0; i < 16; ++i)
-            {
-                //If opponent piece at capture location
-                if (op_locs[i] == cap_loc)
-                {
-                    //XOR out location in occupancy board
-                    *op_all ^= op_locs[i];
-                    //Set to invalid position
-                    op_locs[i] = 0;
-                    //Flag as captured
-                    op_pcs[i] = CAPTURED;
-                    //done
-                    break;
-                }
-            }
+            //XOR out location in occupancy board
+            *op_all ^= op_locs[cap_indx];
+            //Set to invalid position
+            op_locs[cap_indx] = 0;
+            //Flag as captured
+            op_pcs[cap_indx] = CAPTURED;
         }
     }
     else
@@ -721,19 +723,12 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     square_end += (col_end - 'a');
 
     //Find the array index
-    uint8_t * pieces = (white) ? board->w_piece_posns : board->b_piece_posns;
     uint8_t pindex;
 
     bitboard op_oc = (white) ? board->all_b_pieces : board->all_w_pieces;
 
     //Find matching location
-    for (pindex = 0; pindex < 16; ++pindex)
-    {
-        if (pieces[pindex] == square_start)
-        {
-            break;
-        }
-    }
+    pindex = board->pieces[square_start];
 
 #ifdef DEBUG
     printf("making move [piece, dest, white]: %d, %d, %d\n", pindex, square_end,

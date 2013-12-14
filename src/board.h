@@ -47,6 +47,9 @@
 //black king
 #define B_K 11
 
+//No piece @ location
+#define NO_PIECE UINT8_MAX
+
 #define KINGSIDE_FREE 0x60
 #define QUEENSIDE_FREE 0x0E
 #define KINGSIDE_ROOK 1
@@ -71,6 +74,9 @@
  */
 typedef struct
 {
+    //Pieces at locations
+    uint8_t pieces[64];
+
     //Locations of all white pieces
     uint8_t w_piece_posns[16];
     //Bitboard of all white pieces
