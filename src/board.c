@@ -430,6 +430,8 @@ bool makeMove(uint8_t pindex, uint8_t location, bool white,
                 break;
             }
         }
+
+        capped = true;
     }
 
     //Update the location index
