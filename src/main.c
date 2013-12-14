@@ -16,7 +16,7 @@
 #define INITIAL_DEPTH 7
 #define INITIAL_TIME 900
 
-#ifdef DEBUG
+#ifdef TEST_GAME
 void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply);
 #endif
 
@@ -28,6 +28,21 @@ int main(int argc, const char * argv[])
         //No tables available, generate them
         generateMoveTables();
     }
+
+#ifdef TEST_GAME
+    if (argc < 4)
+    {
+        puts(
+                "Usage: <gamenum> <depth_white> <depth_black>");
+        return (0);
+    }
+
+    int gnum = atoi(argv[1]);
+    int dw = atoi(argv[2]);
+    int db = atoi(argv[3]);
+
+    playSampleGame(gnum, dw, db);
+#else
 
     //Get a new board and initialize it
     chessboard current_state;
@@ -92,11 +107,12 @@ int main(int argc, const char * argv[])
         //Update current state
         current_state = next_state;
     }
+#endif
 
     return (0);
 }
 
-#ifdef DEBUG
+#ifdef TEST_GAME
 void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
 {
     //Timers
@@ -139,7 +155,7 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         ++counter;
         current_state = res;
 
-        if (current_state.b_pieces[15] == CAPTURED || tblack <= 0)
+        if (current_state.b_piece_posns[15] == CAPTURED || tblack <= 0)
         {
             white_won = true;
             break;
@@ -161,7 +177,7 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         ++counter;
         current_state = res;
 
-        if (current_state.w_pieces[15] == CAPTURED || twhite <= 0)
+        if (current_state.w_piece_posns[15] == CAPTURED || twhite <= 0)
         {
             white_won = false;
             break;
