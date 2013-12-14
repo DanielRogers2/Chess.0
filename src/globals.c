@@ -143,11 +143,31 @@ const uint8_t black_initial[16] =
  * @initializer pregame->generateHashkeys. Generates a new set of hashkeys
  *              prior to game start. Hashkeys are not currently saved, and
  *              must be regenerated during each startup.
+ *
+ HASHKEY key_table[12][64];
  */
-//HASHKEY key_table[12][64];
 
 /*
- * Lookup tables for evalutation function based on the article here:
+ * Encourages the AI to try to control ranks/files and threaten opposing pieces
+ *
+ * Thanks to Ty for the idea
+ *
+ 1 1 2 2 2 2 1 1
+ 1 2 2 3 3 2 2 1
+ 2 2 3 4 4 3 2 2
+ 2 3 4 5 5 4 3 2
+ 2 3 4 5 5 4 3 2
+ 2 2 3 4 4 3 2 2
+ 1 2 2 3 3 2 2 1
+ 1 1 2 2 2 2 1 1
+ */
+const uint8_t control_multipliers[64] =
+{ 1, 1, 2, 2, 2, 2, 1, 1, 1, 2, 2, 3, 3, 2, 2, 1, 2, 2, 3, 4, 4, 3, 2, 2, 2, 3,
+        4, 5, 5, 4, 3, 2, 2, 3, 4, 5, 5, 4, 3, 2, 2, 2, 3, 4, 4, 3, 2, 2, 1, 2,
+        2, 3, 3, 2, 2, 1, 1, 1, 2, 2, 2, 2, 1, 1 };
+
+/*
+ * Lookup tables for evaluation function based on the article here:
  *      http://chessprogramming.wikispaces.com/Simplified+evaluation+function
  *
  * These are mirrored over X, so that's right... right?
@@ -237,9 +257,13 @@ const int8_t b_K_e_positions[64] =
  * @users board
  * @modifiers whatever function decides the difference between midgame/endgame
  */
-//TODO Modify this so king positions update to endgame state at right time
 const int8_t * board_position_vals[12] =
 { w_P_positions, w_N_positions, w_B_positions, w_R_positions, w_Q_positions,
         w_K_m_positions, b_P_positions, b_N_positions, b_B_positions,
         b_R_positions, b_Q_positions, b_K_m_positions };
+
+const int8_t * egame_board_position_vals[12] =
+{ w_P_positions, w_N_positions, w_B_positions, w_R_positions, w_Q_positions,
+        w_K_e_positions, b_P_positions, b_N_positions, b_B_positions,
+        b_R_positions, b_Q_positions, b_K_e_positions };
 

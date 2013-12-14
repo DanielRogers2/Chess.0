@@ -478,7 +478,8 @@ void moveSpecial(uint8_t pindex, uint8_t location, bool white,
             //location bitboards
             bitboard * op_locs = (white) ? new->b_locations : new->w_locations;
             //piece value
-            uint8_t * op_pcs = (white) ? new->b_piece_posns : new->w_piece_posns;
+            uint8_t * op_pcs =
+                    (white) ? new->b_piece_posns : new->w_piece_posns;
 
             //It's an en passant capture, so the pawn must be +- 1 row from
             //  location. It's -1 row if white, +1 row if black
@@ -555,20 +556,24 @@ int evaluateState(chessboard * const board, bool white)
     int w_val = 0;
     int b_val = 0;
 
-    if (board->w_piece_posns[15] != CAPTURED && board->b_piece_posns[15] != CAPTURED
+    const int8_t ** b_posvals;
+
+    if (board->w_piece_posns[15] != CAPTURED
+            && board->b_piece_posns[15] != CAPTURED
             && (board->w_ident_moves >= 3 || board->b_ident_moves >= 3))
     {
         return (0);
     }
 
     //Check for endgame state
-    if (board->w_piece_posns[14] == CAPTURED && board->b_piece_posns[14] == CAPTURED)
+    if (board->w_piece_posns[14] == CAPTURED
+            && board->b_piece_posns[14] == CAPTURED)
     {
-        board_position_vals[11] = b_K_e_positions;
+        b_posvals = egame_board_position_vals;
     }
     else
     {
-        board_position_vals[11] = b_K_m_positions;
+        b_posvals = board_position_vals;
     }
 
     //Sum up the values for white and black
@@ -581,13 +586,13 @@ int evaluateState(chessboard * const board, bool white)
                 (board->w_piece_posns[i] == CAPTURED) ?
                         0 :
                         piece_vals[board->w_codes[i]]
-                                + board_position_vals[board->w_codes[i]][board->w_piece_posns[i]];
+                                + b_posvals[board->w_codes[i]][board->w_piece_posns[i]];
         //Same for Black
         b_val +=
                 (board->b_piece_posns[i] == CAPTURED) ?
                         0 :
                         piece_vals[board->b_codes[i]]
-                                + board_position_vals[board->b_codes[i]][board->b_piece_posns[i]];
+                                + b_posvals[board->b_codes[i]][board->b_piece_posns[i]];
     }
 
     //Value = white - black
@@ -645,7 +650,8 @@ bool white, char out[7])
     //The piece that moved
     uint8_t piece = (white) ? board->w_last_piece : board->b_last_piece;
     //The location it was in
-    uint8_t last_loc = (white) ? prev->w_piece_posns[piece] : prev->b_piece_posns[piece];
+    uint8_t last_loc =
+            (white) ? prev->w_piece_posns[piece] : prev->b_piece_posns[piece];
     //The location it moved to
     uint8_t last_mv = (white) ? board->w_last_move : board->b_last_move;
     //The piece ID

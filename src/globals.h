@@ -22,6 +22,7 @@ extern const char piece_chars[12];
 extern const uint16_t piece_vals[12];
 extern const uint8_t white_initial[16];
 extern const uint8_t black_initial[16];
+extern const uint8_t control_multipliers[64];
 extern const int8_t w_P_positions[64];
 extern const int8_t b_P_positions[64];
 extern const int8_t w_N_positions[64];
@@ -37,6 +38,7 @@ extern const int8_t b_K_m_positions[64];
 extern const int8_t w_K_e_positions[64];
 extern const int8_t b_K_e_positions[64];
 extern const int8_t * board_position_vals[12];
+extern const int8_t * egame_board_position_vals[12];
 //extern HASHKEY key_table[12][64];
 
 #endif /* GLOBALS_H_ */
