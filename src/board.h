@@ -93,7 +93,7 @@ typedef struct
 
     //Locations of all black pieces
     uint8_t b_piece_posns[16];
-    //Bitboard of all black pieces
+    //Bitboard of all black pieces*
     bitboard all_b_pieces;
     //Bitboards of individual piece locations for black
     bitboard b_locations[16];
@@ -121,6 +121,32 @@ typedef struct
     uint8_t b_ident_moves;
 
 } chessboard;
+
+/*
+ * Tracks data needed for making/unmaking moves on a board
+ */
+typedef struct
+{
+    //The index of the piece last used
+    uint8_t pindex_used = NO_PIECE;
+    //Which ray was looked at for the piece
+    uint8_t ray_used;
+    //Where in the ray the last position checked was
+    uint8_t ray_pos;
+    //where the last piece came from
+    uint8_t last_start;
+    //If a piece was captured
+    bool capped;
+    //Which piece it was (if applicable)
+    uint8_t pcode_capped;
+    //Where it went to
+    uint8_t last_dest;
+    //if a special move happened
+    //  0 - no, 1 - castle, 2 - pawn promote, 3 - en passant
+    uint8_t special = 0;
+    //Flags if it was a queenside/kingside castle
+    bool castled_kingside = false;
+} move_meta;
 
 typedef struct
 {
@@ -153,6 +179,20 @@ void initBoard(chessboard * board);
  * @return The number of states expanded
  */
 uint8_t expandStates(chessboard * const board, boardset * storage, bool white);
+
+/*
+ * Generate the next expandable state from a board state & update the passed in
+ * state with this move.
+ *
+ * @param board A pointer to the board to update
+ * @param metadata A move_meta struct to use in generating the next move
+ *                  This will be updated inside the function for use with
+ *                  nextMove/unmakeMove
+ * @param white true if getting white's move
+ *
+ * @return true if more states can be expanded. false if not.
+ */
+bool nextMove(chessboard * board, move_meta * metadata, bool white);
 
 /*
  * Generates a new board state based on a piece move

@@ -283,6 +283,192 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
 }
 
 /*
+ * Generate the next expandable state from a board state & update the passed in
+ * state with this move.
+ *
+ * @param board A pointer to the board to update
+ * @param metadata A move_meta struct to use in generating the next move
+ *                  This will be updated inside the function for use with
+ *                  nextMove/unmakeMove
+ * @param white true if getting white's move
+ *
+ * @return true if more states can be expanded. false if not.
+ */
+bool nextMove(chessboard * board, move_meta * metadata, bool white)
+{
+    //Get the next move
+    if (metadata->pindex_used == NO_PIECE)
+    {
+        //If not traversing yet, start at end of array
+        metadata->pindex_used = 15;
+    }
+
+    //Select the appropriate sets of data
+    //Piece locations
+    uint8_t * pieces = (white) ? board->w_piece_posns : board->b_piece_posns;
+    //Side location occupancy boards
+    bitboard self = (white) ? board->all_w_pieces : board->all_b_pieces;
+    bitboard op = (white) ? board->all_b_pieces : board->all_w_pieces;
+    //Lookup table piece codes
+    uint8_t * codes = (white) ? board->w_codes : board->b_codes;
+
+    //Number of states generated
+    uint8_t states = 0;
+
+    //Loop variables
+    int8_t i;
+    uint8_t j, k;
+
+    //Used to check for castling
+    uint8_t cancastle, castlefree;
+    uint8_t castleto;
+    //The set of moves
+    uint8_t (*moves)[7];
+
+    bool capped;
+
+    //For the piece, get the set of moves it can make from its location
+    //  Traverse from king to pawns, because maybe this helps alphabeta
+    for (; metadata->pindex_used >= 0; --metadata->pindex_used)
+    {
+        //Check if piece is captured
+        if (pieces[i] == CAPTURED)
+        {
+            continue;
+        }
+
+#ifdef DEBUG_MOVE
+        printf("piece: %d, @%d\n", codes[i], pieces[i]);
+        printf("move0: %d\n", legal_moves[codes[i]][pieces[i]][0][0]);
+#endif
+
+        moves = legal_moves[codes[i]][pieces[i]];
+
+        //Go through each move ray
+        for (j = 0; j < 8; ++j)
+        {
+            capped = false;
+            //Go through each move in ray
+            for (k = 0; k < 7; ++k)
+            {
+#ifdef DEBUG_MOVE
+                printf("making move: %d\n", moves[j][k]);
+#endif
+                //Check for end of ray, or own piece @ location
+                //Location check works as follows:
+                //  Get the bitboard representing the destination
+                //  Then AND with pieces for own side -> all 0 if no pieces at
+                //      destination, meaning valid move. !0 if own piece at
+                //      location, meaning invalid move
+                //location_boards[64] == 0xffffffffffffffff, so any AND will
+                //  make a non-0 value
+                if (location_boards[moves[j][k]] & self)
+                {
+                    //Stop looking through ray
+#ifdef DEBUG_MOVE
+                    puts("breaking");
+#endif
+                    break;
+                }
+                else if ((codes[i] == W_P || codes[i] == B_P)
+                //diagonals must capture
+                        && (((j != 0) && (!(location_boards[moves[j][k]] & op)))
+                        //forward can't capture
+                                || ((j == 0)
+                                        && (location_boards[moves[j][k]] & op))))
+                {
+                    //  If it's a pawn, diagonals are only allowed on capture
+                    //  Can't capture by moving forward
+#ifdef DEBUG_MOVE
+                    puts("breaking");
+#endif
+                    break;
+                }
+                else
+                {
+                    //Expand special moves, do pawn promotion here as it's a
+                    //  result of the move, rather than a unique move
+                    if (((codes[i] == W_P) && ((moves[j][k] / 8) == 7))
+                            || ((codes[i] == B_P) && ((moves[j][k] / 8) == 0)))
+                    {
+                        //pawn promotion, just make it a queen
+                        moveSpecial(i, moves[j][k], white, board,
+                                &storage->data[states++], (white) ? W_Q : B_Q);
+                    }
+                    else
+                    {
+                        //Make the move with the piece
+                        capped = makeMove(i, moves[j][k], white, board,
+                                &storage->data[states++]);
+                    }
+
+                    if (storage->count <= states)
+                    {
+                        //Allocate more storage
+                        storage->count += 10;
+                        storage->data = realloc(storage->data,
+                                storage->count * sizeof(chessboard));
+                    }
+
+                    //See if this was a capturing move, and stop moving along
+                    //  ray if so
+                    if (capped)
+                    {
+                        break;
+                    }
+                }
+                //End making legal moves in ray
+            }
+            //End piece ray traversals
+            //do castling here
+            if ((codes[i] == W_K && board->w_cancastle && board->w_castlefree)
+                    || (codes[i] == B_K && board->b_cancastle
+                            && board->b_castlefree))
+            {
+                //Check if squares matching unoccupied space are free
+                cancastle = (white) ? board->w_cancastle : board->b_cancastle;
+                castlefree =
+                        (white) ? board->w_castlefree : board->b_castlefree;
+
+                if ((cancastle & KINGSIDE_ROOK)
+                        && ((castlefree & KINGSIDE_FREE) == KINGSIDE_FREE))
+                {
+                    castleto = (white) ? KINGSIDE_W_CASTLE : KINGSIDE_B_CASTLE;
+                    //Do the castling, king to g1 or g1
+                    moveSpecial(i, castleto, white, board, board, 0);
+#ifdef DEBUG_MOVE
+                    printf("castled kingside: %d, %x\n", cancastle, castlefree);
+                    printBoard(&storage->data[states-1]);
+#endif
+                }
+                if ((cancastle & QUEENSIDE_ROOK)
+                        && ((castlefree & QUEENSIDE_FREE) == QUEENSIDE_FREE))
+                {
+                    castleto =
+                            (white) ? QUEENSIDE_W_CASTLE : QUEENSIDE_B_CASTLE;
+                    moveSpecial(i, castleto, white, board,
+                            &storage->data[states++], 0);
+                    if (storage->count <= states)
+                    {
+                        //Allocate more storage
+                        storage->count += 10;
+                        storage->data = realloc(storage->data,
+                                storage->count * sizeof(chessboard));
+                    }
+#ifdef DEBUG_MOVE
+                    printf("castled queenside: %d, %x\n", cancastle,
+                            castlefree);
+                    printBoard(&storage->data[states-1]);
+#endif
+                }
+            }
+        }
+    }
+
+    return (false);
+}
+
+/*
  * Generates a new board state based on a piece move
  *
  * @owner Js
