@@ -4,6 +4,8 @@
 /.settings
 /Debug
 /Release
+/Test_Game
+/Test
 /atk_boards.bin
 /move_table.bin
 /curl
