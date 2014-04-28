@@ -20,6 +20,10 @@
 void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply);
 #endif
 
+#ifdef CONSOLE
+void getPlayerMove(char move[7]);
+#endif
+
 int main(int argc, const char * argv[])
 {
     //Load or generate tables
@@ -63,7 +67,11 @@ int main(int argc, const char * argv[])
     {
         puts("\ngetting status");
         //Get their move
+        #ifndef CONSOLE
         getStatus(move, &tlimit, gameid, teamnumber, teamsecret);
+        #else
+        getPlayerMove(move);
+        #endif
 
         printf("received move: %s\n", move);
 
@@ -86,8 +94,12 @@ int main(int argc, const char * argv[])
 
         printf("sending move: %s\n", move);
 
+        #ifndef CONSOLE
         //Submit move to server
         pushMove(gameid, teamnumber, teamsecret, move);
+        #else
+        print("CPU Move: %s\n", move);
+        #endif
 
         //Update current state
         current_state = next_state;
@@ -95,6 +107,18 @@ int main(int argc, const char * argv[])
 
     return (0);
 }
+
+#ifdef CONSOLE
+void getPlayerMove(char move[7])
+{
+    puts("enter a move, e.g. r:");
+    fgets(move, sizeof(move), stdin);
+    if(move[6] == "\n")
+    {
+        move[6] = '\0';
+    }
+}
+#endif
 
 #ifdef DEBUG
 void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
