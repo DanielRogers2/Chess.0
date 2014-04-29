@@ -54,7 +54,6 @@ int main(int argc, const char * argv[])
     const char * teamsecret = argv[3];
     int gameid = atoi(argv[4]);
 
-    int depth = (argc >= 6) ? atoi(argv[5]) : INITIAL_DEPTH;
 #else
     if (argc < 2)
     {
@@ -64,6 +63,7 @@ int main(int argc, const char * argv[])
 #endif
 
     bool self_white = (argv[1][0] == 'w') ? true : false;
+    int depth = (argc >= 6) ? atoi(argv[5]) : INITIAL_DEPTH;
 
     //The play they made/we made
     char move[7];
