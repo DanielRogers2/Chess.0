@@ -11,7 +11,10 @@
 #include "board.h"
 #include "pregame.h"
 #include "brain.h"
+
+#ifndef CONSOLE
 #include "net.h"
+#endif
 
 #define INITIAL_DEPTH 7
 #define INITIAL_TIME 900
@@ -39,6 +42,7 @@ int main(int argc, const char * argv[])
 
     initBoard(&current_state);
 
+#ifndef CONSOLE
     //Need to know side, gameid, teamnumber, teamsecret
     if (argc < 5)
     {
@@ -46,13 +50,20 @@ int main(int argc, const char * argv[])
                 "Usage: <w|b> <teamnumber> <teamsecret> <gameid> [<initial_depth>]");
         return (0);
     }
-
-    bool self_white = (argv[1][0] == 'w') ? true : false;
     int teamnumber = atoi(argv[2]);
     const char * teamsecret = argv[3];
     int gameid = atoi(argv[4]);
 
     int depth = (argc >= 6) ? atoi(argv[5]) : INITIAL_DEPTH;
+#else
+    if (argc < 2)
+    {
+        puts("Usage: <w|b>");
+        return (0);
+    }
+#endif
+
+    bool self_white = (argv[1][0] == 'w') ? true : false;
 
     //The play they made/we made
     char move[7];
@@ -77,8 +88,10 @@ int main(int argc, const char * argv[])
 
         //Parse the move
         parseMoveString(move, !self_white, &current_state);
-
+        
+#ifndef CONSOLE
         printf("making move, with tleft: %f\n", tlimit);
+#endif
 
         WHITE_START:
         //Make move
@@ -98,7 +111,7 @@ int main(int argc, const char * argv[])
         //Submit move to server
         pushMove(gameid, teamnumber, teamsecret, move);
         #else
-        print("CPU Move: %s\n", move);
+        printf("CPU Move: %s\n", move);
         #endif
 
         //Update current state
@@ -111,9 +124,9 @@ int main(int argc, const char * argv[])
 #ifdef CONSOLE
 void getPlayerMove(char move[7])
 {
-    puts("enter a move, e.g. r:");
-    fgets(move, sizeof(move), stdin);
-    if(move[6] == "\n")
+    puts("enter a move, e.g. PA2A3:");
+    fgets(move, 7, stdin);
+    if(move[6] == '\n')
     {
         move[6] = '\0';
     }
