@@ -48,7 +48,7 @@ int main(int argc, const char * argv[])
     const char * teamsecret = argv[3];
     int gameid = atoi(argv[4]);
 
-    int depth = (argc >= 6) ? atoi(argv[5]) : INITIAL_DEPTH;
+    uint8_t depth = (argc >= 6) ? (uint8_t) atoi(argv[5]) : INITIAL_DEPTH;
 
     //The play they made/we made
     char move[7];
@@ -93,7 +93,10 @@ int main(int argc, const char * argv[])
         current_state = next_state;
     }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
     return (0);
+#pragma clang diagnostic pop
 }
 
 #ifdef DEBUG

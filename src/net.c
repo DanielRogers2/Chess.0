@@ -123,12 +123,15 @@ char * pollServer(char * url)
     curl = curl_easy_init();
     if (curl)
     {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdisabled-macro-expansion"
         //Point it to the chess server
         curl_easy_setopt(curl, CURLOPT_URL, url);
         //Use the writeData function
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData);
         //Write it to result
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &result);
+#pragma clang diagnostic pop
 
         //Do the request
         res = curl_easy_perform(curl);
@@ -170,8 +173,12 @@ void pushMove(int gameid, int teamnum, const char * teamsecret, char * move)
     curl = curl_easy_init();
     if (curl)
     {
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdisabled-macro-expansion"
         //Point it to the chess server
         curl_easy_setopt(curl, CURLOPT_URL, url);
+#pragma clang diagnostic pop
 
         //Do the request
         res = curl_easy_perform(curl);
@@ -198,7 +205,7 @@ size_t writeData(char *ptr, size_t size, size_t nmemb, void *userdata)
     write_response * res = (write_response *) userdata;
 
     //check for overflow
-    if ((res->pos + size * nmemb) > BUFFER_SIZE)
+    if (((unsigned) res->pos + size * nmemb) > BUFFER_SIZE)
     {
         puts("Buffer too small");
         return (0);

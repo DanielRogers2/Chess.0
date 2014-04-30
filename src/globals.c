@@ -8,6 +8,8 @@
  */
 
 #include <inttypes.h>
+ 
+#include "globals.h"
 #include "common_defs.h"
 
 /*

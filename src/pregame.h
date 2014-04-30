@@ -29,7 +29,7 @@
  *
  * @modifies legal_moves, attacked_squares
  */
-void generateMoveTables();
+void generateMoveTables(void);
 
 /*
  * Loads in a binary file created by generateMoveTable to initializer the
@@ -43,7 +43,7 @@ void generateMoveTables();
  *          which prevented a successful initialization of legal_moves and
  *          attacked_squares.
  */
-bool loadMoveTables();
+bool loadMoveTables(void);
 
 /*
  * Populates the hashkey table for the board with randomly generated N-bit

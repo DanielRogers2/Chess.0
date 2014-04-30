@@ -19,7 +19,7 @@
  *
  * @modifies legal_moves, attacked_squares
  */
-void generateMoveTables()
+void generateMoveTables(void)
 {
     for (uint8_t i = 0; i < 12; ++i)
     {
@@ -100,7 +100,7 @@ void generateMoveTables()
  *          which prevented a successful initialization of legal_moves and
  *          attacked_squares.
  */
-bool loadMoveTables()
+bool loadMoveTables(void)
 {
     //Table files in local directory
     FILE * move_table = fopen("move_table.bin", "rb");
@@ -186,7 +186,7 @@ bool white)
         uint8_t col = location % 8;
         //Valid moves are up and left, up, up and right
         //up
-        moves[0][0] = location + delta;
+        moves[0][0] = (uint8_t) (location + delta);
 
         //Check for right edge, if location %8 == 7, then it's a rightmost square
         //Update the attack bitboard, pawns can only cap diagonally
@@ -203,7 +203,7 @@ bool white)
     if ((white && ((location / 8) == 1)) || (!white && ((location / 8) == 6)))
     {
         //up 2
-        moves[0][1] = location + 2 * delta;
+        moves[0][1] = (uint8_t) (location + 2 * delta);
     }
 }
 

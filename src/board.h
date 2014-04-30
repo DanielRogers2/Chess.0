@@ -69,6 +69,8 @@
  * A value of 64 indicates a captured piece
  *
  */
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
 typedef struct
 {
     //Locations of all white pieces
@@ -121,6 +123,7 @@ typedef struct
     uint8_t count;
     chessboard * data;
 } boardset;
+#pragma clang diagnostic pop
 
 /*
  * Initializes the board to its base state, where no moves have been made yet

@@ -117,7 +117,8 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
         //  depth 0 values won't be over-written, so we can just look up
         //  the data we want after the loop ends
 #ifndef PARALLEL_NEGAMAX
-        cur = -negamax(&store[0].data[i], !self_white, &store[1], depth - 1);
+        cur = -negamax(&store[0].data[i], !self_white, &store[1], -INT_MAX, 
+                INT_MAX, depth - 1);
         if (cur > best)
         {
             best = cur;

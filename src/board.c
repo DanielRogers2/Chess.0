@@ -105,7 +105,7 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
     uint8_t states = 0;
 
     //Loop variables
-    int8_t i;
+    uint8_t i;
     uint8_t j, k;
 
     //Used to check for castling
@@ -681,7 +681,7 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     char piece = move[0];
     //Get data for start position
     char col_start = move[1];
-    uint8_t row_start = atoi(&move[2]) - 1;
+    uint8_t row_start = (uint8_t) atoi(&move[2]) - 1;
 
 #ifdef DEBUG
     printf("cs: %c, rs: %d\n", col_start, row_start);
@@ -689,7 +689,7 @@ void parseMoveString(char move[7], bool white, chessboard * board)
 
     //Get data for end position
     char col_end = move[3];
-    uint8_t row_end = atoi(&move[4]) - 1;
+    uint8_t row_end = (uint8_t) atoi(&move[4]) - 1;
 
 #ifdef DEBUG
     printf("ce: %c, re: %d\n", col_end, row_end);

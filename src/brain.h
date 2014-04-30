@@ -11,6 +11,7 @@
 #define BRAIN_H_
 
 #include <inttypes.h>
+#include <limits.h>
 
 #include "common_defs.h"
 #include "board.h"
