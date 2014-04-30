@@ -11,13 +11,20 @@
 #include "board.h"
 #include "pregame.h"
 #include "brain.h"
+
+#ifndef CONSOLE
 #include "net.h"
+#endif
 
 #define INITIAL_DEPTH 7
 #define INITIAL_TIME 900
 
 #ifdef DEBUG
 void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply);
+#endif
+
+#ifdef CONSOLE
+void getPlayerMove(char move[7]);
 #endif
 
 int main(int argc, const char * argv[])
@@ -35,6 +42,7 @@ int main(int argc, const char * argv[])
 
     initBoard(&current_state);
 
+#ifndef CONSOLE
     //Need to know side, gameid, teamnumber, teamsecret
     if (argc < 5)
     {
@@ -42,12 +50,19 @@ int main(int argc, const char * argv[])
                 "Usage: <w|b> <teamnumber> <teamsecret> <gameid> [<initial_depth>]");
         return (0);
     }
-
-    bool self_white = (argv[1][0] == 'w') ? true : false;
     int teamnumber = atoi(argv[2]);
     const char * teamsecret = argv[3];
     int gameid = atoi(argv[4]);
 
+#else
+    if (argc < 2)
+    {
+        puts("Usage: <w|b>");
+        return (0);
+    }
+#endif
+
+    bool self_white = (argv[1][0] == 'w') ? true : false;
     uint8_t depth = (argc >= 6) ? (uint8_t) atoi(argv[5]) : INITIAL_DEPTH;
 
     //The play they made/we made
@@ -63,14 +78,20 @@ int main(int argc, const char * argv[])
     {
         puts("\ngetting status");
         //Get their move
+        #ifndef CONSOLE
         getStatus(move, &tlimit, gameid, teamnumber, teamsecret);
+        #else
+        getPlayerMove(move);
+        #endif
 
         printf("received move: %s\n", move);
 
         //Parse the move
         parseMoveString(move, !self_white, &current_state);
-
+        
+#ifndef CONSOLE
         printf("making move, with tleft: %f\n", tlimit);
+#endif
 
         WHITE_START:
         //Make move
@@ -86,8 +107,12 @@ int main(int argc, const char * argv[])
 
         printf("sending move: %s\n", move);
 
+        #ifndef CONSOLE
         //Submit move to server
         pushMove(gameid, teamnumber, teamsecret, move);
+        #else
+        printf("CPU Move: %s\n", move);
+        #endif
 
         //Update current state
         current_state = next_state;
@@ -98,6 +123,18 @@ int main(int argc, const char * argv[])
     return (0);
 #pragma clang diagnostic pop
 }
+
+#ifdef CONSOLE
+void getPlayerMove(char move[7])
+{
+    puts("enter a move, e.g. PA2A3:");
+    fgets(move, 7, stdin);
+    if(move[6] == '\n')
+    {
+        move[6] = '\0';
+    }
+}
+#endif
 
 #ifdef DEBUG
 void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
