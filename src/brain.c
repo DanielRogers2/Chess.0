@@ -38,8 +38,10 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
     baseStates.count = 0;
     baseStates.data = NULL;
 
+    const size_t futurestore_states = depth - 1;
+
 #ifndef PARALLEL_NEGAMAX
-    boardset * futureStates = calloc(depth - 1, sizeof(boardset));
+    boardset * future_states = calloc(futurestore_states, sizeof(boardset));
 #else
     int thread;
 
@@ -53,10 +55,10 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
 #endif
 
     omp_set_num_threads(threadcount);
-    boardset * futureStates[threadcount];
+    boardset * future_states[threadcount];
     for (uint8_t i = 0; i < threadcount; ++i)
     {
-        futureStates[i] = calloc(depth - 1, sizeof(boardset));
+        future_states[i] = calloc(futurestore_states, sizeof(boardset));
     }
 #endif
 
@@ -102,13 +104,13 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
     }
 
 #ifdef DEBUG_SEARCH
-    puts("staring search");
+    puts("starting search");
 #endif
 
     //Do the search
 #ifdef PARALLEL_NEGAMAX
 #pragma omp parallel for private(cur, thread) \
-    shared(best_indx, best, states, baseStates, futureStates, self_white, depth)
+    shared(best_indx, best, states, baseStates, future_states, self_white, depth)
 #endif
     for (uint8_t i = 0; i < states; ++i)
     {
@@ -116,7 +118,7 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
         //  depth 0 values won't be over-written, so we can just look up
         //  the data we want after the loop ends
 #ifndef PARALLEL_NEGAMAX
-        cur = -negamax(&baseStates.data[i], !self_white, futureStates, -INT_MAX, 
+        cur = -negamax(&baseStates.data[i], !self_white, future_states, -INT_MAX,
                 INT_MAX, depth - 1);
         if (cur > best)
         {
@@ -125,7 +127,7 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
         }
 #else
         thread = omp_get_thread_num();
-        cur = -negamax(&baseStates.data[i], !self_white, futureStates[thread],
+        cur = -negamax(&baseStates.data[i], !self_white, future_states[thread],
                 -INT_MAX, INT_MAX, depth - 1);
         if (cur > best[thread])
         {
@@ -146,11 +148,11 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
     //Get best board state
     memcpy(result, &baseStates.data[best_indx], sizeof(chessboard));
     //Free used memory
-    for (uint8_t i = 0; i < depth; ++i)
+    for (uint8_t i = 0; i < futurestore_states; ++i)
     {
-        free(futureStates[i].data);
+        free(future_states[i].data);
     }
-    free(futureStates);
+    free(future_states);
 #else
     //Get thread best
     int th_best = best[0];
@@ -176,9 +178,9 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
     {
         for (uint8_t i = 0; i < depth - 1; ++i)
         {
-            free(futureStates[j][i].data);
+            free(future_states[j][i].data);
         }
-        free(futureStates[j]);
+        free(future_states[j]);
     }
 #endif
 }
