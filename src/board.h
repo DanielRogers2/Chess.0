@@ -129,8 +129,6 @@ typedef struct
 /*
  * Initializes the board to its base state, where no moves have been made yet
  *
- * @owner Js
- *
  * @uses white_initial, black_initial, w_codes, b_codes
  *
  * @param board The chessboard to initialize.
@@ -139,8 +137,6 @@ void initBoard(chessboard * board);
 
 /*
  * Expands the set of all possible board states from an initial state
- *
- * @owner Js
  *
  * @uses w_codes, b_codes, location_boards, legal_moves
  *
@@ -152,10 +148,27 @@ void initBoard(chessboard * board);
  */
 uint8_t expandStates(chessboard * const board, boardset * storage, bool white);
 
+/**
+ * Makes simple checks against a destination square to validate moves
+ *
+ * @param destination The bitboard representing the destination of a piece
+ * @param self_pieces A bitboard representing the locations of all pieces
+ *          belonging to the side (w|b) making the move
+ * @param opponent_pieces A bitboard representing the lcoations of all pieces
+ *          belonging to the opposing side
+ * @param piece_code The piece moving
+ * @param movingForward should be true if the piece is moving forward from its
+ * perspective
+ *
+ * @return true if the destination square does not contain an allied piece, or
+ * if the piece is a pawn and if moving forward, no opposing piece is at the
+ * destination, or if moving diagonally, an opposing piece is at the destination
+ */
+bool invalidMoveSimple(bitboard destination, bitboard self_pieces,
+        bitboard opponent_pieces, uint8_t piece_code, bool movingForward);
+
 /*
  * Generates a new board state based on a piece move
- *
- * @owner Js
  *
  * @param pindex The index of the piece to move
  * @param location The location to move to
@@ -189,8 +202,6 @@ void moveSpecial(uint8_t pindex, uint8_t location, bool white,
 /*
  * Evaluates the value of a particular board
  *
- * @owner Js
- *
  * Based on:
  *   http://chessprogramming.wikispaces.com/Simplified+evaluation+function
  *
@@ -204,8 +215,6 @@ int evaluateState(chessboard * const board, bool white);
 
 /*
  * Prints a board state
- *
- * @owner Js
  *
  * @param board The chessboard to print
  */

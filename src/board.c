@@ -14,8 +14,6 @@
  *
  * @uses white_initial, black_initial, location_bitboards, w_codes, b_codes
  *
- * @owner Js
- *
  * @param board The chessboard to initialize.
  */
 void initBoard(chessboard * board)
@@ -79,8 +77,6 @@ void initBoard(chessboard * board)
 
 /*
  * Expands the set of all possible board states from an initial state
- *
- * @owner Js
  *
  * @uses location_boards, legal_moves
  *
@@ -153,31 +149,9 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
 #ifdef DEBUG_MOVE
                 fprintf(stderr, "making move: %d\n", moves[j][k]);
 #endif
-                //Check for end of ray, or own piece @ location
-                //Location check works as follows:
-                //  Get the bitboard representing the destination
-                //  Then AND with pieces for own side -> all 0 if no pieces at
-                //      destination, meaning valid move. !0 if own piece at
-                //      location, meaning invalid move
-                //location_boards[64] == 0xffffffffffffffff, so any AND will
-                //  make a non-0 value
-                if (location_boards[moves[j][k]] & self)
+                if(invalidMoveSimple(location_boards[moves[j][k]], self, op, codes[i], j==0))
                 {
                     //Stop looking through ray
-#ifdef DEBUG_MOVE
-                    puts("breaking");
-#endif
-                    break;
-                }
-                else if ((codes[i] == W_P || codes[i] == B_P)
-                //diagonals must capture
-                        && (((j != 0) && (!(location_boards[moves[j][k]] & op)))
-                        //forward can't capture
-                                || ((j == 0)
-                                        && (location_boards[moves[j][k]] & op))))
-                {
-                    //  If it's a pawn, diagonals are only allowed on capture
-                    //  Can't capture by moving forward
 #ifdef DEBUG_MOVE
                     puts("breaking");
 #endif
@@ -275,10 +249,47 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
     return (states);
 }
 
+/**
+ * Makes simple checks against a destination square to validate moves
+ *
+ * @param destination The bitboard representing the destination of a piece
+ * @param self_pieces A bitboard representing the locations of all pieces
+ *          belonging to the side (w|b) making the move
+ * @param opponent_pieces A bitboard representing the lcoations of all pieces
+ *          belonging to the opposing side
+ * @param piece_code The piece moving
+ * @param movingForward should be true if the piece is moving forward from its
+ * perspective
+ *
+ * @return true if the destination square does not contain an allied piece, or
+ * if the piece is a pawn and if moving forward, no opposing piece is at the
+ * destination, or if moving diagonally, an opposing piece is at the destination
+ */
+bool invalidMoveSimple(bitboard destination, bitboard self_pieces,
+        bitboard opponent_pieces, uint8_t piece_code, bool movingForward)
+{
+    //Check for end of ray, or own piece @ location
+    //Location check works as follows:
+    //  Get the bitboard representing the destination
+    //  Then AND with pieces for own side -> all 0 if no pieces at
+    //      destination, meaning valid move. !0 if own piece at
+    //      location, meaning invalid move
+    //location_boards[64] == 0xffffffffffffffff, so any AND will
+    //  make a non-0 value
+    return (destination & self_pieces) ||
+        (
+            (piece_code == W_P || piece_code == B_P) &&
+            /*!! NOT the result, since the XOR check is for a VALID move */
+            ! (
+                //if moving forward, must have opponent piece
+                //  if moving forward, must NOT have opponent piece
+                movingForward ^ (destination & opponent_pieces)
+            )
+        );
+}
+
 /*
  * Generates a new board state based on a piece move
- *
- * @owner Js
  *
  * @param pindex The index of the piece to move
  * @param location The location to move to
@@ -440,8 +451,6 @@ bool makeMove(uint8_t pindex, uint8_t location, bool white,
  *
  * @uses *_initial to determine index of rook for castling maneuver
  *
- * @owner Js
- *
  * @param pindex The index of the piece to move
  * @param location The location to move to
  * @param white true If the piece being moved is white
@@ -540,8 +549,6 @@ void moveSpecial(uint8_t pindex, uint8_t location, bool white,
 /*
  * Evaluates the value of a particular board
  *
- * @owner Js
- *
  * Based on:
  *   http://chessprogramming.wikispaces.com/Simplified+evaluation+function
  *
@@ -606,8 +613,6 @@ int evaluateState(chessboard * const board, bool white)
 
 /*
  * Prints a board state
- *
- * @owner Js
  *
  * @param board The chessboard to print
  */
