@@ -65,13 +65,13 @@ void initBoard(chessboard * board)
 #ifdef DEBUG_INIT
     for (uint8_t i = 0; i < 16; ++i)
     {
-        fprintf(stderr, "w%d: %d\n", i, board->w_piece_posns[i]);
-        fprintf(stderr, "wloc%d: %llx\n", i, board->w_locations[i]);
-        fprintf(stderr, "b%d: %d\n", i, board->b_piece_posns[i]);
-        fprintf(stderr, "bloc%d: %llx\n", i, board->b_locations[i]);
+        fprintf(stdout, "w%d: %d\n", i, board->w_piece_posns[i]);
+        fprintf(stdout, "wloc%d: %llx\n", i, board->w_locations[i]);
+        fprintf(stdout, "b%d: %d\n", i, board->b_piece_posns[i]);
+        fprintf(stdout, "bloc%d: %llx\n", i, board->b_locations[i]);
     }
-    fprintf(stderr, "woc: %llx\n", board->all_w_pieces);
-    fprintf(stderr, "boc: %llx\n", board->all_b_pieces);
+    fprintf(stdout, "woc: %llx\n", board->all_w_pieces);
+    fprintf(stdout, "boc: %llx\n", board->all_b_pieces);
 #endif
 }
 
@@ -132,9 +132,9 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
 
         assert(i < 16);
 #ifdef DEBUG_MOVE
-        fprintf(stderr, "index: %d\n", (int) i);
-        fprintf(stderr, "piece: %d, @%d\n", codes[i], pieces[i]);
-        fprintf(stderr, "move0: %d\n", legal_moves[codes[i]][pieces[i]][0][0]);
+        fprintf(stdout, "index: %d\n", (int) i);
+        fprintf(stdout, "piece: %d, @%d\n", codes[i], pieces[i]);
+        fprintf(stdout, "move0: %d\n", legal_moves[codes[i]][pieces[i]][0][0]);
 #endif
 
         moves = legal_moves[codes[i]][pieces[i]];
@@ -147,9 +147,10 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
             for (k = 0; k < 7; ++k)
             {
 #ifdef DEBUG_MOVE
-                fprintf(stderr, "making move: %d\n", moves[j][k]);
+                fprintf(stdout, "making move: %d\n", moves[j][k]);
 #endif
-                if(invalidMoveSimple(location_boards[moves[j][k]], self, op, codes[i], j==0))
+                if(invalidMoveSimple(location_boards[moves[j][k]], self, op,
+                    codes[i], j == 0))
                 {
                     //Stop looking through ray
 #ifdef DEBUG_MOVE
@@ -218,7 +219,7 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                                 storage->count * sizeof(chessboard));
                     }
 #ifdef DEBUG_MOVE
-                    fprintf(stderr, "castled kingside: %d, %x\n", cancastle, castlefree);
+                    fprintf(stdout, "castled kingside: %d, %x\n", cancastle, castlefree);
                     printBoard(&storage->data[states-1]);
 #endif
                 }
@@ -237,7 +238,7 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                                 storage->count * sizeof(chessboard));
                     }
 #ifdef DEBUG_MOVE
-                    fprintf(stderr, "castled queenside: %d, %x\n", cancastle,
+                    fprintf(stdout, "castled queenside: %d, %x\n", cancastle,
                             castlefree);
                     printBoard(&storage->data[states-1]);
 #endif
@@ -691,7 +692,7 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     uint8_t row_start = (uint8_t) atoi(&move[2]) - 1;
 
 #ifdef DEBUG
-    fprintf(stderr, "cs: %c, rs: %d\n", col_start, row_start);
+    fprintf(stdout, "cs: %c, rs: %d\n", col_start, row_start);
 #endif
 
     //Get data for end position
@@ -699,7 +700,7 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     uint8_t row_end = (uint8_t) atoi(&move[4]) - 1;
 
 #ifdef DEBUG
-    fprintf(stderr, "ce: %c, re: %d\n", col_end, row_end);
+    fprintf(stdout, "ce: %c, re: %d\n", col_end, row_end);
 #endif
 
     //Get data for promotion
@@ -710,13 +711,13 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     //shhhhhh
     square_start += (col_start - 'a');
 #ifdef DEBUG
-    fprintf(stderr, "ss: %d\n", square_start);
+    fprintf(stdout, "ss: %d\n", square_start);
 #endif
 
     //Compute square on board for end
     uint8_t square_end = row_end * 8;
 #ifdef DEBUG
-    fprintf(stderr, "seinitial: %d\n", square_end);
+    fprintf(stdout, "seinitial: %d\n", square_end);
 #endif
     //shhhhhh
     square_end += (col_end - 'a');
@@ -737,7 +738,7 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     }
 
 #ifdef DEBUG
-    fprintf(stderr, "making move [piece, dest, white]: %d, %d, %d\n", pindex, square_end,
+    fprintf(stdout, "making move [piece, dest, white]: %d, %d, %d\n", pindex, square_end,
             white);
 #endif
 
@@ -745,7 +746,7 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     if (promote != '\0')
     {
 #ifdef DEBUG
-        fprintf(stderr, "promotion to: %c\n", promote);
+        fprintf(stdout, "promotion to: %c\n", promote);
 #endif
 
         uint8_t promote_to = (white) ? 0 : 6;
