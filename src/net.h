@@ -12,7 +12,12 @@
 
 #include <string.h>
 #include <curl/curl.h>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
 #include <jansson.h>
+#pragma clang diagnostic pop
+
 #include <stdbool.h>
 #include <windows.h>
 #include <inttypes.h>
@@ -22,11 +27,15 @@
 #define URL_SIZE 256
 #define BUFFER_SIZE 256
 
+//We don't want to change the layout of this struct
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
 typedef struct
 {
     char * data;
     int pos;
 } write_response;
+#pragma clang diagnostic pop
 
 /**
  * Polls the server for updates
