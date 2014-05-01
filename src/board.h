@@ -11,6 +11,7 @@
 #ifndef BOARD_H_
 #define BOARD_H_
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>

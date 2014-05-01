@@ -1,4 +1,4 @@
-CFLAGS = -std=c11 -m64
+CFLAGS = -std=c11 -m64 $(DEBUG_FLAGS)
 OPFLAGS = -O0
 LDFLAGS = -m64
 
@@ -13,9 +13,9 @@ else
 CC = gcc
 OPFLAGS = -flto -O3
 OBJDIR = RELEASE
+endif
 ifdef PARALLEL
 CFLAGS += -DPARALLEL_NEGAMAX -DUSE_MAX_THREADS -fopenmp
-endif
 endif
 
 SRCS = board.c brain.c globals.c main.c pregame.c
@@ -39,7 +39,7 @@ OBJS = $(SRCS:%.c=$(OBJDIR)/%.o)
 EXECUTABLE = chess.0
 
 all: $(SRCS) $(EXECUTABLE)
-   
+
 $(OBJS): | $(OBJDIR)
 
 $(OBJDIR):

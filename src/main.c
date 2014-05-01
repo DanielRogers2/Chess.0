@@ -93,7 +93,7 @@ int main(int argc, const char * argv[])
         printf("making move, with tleft: %f\n", tlimit);
 #endif
 
-        WHITE_START:
+WHITE_START:
         //Make move
         selectBestMove(self_white, &current_state, &next_state, depth, tlimit);
 
