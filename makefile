@@ -7,7 +7,7 @@ CONSOLE = 1
 
 ifdef DEBUG
 CC = clang
-CFLAGS += -Weverything -Werror
+CFLAGS += -Weverything -Werror -DDEBUG
 OBJDIR = DEBUG
 else
 CC = gcc

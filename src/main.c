@@ -19,7 +19,7 @@
 #define INITIAL_DEPTH 7
 #define INITIAL_TIME 900
 
-#ifdef DEBUG
+#ifdef PLAY_SELF
 void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply);
 #endif
 
@@ -136,7 +136,7 @@ void getPlayerMove(char move[7])
 }
 #endif
 
-#ifdef DEBUG
+#ifdef PLAY_SELF
 void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
 {
     //Timers
