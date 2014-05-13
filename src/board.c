@@ -131,12 +131,6 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
         }
 
         assert(i < 16);
-#ifdef DEBUG_MOVE
-        fprintf(stdout, "index: %d\n", (int) i);
-        fprintf(stdout, "piece: %d, @%d\n", codes[i], pieces[i]);
-        fprintf(stdout, "move0: %d\n", legal_moves[codes[i]][pieces[i]][0][0]);
-#endif
-
         moves = legal_moves[codes[i]][pieces[i]];
 
         //Go through each move ray
@@ -146,24 +140,17 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
             //Go through each move in ray
             for (k = 0; k < 7; ++k)
             {
-#ifdef DEBUG_MOVE
-                fprintf(stdout, "making move: %d\n", moves[j][k]);
-#endif
                 if(invalidMoveSimple(location_boards[moves[j][k]], self, op,
                     codes[i], j == 0))
                 {
                     //Stop looking through ray
-#ifdef DEBUG_MOVE
-                    puts("breaking");
-#endif
                     break;
                 }
                 else
                 {
                     //Expand special moves, do pawn promotion here as it's a
                     //  result of the move, rather than a unique move
-                    if (((codes[i] == W_P) && ((moves[j][k] / 8) == 7))
-                            || ((codes[i] == B_P) && ((moves[j][k] / 8) == 0)))
+                    if (canPromotePawn(codes[i], moves[j][k]))
                     {
                         //pawn promotion, just make it a queen
                         moveSpecial(i, moves[j][k], white, board,
@@ -218,10 +205,6 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                         storage->data = realloc(storage->data,
                                 storage->count * sizeof(chessboard));
                     }
-#ifdef DEBUG_MOVE
-                    fprintf(stdout, "castled kingside: %d, %x\n", cancastle, castlefree);
-                    printBoard(&storage->data[states-1]);
-#endif
                 }
                 if ((cancastle & QUEENSIDE_ROOK)
                         && ((castlefree & QUEENSIDE_FREE) == QUEENSIDE_FREE))
@@ -237,11 +220,6 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white)
                         storage->data = realloc(storage->data,
                                 storage->count * sizeof(chessboard));
                     }
-#ifdef DEBUG_MOVE
-                    fprintf(stdout, "castled queenside: %d, %x\n", cancastle,
-                            castlefree);
-                    printBoard(&storage->data[states-1]);
-#endif
                 }
             }
         }
@@ -287,6 +265,23 @@ bool invalidMoveSimple(bitboard destination, bitboard self_pieces,
                 movingForward ^ (destination & opponent_pieces)
             )
         );
+}
+
+/**
+ * Checks if a move is a candidate for pawn promotion.
+ *
+ * @param piece_code The piece being evaluated
+ * @param move_dest The square the piece is moving to
+ *
+ * @return true if the piece is a pawn and moving to the last row opposite its
+ * starting position
+ */
+bool canPromotePawn(uint8_t piece_code, uint8_t move_dest)
+{
+    //If it's a white pawn and moving into the last row,
+    //or it's a black pawn and moving into the first row
+    return ((piece_code == W_P) && ((move_dest / 8) == 7))
+            || ((piece_code == B_P) && ((move_dest / 8) == 0));
 }
 
 /*

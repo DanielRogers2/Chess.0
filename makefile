@@ -16,6 +16,7 @@ OBJDIR = RELEASE
 endif
 ifdef PARALLEL
 CFLAGS += -DPARALLEL_NEGAMAX -DUSE_MAX_THREADS -fopenmp
+LDFLAGS += -fopenmp
 endif
 
 SRCS = board.c brain.c globals.c main.c pregame.c
@@ -45,7 +46,7 @@ $(OBJS): | $(OBJDIR)
 $(OBJDIR):
 	mkdir $(OBJDIR)
 
-$(EXECUTABLE): $(OBJS) 
+$(EXECUTABLE): $(OBJS)
 	$(CC) $(OPFLAGS) $(LDFLAGS) $(OBJS) -o $(OBJDIR)/$@
 
 $(OBJDIR)/%.o: %.c

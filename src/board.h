@@ -167,6 +167,17 @@ uint8_t expandStates(chessboard * const board, boardset * storage, bool white);
 bool invalidMoveSimple(bitboard destination, bitboard self_pieces,
         bitboard opponent_pieces, uint8_t piece_code, bool movingForward);
 
+/**
+ * Checks if a move is a candidate for pawn promotion.
+ *
+ * @param piece_code The piece being evaluated
+ * @param move_dest The square the piece is moving to
+ *
+ * @return true if the piece is a pawn and moving to the last row opposite its
+ * starting position
+ */
+bool canPromotePawn(uint8_t piece_code, uint8_t move_dest);
+
 /*
  * Generates a new board state based on a piece move
  *
