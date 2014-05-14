@@ -224,6 +224,8 @@ void moveSpecial(uint8_t pindex, uint8_t location, bool white,
  */
 int evaluateState(chessboard * const board, bool white);
 
+void getDiagonalIndexes(uint8_t pindex, uint8_t diagonal_indexes[2]);
+
 /*
  * Prints a board state
  *

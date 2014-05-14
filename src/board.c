@@ -607,6 +607,42 @@ int evaluateState(chessboard * const board, bool white)
     return (value);
 }
 
+void getDiagonalIndexes(uint8_t pindex, uint8_t diagonal_indexes[2])
+{
+    uint8_t row = pindex / 8;
+    uint8_t col = pindex % 8;
+
+    /*
+     * 14 13 12 11 10 9  8  7       7
+     * 13 12 11 10 9  8  7  6       6
+     * 12 11 10 9  8  7  6  5       5
+     * 11 10 9  8  7  6  5  4       4
+     * 10 9  8  7  6  5  4  3       3
+     * 9  8  7  6  5  4  3  2       2
+     * 8  7  6  5  4  3  2  1       1
+     * 7  6  5  4  3  2  1  0       0
+     *
+     * 0  1  2  3  4  5  6  7
+     */
+    //The main diagonal is 7, and goes from a1 to h8
+    diagonal_indexes[0] = row + 7 - col;
+
+    /*
+     * 7  8  9  10 11 12 13 14      7
+     * 6  7  8  9  10 11 12 13      6
+     * 5  6  7  8  9  10 11 12      5
+     * 4  5  6  7  8  9  10 11      4
+     * 3  4  5  6  7  8  9  10      3
+     * 2  3  4  5  6  7  8  9       2
+     * 1  2  3  4  5  6  7  8       1
+     * 0  1  2  3  4  5  6  7       0
+     *
+     * 0  1  2  3  4  5  6  7
+     */
+    //The main diagonal is 7, and goes from a8 to h1
+    diagonal_indexes[1] = row + col;
+}
+
 /*
  * Prints a board state
  *

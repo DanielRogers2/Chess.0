@@ -132,23 +132,6 @@ const uint8_t black_initial[16] =
 { 48, 49, 50, 51, 52, 53, 54, 55, 56, 63, 57, 62, 58, 61, 59, 60 };
 
 /*
- * Stores the randomly generated N-bit keys for hash table key generation.
- * The resulting hash table will contain 2^N entries. This is indexed by piece
- * type and location.
- *
- * These are loaded at program start, and not modified during runtime unless
- * game pre-generation work is being performed.
- *
- * @users board
- * @modifiers pregame
- *
- * @initializer pregame->generateHashkeys. Generates a new set of hashkeys
- *              prior to game start. Hashkeys are not currently saved, and
- *              must be regenerated during each startup.
- */
-//HASHKEY key_table[12][64];
-
-/*
  * Lookup tables for evalutation function based on the article here:
  *      http://chessprogramming.wikispaces.com/Simplified+evaluation+function
  *

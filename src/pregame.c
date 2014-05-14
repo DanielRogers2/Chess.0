@@ -15,8 +15,6 @@
  * resulting table will be exported as a binary file to be used by
  * loadMoveTables()
  *
- * @owner Js
- *
  * @modifies legal_moves, attacked_squares
  */
 void generateMoveTables(void)
@@ -92,8 +90,6 @@ void generateMoveTables(void)
  * Loads in a binary file created by generateMoveTable to initializer the
  * pre-calculated move tables.
  *
- * @owner Js
- *
  * @modifies legal_moves, attacked_squares
  *
  * @returns true if the file loaded successfully, false if some error occurred
@@ -143,21 +139,104 @@ bool loadMoveTables(void)
     }
 }
 
-/*
- * Populates the hashkey table for the board with randomly generated N-bit
- * values, where N is the bitwidth of HASHKEY.
- *
- * @modifies key_table
- void generateHashkeys()
- {
- //TODO Generate the hashkey tables
- }
- */
+void computeShadowMasks(void)
+{
+    //Masks are identical as long as in a row/column/diagonal, since they don't
+    //  care about directions
+    bitboard horizonal_shadows[8];
+    bitboard vertical_shadows[8];
+    for(uint8_t i = 0; i < 8; ++i)
+    {
+        computeShadowHorizontal(horizonal_shadows, i);
+        computeShadowVertical(vertical_shadows, i);
+    }
+
+    bitboard diagonal_a1h8_shadows[15];
+    bitboard diagonal_a8h1_shadows[15];
+
+    uint8_t diagonal_indexes[2];
+
+    //Get shadow maps for diagonals ending along the bottom row
+    for(uint8_t row = 0, col = 0; row < 8; ++row)
+    {
+        getDiagonalIndexes(row * 8 + col, diagonal_indexes);
+        computeShadowDiagonalA1H8(&diagonal_a1h8_shadows[diagonal_indexes[0]], row, col);
+        computeShadowDiagonalA8H1(&diagonal_a8h1_shadows[diagonal_indexes[1]], row, col);
+    }
+
+    //Get shadow maps for diagonals ending on the right edge
+    for(uint8_t row = 7, col = 1; col < 8; ++col)
+    {
+        getDiagonalIndexes(row * 8 + col, diagonal_indexes);
+        computeShadowDiagonalA1H8(&diagonal_a1h8_shadows[diagonal_indexes[0]], row, col);
+        computeShadowDiagonalA8H1(&diagonal_a8h1_shadows[diagonal_indexes[1]], row, col);
+    }
+}
+
+void computeShadowHorizontal(bitboard * board, uint8_t row)
+{
+    //8 bits adjacent starting at row[row]
+    *board = ((bitboard) 0xFF) << ((bitboard) row * 8);
+}
+
+void computeShadowDiagonalA1H8(bitboard * board, uint8_t row, uint8_t col)
+{
+    /*
+     * 7654 3210
+     *
+     * 1000 0000 <- H1 7
+     * 0100 0000       6
+     * 0010 0000       5
+     * 0001 0000       4
+     * 0000 1000       3
+     * 0000 0100       2
+     * 0000 0010       1
+     * 0000 0001 <- A1 0
+     */
+    //if row < col, need to move mask left by dif
+    //If row > col, need to move mask up by dif
+    bitboard move = (row < col) ? col - row : (row - col) * 8;
+    assert(move < 64);
+
+    *board = ((bitboard) 0x8040201008040201) << move;
+}
+
+void computeShadowVertical(bitboard * board, uint8_t col)
+{
+    //8 bits separated by 7 bits, starting at col[col]
+    *board = ((bitboard) 0x0101010101010101) << (col);
+}
+
+void computeShadowDiagonalA8H1(bitboard * board, uint8_t row, uint8_t col)
+{
+    /*
+     * 7654 3210
+     *
+     * 0000 0001 <- H1 7
+     * 0000 0010       6
+     * 0000 0100       5
+     * 0000 1000       4
+     * 0001 0000       3
+     * 0010 0000       2
+     * 0100 0000       1
+     * 1000 0000 <- A1 0
+     * ^       ^
+     * |       L row = 0, col = 0, dif = 0, disp = 7
+     * L row = 0, col = 7, dif = 7, disp = 0
+     */
+    //If row < col, need to move mask right by 7 - dif
+    //If row > col, need to move mask left by dif
+    bitboard move = (row < col) ? 7 - (col - row) : row - col;
+    assert(move < 64);
+
+    *board = ((bitboard) 0x0102040810204080);
+    *board = (row < col) ? *board >> move : *board << move;
+}
+
+
 
 /*
  * Calculates the moves available to a pawn piece from a location
- *
- * @owner Js
  *
  * @uses location_boards
  *
@@ -209,8 +288,6 @@ bool white)
 
 /*
  * Calculates the moves available to a knight piece from a location
- *
- * @owner Js
  *
  * @uses location_boards
  *
@@ -283,8 +360,6 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
 /*
  * Calculates the moves available to a bishop piece from a location
  *
- * @owner Js
- *
  * @uses location_boards
  *
  * @param location The location of the bishop
@@ -343,8 +418,6 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
 /*
  * Calculates the moves available to a rook piece from a location
  *
- * @owner Js
- *
  * @uses location_boards
  *
  * @param location The location of the rook
@@ -399,8 +472,6 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard)
 
 /*
  * Calculates the moves available to a queen piece from a location
- *
- * @owner Js
  *
  * @uses location_boards
  *
@@ -483,8 +554,6 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard)
 
 /*
  * Calculates the moves available to a king from a location
- *
- * @owner Js
  *
  * @uses location_boards
  *

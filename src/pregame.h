@@ -25,8 +25,6 @@
  * resulting table will be exported as a binary file to be used by
  * loadMoveTables()
  *
- * @owner Js
- *
  * @modifies legal_moves, attacked_squares
  */
 void generateMoveTables(void);
@@ -34,8 +32,6 @@ void generateMoveTables(void);
 /*
  * Loads in a binary file created by generateMoveTable to initializer the
  * pre-calculated move tables.
- *
- * @owner Js
  *
  * @modifies legal_moves, attacked_squares
  *
@@ -45,18 +41,14 @@ void generateMoveTables(void);
  */
 bool loadMoveTables(void);
 
-/*
- * Populates the hashkey table for the board with randomly generated N-bit
- * values, where N is the bitwidth of HASHKEY.
- *
- * @modifies key_table
- void generateHashkeys();
- */
+void computeShadowMasks(void);
+void computeShadowHorizontal(bitboard * board, uint8_t row);
+void computeShadowDiagonalA1H8(bitboard * board, uint8_t row, uint8_t col);
+void computeShadowVertical(bitboard * board, uint8_t col);
+void computeShadowDiagonalA8H1(bitboard * board, uint8_t row, uint8_t col);
 
 /*
  * Calculates the moves available to a pawn piece from a location
- *
- * @owner Js
  *
  * @uses location_boards
  *
@@ -76,8 +68,6 @@ bool white);
 /*
  * Calculates the moves available to a knight piece from a location
  *
- * @owner Js
- *
  * @uses location_boards
  *
  * @param location The location of the knight
@@ -92,8 +82,6 @@ void calcKnightMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard);
 
 /*
  * Calculates the moves available to a bishop piece from a location
- *
- * @owner Js
  *
  * @uses location_boards
  *
@@ -112,8 +100,6 @@ void calcBishopMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard);
 /*
  * Calculates the moves available to a rook piece from a location
  *
- * @owner Js
- *
  * @uses location_boards
  *
  * @param location The location of the rook
@@ -131,8 +117,6 @@ void calcRookMoves(uint8_t location, uint8_t moves[4][7], bitboard atkbboard);
 /*
  * Calculates the moves available to a queen piece from a location
  *
- * @owner Js
- *
  * @uses location_boards
  *
  * @param location The location of the queen
@@ -149,8 +133,6 @@ void calcQueenMoves(uint8_t location, uint8_t moves[8][7], bitboard atkbboard);
 
 /*
  * Calculates the moves available to a king from a location
- *
- * @owner Js
  *
  * @uses location_boards
  *
