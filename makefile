@@ -17,7 +17,7 @@ CFLAGS += -DPARALLEL_NEGAMAX -DUSE_MAX_THREADS -fopenmp
 LDFLAGS += -fopenmp
 endif
 
-SRCS = board.c brain.c globals.c main.c pregame.c
+SRCS = board.c brain.c globals.c main.c pregame.c utils.c
 
 SRCDIR = src
 vpath %.c $(SRCDIR)
