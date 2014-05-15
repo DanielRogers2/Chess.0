@@ -16,14 +16,6 @@
 #include "common_defs.h"
 #include "board.h"
 
-//Safty margins for depth
-//4mins, switch to depth medium
-#define MED_DEPTH_CUTOFF 300
-#define MEDIUM_DEPTH 6
-//45s, switch to depth small
-#define SMALL_DEPTH_CUTOFF 60
-#define SMALLEST_DEPTH 5
-
 /*
  * Does a search for and returns the best move for the board
  *
@@ -37,7 +29,7 @@
  * @param tlimit The amount of time left on the clock in seconds
  */
 void selectBestMove(bool self_white, chessboard * restrict const initial,
-        chessboard * restrict result, uint8_t depth, double tlimit);
+        chessboard * restrict result, uint8_t depth);
 
 /*
  * Performs a standard negamax search

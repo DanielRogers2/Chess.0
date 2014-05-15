@@ -242,7 +242,7 @@ void printBoard(chessboard * const board);
  * @param out An array of char[7] to fill with the movestring
  */
 void getMoveString(chessboard * const board, chessboard * const prev,
-bool white, char out[7]);
+bool white, char out[6]);
 
 /**
  * Parses a move string and makes the appropriate move
@@ -251,7 +251,7 @@ bool white, char out[7]);
  * @param white true if the move was made by white
  * @param board The board to update
  */
-void parseMoveString(char move[7], bool white, chessboard * board);
+void parseMoveString(char move[6], bool white, chessboard * board);
 
 /*
  * Converts a board coordinate to a notation string
@@ -261,6 +261,16 @@ void parseMoveString(char move[7], bool white, chessboard * board);
  *                  - ac indicates a capture
  */
 void squareToString(uint8_t pos, char str[3]);
+
+/*
+ * Finds if the index of the piece at a location
+ *
+ * @param pos The position (0-64) of the piece
+ * @param positions The array of positions to search for
+ *
+ * @return The index of the piece at the supplied position, 16 if not found
+ */
+uint8_t findPieceByPosition(uint8_t pos, uint8_t positions[16]);
 
 /*
  * for readability/debugging purposes, should not be used for net moves

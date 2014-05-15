@@ -28,7 +28,7 @@
  * @param depth The depth to search to
  */
 void selectBestMove(bool self_white, chessboard * restrict const initial,
-        chessboard * restrict result, uint8_t depth, double tlimit)
+        chessboard * restrict result, uint8_t depth)
 {
 #ifdef DEBUG_SEARCH
     puts("setting up storage");
@@ -89,19 +89,6 @@ void selectBestMove(bool self_white, chessboard * restrict const initial,
 
     //Currently seen value
     int cur;
-
-    //Dynamic setup of depth to prevent loss due to timeout
-    if (tlimit <= MED_DEPTH_CUTOFF)
-    {
-        if (tlimit < SMALL_DEPTH_CUTOFF)
-        {
-            depth = SMALLEST_DEPTH;
-        }
-        else
-        {
-            depth = MEDIUM_DEPTH;
-        }
-    }
 
 #ifdef DEBUG_SEARCH
     puts("starting search");

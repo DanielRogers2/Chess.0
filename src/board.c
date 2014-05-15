@@ -262,7 +262,7 @@ bool invalidMoveSimple(bitboard destination, bitboard self_pieces,
             ! (
                 //if moving forward, must have opponent piece
                 //  if moving forward, must NOT have opponent piece
-                movingForward ^ (destination & opponent_pieces)
+                movingForward ^ (bool) (destination & opponent_pieces)
             )
         );
 }
@@ -650,24 +650,54 @@ void getDiagonalIndexes(uint8_t pindex, uint8_t diagonal_indexes[2])
  */
 void printBoard(chessboard * const board)
 {
-    char pos_str[3];
+    //Yeah this is slow and bad
+    uint8_t col, row, pindex;
 
-    puts("White:");
-    for (uint8_t i = 0; i < 16; ++i)
+    puts("\ncol a|b|c|d|e|f|g|h\n                      row");
+    printf("    ");
+    //Want black on top, so start from black's side
+    //But this makes row traversal reversed, so do this funky math
+    for(int8_t i = 56; i != -8; ++i)
     {
-        squareToString(board->w_piece_posns[i], pos_str);
+        row = (uint8_t) i / 8;
+        col = i % 8;
+        //Piece glyphs
+        pindex = findPieceByPosition((uint8_t) i, board->w_piece_posns);
 
-        printf("    pid: %d @ %s\n", board->w_codes[i], pos_str);
-    }
-    //printf("    occupancy: %llx\n", board->all_w_pieces);
+        if(pindex == 16)
+        {
+            //No white pieces at location
+            pindex = findPieceByPosition((uint8_t) i, board->b_piece_posns);
+            if(pindex != 16)
+            {
+                printf("%c", piece_chars[board->b_codes[pindex]] + 'a' - 'A');
+            }
+            else
+            {
+                //No black pieces at location
+                putchar((col % 2) ^ (row % 2) ? '~' : ' ');
+            }
+        }
+        else
+        {
+            printf("%c", piece_chars[board->w_codes[pindex]]);
+        }
 
-    puts("Black:");
-    for (uint8_t i = 0; i < 16; ++i)
-    {
-        squareToString(board->b_piece_posns[i], pos_str);
-        printf("    pid: %d @ %s\n", board->b_codes[i], pos_str);
+        //End of row
+        if(col == 7)
+        {
+            printf("    %d\n", row + 1);
+            //Separators between rows
+            puts("    ---------------    ");
+            printf("    ");
+            i -= 16;
+        }
+        else
+        {
+            //Separate pieces
+            putchar('|');
+        }
     }
-    //printf("    occupancy: %llx\n", board->all_b_pieces);
 }
 
 /*
@@ -679,7 +709,7 @@ void printBoard(chessboard * const board)
  * @param out An array of char[7] to fill with the movestring
  */
 void getMoveString(chessboard * const board, chessboard * const prev,
-bool white, char out[7])
+bool white, char out[6])
 {
     //The piece that moved
     uint8_t piece = (white) ? board->w_last_piece : board->b_last_piece;
@@ -690,21 +720,19 @@ bool white, char out[7])
     //The piece ID
     uint8_t pid = (white) ? prev->w_codes[piece] : prev->b_codes[piece];
 
-    //First get the piece code
-    out[0] = piece_chars[pid];
-    //then the square from, into 1,2 (3 will be \0)
-    squareToString(last_loc, &out[1]);
-    //And the square to, into 3, 4 (5 will be \0)
-    squareToString(last_mv, &out[3]);
+    //then the square from, into 0,1 (2 will be \0)
+    squareToString(last_loc, &out[0]);
+    //And the square to, into 2, 3 (4 will be \0)
+    squareToString(last_mv, &out[2]);
 
     if (pid == W_P || pid == B_P)
     {
         //Check for pawn promotion
         uint8_t npid = (white) ? board->w_codes[piece] : prev->b_codes[piece];
         //Record promotion (if applicable)
-        out[5] = (npid != pid) ? piece_chars[npid] : out[5];
+        out[4] = (npid != pid) ? piece_chars[npid] : out[4];
     }
-    out[6] = '\0';
+    out[5] = '\0';
 }
 
 /**
@@ -714,42 +742,32 @@ bool white, char out[7])
  * @param white true if the move was made by white
  * @param board The board to update
  */
-void parseMoveString(char move[7], bool white, chessboard * board)
+void parseMoveString(char move[6], bool white, chessboard * board)
 {
-    //Get piece character
-    char piece = move[0];
-    //Get data for start position
-    char col_start = move[1];
-    uint8_t row_start = (uint8_t) atoi(&move[2]) - 1;
-
-#ifdef DEBUG
-    fprintf(stdout, "cs: %c, rs: %d\n", col_start, row_start);
+#ifndef NDEBUG
+    chessboard original;
+    memmove(&original, board, sizeof(chessboard));
+    char move_res[6];
 #endif
+
+    //Get data for start position
+    char col_start = move[0];
+    uint8_t row_start = (uint8_t) atoi(&move[1]) - 1;
 
     //Get data for end position
-    char col_end = move[3];
-    uint8_t row_end = (uint8_t) atoi(&move[4]) - 1;
-
-#ifdef DEBUG
-    fprintf(stdout, "ce: %c, re: %d\n", col_end, row_end);
-#endif
+    char col_end = move[2];
+    uint8_t row_end = (uint8_t) atoi(&move[3]) - 1;
 
     //Get data for promotion
-    char promote = move[5];
+    char promote = move[4];
 
     //Compute square on board for start
     uint8_t square_start = row_start * 8;
     //shhhhhh
     square_start += (col_start - 'a');
-#ifdef DEBUG
-    fprintf(stdout, "ss: %d\n", square_start);
-#endif
 
     //Compute square on board for end
     uint8_t square_end = row_end * 8;
-#ifdef DEBUG
-    fprintf(stdout, "seinitial: %d\n", square_end);
-#endif
     //shhhhhh
     square_end += (col_end - 'a');
 
@@ -760,26 +778,11 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     bitboard op_oc = (white) ? board->all_b_pieces : board->all_w_pieces;
 
     //Find matching location
-    for (pindex = 0; pindex < 16; ++pindex)
-    {
-        if (pieces[pindex] == square_start)
-        {
-            break;
-        }
-    }
-
-#ifdef DEBUG
-    fprintf(stdout, "making move [piece, dest, white]: %d, %d, %d\n", pindex, square_end,
-            white);
-#endif
+    pindex = findPieceByPosition(square_start, pieces);
 
     //See if it's a promotion
     if (promote != '\0')
     {
-#ifdef DEBUG
-        fprintf(stdout, "promotion to: %c\n", promote);
-#endif
-
         uint8_t promote_to = (white) ? 0 : 6;
         //Get the piece code
         for (uint8_t i = 0; i < 6; ++i, ++promote_to)
@@ -795,12 +798,9 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     }
     //Pawn move, check for en passant
     //  If moving diagonally, and not a piece @ location
-    else if ((piece == 'P') && (col_start != col_end)
+    else if ((piece_chars[pieces[pindex]] == 'P') && (col_start != col_end)
             && !(location_boards[square_end] & op_oc))
     {
-#ifdef DEBUG
-        puts("en passant");
-#endif
         moveSpecial(pindex, square_end, white, board, board, 0);
     }
     //King move
@@ -808,12 +808,9 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     //Staying in same row
     //moving more than one column
     //Must be a castling maneuver
-    else if (piece == 'K' && (col_start == 'e')
+    else if (piece_chars[pieces[pindex]] == 'K' && (col_start == 'e')
             && (col_end != 'd' && col_end != 'f') && (row_start == row_end))
     {
-#ifdef DEBUG
-        puts("castle");
-#endif
         moveSpecial(pindex, square_end, white, board, board, 0);
     }
     //Normal move
@@ -821,6 +818,11 @@ void parseMoveString(char move[7], bool white, chessboard * board)
     {
         makeMove(pindex, square_end, white, board, board);
     }
+
+#ifndef NDEBUG
+    getMoveString(board, &original, white, move_res);
+    assert(memcmp(move_res, move, sizeof(move_res)) == 0);
+#endif
 }
 
 /*
@@ -841,6 +843,29 @@ void squareToString(uint8_t pos, char str[3])
     str[0] = cols[pos % 8];
     str[1] = rows[pos / 8];
 }
+
+/*
+ * Finds if the index of the piece at a location
+ *
+ * @param pos The position (0-64) of the piece
+ * @param positions The array of positions to search for
+ *
+ * @return The index of the piece at the supplied position, 16 if not found
+ */
+uint8_t findPieceByPosition(uint8_t pos, uint8_t positions[16])
+{
+    uint8_t pindex;
+    for (pindex = 0; pindex < 16; ++pindex)
+    {
+        if (positions[pindex] == pos)
+        {
+            break;
+        }
+    }
+
+    return pindex;
+}
+
 
 /*
  * for readability/debugging purposes, should not be used for net moves

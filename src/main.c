@@ -12,20 +12,13 @@
 #include "pregame.h"
 #include "brain.h"
 
-#ifndef CONSOLE
-#include "net.h"
-#endif
-
 #define INITIAL_DEPTH 7
-#define INITIAL_TIME 900
 
 #ifdef PLAY_SELF
-void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply);
+void playSampleGame(uint8_t w_ply, uint8_t b_ply);
 #endif
 
-#ifdef CONSOLE
 void getPlayerMove(char move[7]);
-#endif
 
 int main(int argc, const char * argv[])
 {
@@ -42,33 +35,31 @@ int main(int argc, const char * argv[])
 
     initBoard(&current_state);
 
-#ifndef CONSOLE
-    //Need to know side, gameid, teamnumber, teamsecret
-    if (argc < 5)
+#ifdef PLAY_SELF
+    if (argc < 3)
     {
-        puts(
-                "Usage: <w|b> <teamnumber> <teamsecret> <gameid> [<initial_depth>]");
+        puts("Usage: w_ply, b_ply");
         return (0);
     }
-    int teamnumber = atoi(argv[2]);
-    const char * teamsecret = argv[3];
-    int gameid = atoi(argv[4]);
+    playSampleGame((uint8_t) atoi(argv[1]), (uint8_t) atoi(argv[2]));
+    return 0;
 
-#else
-    if (argc < 2)
-    {
-        puts("Usage: <w|b>");
-        return (0);
-    }
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
 #endif
 
+    if (argc < 2)
+    {
+        puts("Usage: <w|b> [<initial_depth>]");
+        return (0);
+    }
+
+    uint8_t depth = (argc >= 3) ? (uint8_t) atoi(argv[2]) : INITIAL_DEPTH;
+
     bool self_white = (argv[1][0] == 'w') ? true : false;
-    uint8_t depth = (argc >= 6) ? (uint8_t) atoi(argv[5]) : INITIAL_DEPTH;
 
     //The play they made/we made
     char move[7];
-
-    double tlimit = INITIAL_TIME;
 
     if (self_white)
         goto WHITE_START;
@@ -76,43 +67,24 @@ int main(int argc, const char * argv[])
     //Game loop
     while (true)
     {
-        puts("\ngetting status");
         //Get their move
-        #ifndef CONSOLE
-        getStatus(move, &tlimit, gameid, teamnumber, teamsecret);
-        #else
         getPlayerMove(move);
-        #endif
 
         printf("received move: %s\n", move);
 
         //Parse the move
         parseMoveString(move, !self_white, &current_state);
-        
-#ifndef CONSOLE
-        printf("making move, with tleft: %f\n", tlimit);
-#endif
+        printBoard(&current_state);
 
 WHITE_START:
         //Make move
-        selectBestMove(self_white, &current_state, &next_state, depth, tlimit);
+        selectBestMove(self_white, &current_state, &next_state, depth);
 
-#ifdef DEBUG
-        puts("result board:");
-        printBoard(&next_state);
-        puts("getting move string");
-#endif
         //Extract the move
         getMoveString(&next_state, &current_state, self_white, move);
 
-        printf("sending move: %s\n", move);
-
-        #ifndef CONSOLE
-        //Submit move to server
-        pushMove(gameid, teamnumber, teamsecret, move);
-        #else
         printf("CPU Move: %s\n", move);
-        #endif
+        printBoard(&current_state);
 
         //Update current state
         current_state = next_state;
@@ -122,9 +94,12 @@ WHITE_START:
 #pragma clang diagnostic ignored "-Wunreachable-code"
     return (0);
 #pragma clang diagnostic pop
+
+#ifdef PLAY_SELF
+#pragma clang diagnostic pop
+#endif
 }
 
-#ifdef CONSOLE
 void getPlayerMove(char move[7])
 {
     puts("enter a move, e.g. PA2A3:");
@@ -133,22 +108,22 @@ void getPlayerMove(char move[7])
     {
         move[6] = '\0';
     }
+
+    if(move[5] == '\n')
+    {
+        move[5] = '\0';
+    }
 }
-#endif
 
 #ifdef PLAY_SELF
-void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
+void playSampleGame(uint8_t w_ply, uint8_t b_ply)
 {
     //Timers
     clock_t tstart, tend;
     double tex;
 
-    //15 mins each
-    double twhite = 900;
-    double tblack = 900;
-
     //Record a play string to allow animation if desired
-    char plays[256][7] =
+    char plays[256][6] =
     {
         {   0}};
 
@@ -160,48 +135,48 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
 
     initBoard(&current_state);
     uint16_t counter = 0;
+    int waiter;
 
     while (true)
     {
         //white
         printf("white: turn %d\n", counter);
         tstart = clock();
-        selectBestMove(true, &current_state, &res, w_ply, twhite);
+        selectBestMove(true, &current_state, &res, w_ply);
         tend = clock();
 
         getMoveString(&res, &current_state, true, plays[counter]);
         tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
-        //5 seconds back every move
-        twhite -= (tex - 5);
 
         printf("move: %s value: %d, time: %f\n", plays[counter],
-                evaluateState(&res, true), twhite);
+                evaluateState(&res, true), tex);
         ++counter;
         current_state = res;
 
-        if (current_state.b_pieces[15] == CAPTURED || tblack <= 0)
+        if (current_state.b_piece_posns[15] == CAPTURED)
         {
             white_won = true;
             break;
         }
 
+        printBoard(&current_state);
+        waiter = getchar();
+
         //black
         printf("black: turn %d\n", counter);
         tstart = clock();
-        selectBestMove(false, &current_state, &res, b_ply, tblack);
+        selectBestMove(false, &current_state, &res, b_ply);
         tend = clock();
 
         getMoveString(&res, &current_state, false, plays[counter]);
         tex = (double) (tend - tstart) / CLOCKS_PER_SEC;
-        //5 seconds back every move
-        tblack -= (tex - 5);
 
         printf("move: %s value: %d, time: %f\n", plays[counter],
-                evaluateState(&res, false), tblack);
+                evaluateState(&res, false), tex);
         ++counter;
         current_state = res;
 
-        if (current_state.w_pieces[15] == CAPTURED || twhite <= 0)
+        if (current_state.w_piece_posns[15] == CAPTURED)
         {
             white_won = false;
             break;
@@ -213,6 +188,9 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
             draw = true;
             break;
         }
+
+        printBoard(&current_state);
+        waiter = getchar();
     }
 
     if (white_won)
@@ -228,7 +206,7 @@ void playSampleGame(unsigned gamenum, uint8_t w_ply, uint8_t b_ply)
         puts("Draw.. maybe?");
     }
 
-    printf("board state %u\n", gamenum);
+    printf("board state\n");
     printBoard(&current_state);
 
     counter = counter - 1;
